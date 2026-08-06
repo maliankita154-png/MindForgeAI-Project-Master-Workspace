@@ -1,5 +1,25 @@
-# Replace This Folder With Your Current Working Folder
+# IT2026013 Current Working Folder
 
-Rename this folder using your student ID, for example `2026CS001_current_working_folder`, or run the supplied setup script.
+## Purpose
 
-Copy your existing project work **inside** that folder. Do not delete the other master-workspace folders. This area is for personal experiments, scratch notebooks and work awaiting group review. Reviewed outputs must move through `05_shared_integration/`.
+This folder contains the current working version of the **Aethera – A Planetary-Scale Water Intelligence Platform** project.
+
+## Contents
+
+- Flask application source code
+- Machine Learning models
+- HTML templates
+- CSS, JavaScript, and images
+- Datasets
+- Experimental notebooks
+- Prototype implementations
+
+## Workflow
+
+- All individual development work is performed in this folder.
+- After testing and review, approved files are moved to the `05_shared_integration` folder.
+- This folder may contain experimental or incomplete work.
+
+**Student ID:** IT2026013
+
+**Student Name:** Ankita Mali
