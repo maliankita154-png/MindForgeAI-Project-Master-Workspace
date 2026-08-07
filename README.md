@@ -1,15 +1,17 @@
 # MindForgeAI Industry Project — Master Workspace
 
-This repository is the standard 30-day engineering workspace for every Internship 1.0 project group. Clone it once for the group. Preserve this structure. Add work inside the correct folder instead of creating unrelated folders at the root.
+This repository is the official Chatake Innoworks template for every Internship 1.0 industry project. The Program Office creates one company-owned repository per active project from this template. Students clone their assigned project repository—not this master template—and preserve the standard structure.
 
 ## First setup
 
-1. Clone the repository and open it in VS Code.
-2. Read `00_project_governance/WORKING_RULES.md` with the complete team.
-3. Run `scripts/create_member_workspace.ps1 STUDENT_ID` on Windows PowerShell or `bash scripts/create_member_workspace.sh STUDENT_ID` on macOS/Linux.
-4. Each member copies their existing current working folder into their generated folder under `04_active_workspaces/`.
-5. Do experimental work only inside the member workspace. Move reviewed, team-approved work into `05_shared_integration/` and then the relevant production folder.
-6. Record sources, decisions, tasks and diary entries as the work happens.
+1. Open the project repository assigned to your group under the `Chatake-Innoworks` GitHub organization.
+2. Clone that assigned repository and open it in VS Code.
+3. Read `00_project_governance/WORKING_RULES.md` and `00_project_governance/OWNERSHIP_AND_ACCESS.md` with the complete team.
+4. Run `scripts/create_member_workspace.ps1 STUDENT_ID` on Windows PowerShell or `bash scripts/create_member_workspace.sh STUDENT_ID` on macOS/Linux.
+5. Each member copies their existing current working folder into their generated folder under `04_active_workspaces/`.
+6. Create a branch named `member/STUDENT-ID/short-task-name` before making project changes.
+7. Move only reviewed, team-approved work into `05_shared_integration/` and then the relevant production folder through a pull request.
+8. Record sources, decisions, tasks and diary entries as the work happens.
 
 ## Repository map
 
@@ -29,6 +31,7 @@ This repository is the standard 30-day engineering workspace for every Internshi
 | `11_deployment` | container, cloud, monitoring, rollback and runbook assets |
 | `12_presentation_and_demo` | slides, demo script, screenshots, rehearsal and backup demo |
 | `13_release_and_handover` | final release, checksums, installation, user guide and handover |
+| `14_publication_and_portfolio` | approved public project profile, publication checklist and showcase assets |
 | `study_material` | approved learning material relevant to this project |
 
 ## Branch and review model
@@ -37,7 +40,9 @@ This repository is the standard 30-day engineering workspace for every Internshi
 - `develop`: integrated work for the next stable checkpoint.
 - `member/<student-id>/<task>`: individual task branch.
 - No member pushes experimental code directly to `main`.
-- A merge requires a meaningful commit message, evidence of testing and team awareness.
+- A merge requires a pull request, meaningful commit message, evidence of testing and team awareness.
+- Student Codex/AI agents may push only through the authenticated student's branch and permissions.
+- Company credentials, owner tokens and shared access tokens must never be given to a student or an AI agent.
 
 ## Security
 
@@ -50,3 +55,7 @@ The online Project Portal is the shared operational record. This repository is t
 - Portal: tasks, daily diary, abstract/report working text, notes and links.
 - Repository: code, notebooks, tests, formal report source, diagrams, deployment assets and evidence.
 - Printed diary: signed physical group record.
+
+## Publication relationship
+
+The repository remains the technical source of truth. Only reviewed material is published through `projects.chatakeinnoworks.com`. Public project pages must use the approved content in `14_publication_and_portfolio/` and must not expose private data, secrets, restricted datasets or unapproved company material.
