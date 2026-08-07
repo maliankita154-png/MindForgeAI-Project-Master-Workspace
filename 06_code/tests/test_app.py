@@ -21,6 +21,12 @@ class AetheraAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["status"], "ok")
 
+    def test_overview_reads_the_csv_practice_dataset(self):
+        response = self.client.get("/api/overview")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["data_label"], "Synthetic CSV practice data")
+        self.assertGreater(response.json["rainfall"], 0)
+
     def test_digital_twin_returns_bounded_values(self):
         response = self.client.post("/api/twin/simulate", json={"drought": 90, "growth": 40, "conservation": 30})
         self.assertEqual(response.status_code, 200)

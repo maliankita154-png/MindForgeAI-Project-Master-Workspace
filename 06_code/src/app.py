@@ -1,25 +1,16 @@
-"""Aethera — interactive water intelligence demonstration platform."""
+"""Aethera - interactive water intelligence demonstration platform."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import Flask, jsonify, render_template, request
+
+from services.data_service import overview_metrics, recent_rainfall
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_mapping(SECRET_KEY="development-only-change-me")
-
-    def overview() -> dict:
-        return {
-            "region": "Solapur Basin · Demonstration workspace",
-            "availability": 78,
-            "rainfall": 124,
-            "demand": 62,
-            "reservoir": 81,
-            "sustainability": 91,
-            "updated_at": datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC"),
-        }
 
     @app.context_processor
     def inject_brand():
@@ -31,11 +22,11 @@ def create_app() -> Flask:
 
     @app.get("/dashboard")
     def dashboard():
-        return render_template("dashboard.html", data=overview())
+        return render_template("dashboard.html", data=overview_metrics())
 
     @app.get("/rainfall")
     def rainfall():
-        return render_template("rainfall.html", forecast=[102, 124, 118, 96, 74, 61, 82])
+        return render_template("rainfall.html", rainfall=recent_rainfall())
 
     @app.get("/demand")
     def demand():
@@ -49,10 +40,8 @@ def create_app() -> Flask:
 
     @app.get("/reservoir")
     def reservoir():
-        reservoirs = [
-            ("Ujani", 76, "Watch"), ("Khadakwasla", 81, "Healthy"),
-            ("Bhima", 68, "Watch"), ("Veer", 88, "Healthy"),
-        ]
+        metrics = overview_metrics()
+        reservoirs = [("Ujani demonstration", metrics["reservoir"], "Synthetic")]
         return render_template("reservoir.html", reservoirs=reservoirs)
 
     @app.get("/digital-twin")
@@ -73,7 +62,7 @@ def create_app() -> Flask:
 
     @app.get("/api/overview")
     def api_overview():
-        return jsonify(overview())
+        return jsonify(overview_metrics())
 
     @app.post("/api/twin/simulate")
     def simulate_twin():
@@ -86,8 +75,8 @@ def create_app() -> Flask:
         resilience = round(min(100, max(0, 91 - drought * 0.31 - growth * 0.12 + conservation * 0.42)))
         recommendation = (
             "Activate equitable demand measures and protect ecological minimum flows."
-            if availability < 60 else
-            "Maintain monitored allocation; prioritise recharge and leakage reduction."
+            if availability < 60
+            else "Maintain monitored allocation; prioritise recharge and leakage reduction."
         )
         return jsonify(availability=availability, demand=demand_index, resilience=resilience,
                        recommendation=recommendation, is_demo=True)
