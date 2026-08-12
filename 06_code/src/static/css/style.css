@@ -1,811 +1,1728 @@
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Aethera | Water Intelligence Dashboard</title>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f8fb;
-            color: #17324d;
-        }
-
-        /* HEADER */
-
-        .header {
-            background: #0b3954;
-            color: white;
-            padding: 22px 35px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        .status {
-            background: #ffffff22;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        /* NAVIGATION */
-
-        .nav {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            box-shadow: 0 2px 8px #00000015;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #0b3954;
-            padding: 9px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .nav a:hover {
-            background: #e6f4fa;
-        }
-
-        /* MAIN */
-
-        .container {
-            padding: 30px;
-            max-width: 1400px;
-            margin: auto;
-        }
-
-        .welcome {
-            margin-bottom: 25px;
-        }
-
-        .welcome h1 {
-            font-size: 30px;
-            margin-bottom: 8px;
-        }
-
-        .welcome p {
-            color: #61788b;
-        }
-
-        /* CARDS */
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            padding: 22px;
-            border-radius: 15px;
-            box-shadow: 0 3px 12px #00000012;
-        }
-
-        .card-title {
-            color: #718596;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .card-value {
-            font-size: 30px;
-            font-weight: bold;
-            color: #0b3954;
-        }
-
-        .card-info {
-            margin-top: 8px;
-            color: #6c8292;
-            font-size: 13px;
-        }
-
-        /* CONTENT GRID */
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
-
-        .panel {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 3px 12px #00000012;
-        }
-
-        .panel h2 {
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        /* MAP */
-
-        .map {
-            height: 420px;
-            background: #dceef5;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #567487;
-            text-align: center;
-        }
-
-        .map-icon {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-
-        /* PREDICTIONS */
-
-        .prediction {
-            padding: 15px;
-            border-bottom: 1px solid #eeeeee;
-        }
-
-        .prediction:last-child {
-            border-bottom: none;
-        }
-
-        .prediction-name {
-            font-size: 14px;
-            color: #718596;
-        }
-
-        .prediction-value {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        /* RISK */
-
-        .risk-list {
-            margin-top: 20px;
-        }
-
-        .risk {
-            display: flex;
-            justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid #eeeeee;
-        }
-
-        .risk-name {
-            font-size: 14px;
-        }
-
-        .risk-status {
-            font-weight: bold;
-        }
-
-        .low {
-            color: green;
-        }
-
-        .medium {
-            color: #d18a00;
-        }
-
-        .high {
-            color: red;
-        }
-
-        /* QUICK ACTIONS */
-
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .action {
-            text-decoration: none;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            color: #0b3954;
-            box-shadow: 0 3px 10px #00000012;
-            transition: 0.2s;
-        }
-
-        .action:hover {
-            transform: translateY(-3px);
-        }
-
-        .action-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .action-title {
-            font-weight: bold;
-        }
-
-        .action-text {
-            font-size: 12px;
-            color: #718596;
-            margin-top: 5px;
-        }
-
-        /* FOOTER */
-
-        .footer {
-            text-align: center;
-            padding: 30px;
-            margin-top: 30px;
-            color: #718596;
-            font-size: 13px;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 900px) {
-
-            .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-        }
-
-        @media (max-width: 600px) {
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .actions {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 18px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-    <!-- HEADER -->
-
-    <header class="header">
-
-        <div>
-
-            <div class="logo">
-                AETHERA
-            </div>
-
-            <div class="subtitle">
-                Planetary Water Intelligence
-            </div>
-
-        </div>
-
-        <div class="status">
-            ● System Online
-        </div>
-
-    </header>
-
-
-    <!-- NAVIGATION -->
-
-    <nav class="nav">
-
-        <a href="/">Home</a>
-
-        <a href="/dashboard">
-            Dashboard
-        </a>
-
-        <a href="/rainfall">
-            🌧 Rainfall
-        </a>
-
-        <a href="/rivers">
-            🌊 Rivers
-        </a>
-
-        <a href="/dams">
-            🏗 Dams
-        </a>
-
-        <a href="/reservoirs">
-            🏞 Reservoirs
-        </a>
-
-        <a href="/demand">
-            💧 Demand
-        </a>
-
-        <a href="/water-quality">
-            🧪 Water Quality
-        </a>
-
-        <a href="/digital-twin">
-            🪞 Digital Twin
-        </a>
-
-        <a href="/sustainability">
-            🌱 Sustainability
-        </a>
-
-    </nav>
-
-
-    <!-- MAIN CONTENT -->
-
-    <main class="container">
-
-        <section class="welcome">
-
-            <h1>
-                Water Intelligence Dashboard
-            </h1>
-
-            <p>
-                Monitor, analyze and predict global freshwater resources.
-            </p>
-
-        </section>
-
-
-        <!-- STATISTICS -->
-
-        <section class="cards">
-
-            <div class="card">
-
-                <div class="card-title">
-                    🌧 Rainfall
-                </div>
-
-                <div class="card-value">
-                    842 mm
-                </div>
-
-                <div class="card-info">
-                    Current monitored rainfall
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    🌊 Rivers
-                </div>
-
-                <div class="card-value">
-                    12,450
-                </div>
-
-                <div class="card-info">
-                    Rivers in global database
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    🏗 Dams
-                </div>
-
-                <div class="card-value">
-                    18,500
-                </div>
-
-                <div class="card-info">
-                    Dams and hydraulic structures
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    🏞 Reservoir Storage
-                </div>
-
-                <div class="card-value">
-                    72%
-                </div>
-
-                <div class="card-info">
-                    Average monitored storage
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    💧 Water Demand
-                </div>
-
-                <div class="card-value">
-                    820 MLD
-                </div>
-
-                <div class="card-info">
-                    Estimated current demand
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    🧪 Water Quality
-                </div>
-
-                <div class="card-value">
-                    GOOD
-                </div>
-
-                <div class="card-info">
-                    Overall monitored quality
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- MAP + PREDICTIONS -->
-
-        <section class="content-grid">
-
-
-            <!-- MAP -->
-
-            <div class="panel">
-
-                <h2>
-                    🌍 Global Water Map
-                </h2>
-
-                <div class="map">
-
-                    <div>
-
-                        <div class="map-icon">
-                            🌍
-                        </div>
-
-                        <h3>
-                            Global Water Intelligence Map
-                        </h3>
-
-                        <p>
-                            Rivers • Dams • Reservoirs • Rainfall
-                        </p>
-
-                        <p>
-                            Interactive GIS map will be connected here.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- AI PREDICTIONS -->
-
-            <div class="panel">
-
-                <h2>
-                    🤖 AI Predictions
-                </h2>
-
-
-                <div class="prediction">
-
-                    <div class="prediction-name">
-                        Rainfall
-                    </div>
-
-                    <div class="prediction-value">
-                        NORMAL
-                    </div>
-
-                </div>
-
-
-                <div class="prediction">
-
-                    <div class="prediction-name">
-                        Water Demand
-                    </div>
-
-                    <div class="prediction-value">
-                        ↑ 8.2%
-                    </div>
-
-                </div>
-
-
-                <div class="prediction">
-
-                    <div class="prediction-name">
-                        Reservoir
-                    </div>
-
-                    <div class="prediction-value">
-                        STABLE
-                    </div>
-
-                </div>
-
-
-                <div class="prediction">
-
-                    <div class="prediction-name">
-                        Water Stress
-                    </div>
-
-                    <div class="prediction-value">
-                        MEDIUM
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- RISK MONITOR -->
-
-        <section class="panel" style="margin-top:25px;">
-
-            <h2>
-                ⚠️ Water Risk Monitor
-            </h2>
-
-
-            <div class="risk-list">
-
-
-                <div class="risk">
-
-                    <div class="risk-name">
-                        Flood Risk
-                    </div>
-
-                    <div class="risk-status low">
-                        ● LOW
-                    </div>
-
-                </div>
-
-
-                <div class="risk">
-
-                    <div class="risk-name">
-                        Drought Risk
-                    </div>
-
-                    <div class="risk-status medium">
-                        ● MEDIUM
-                    </div>
-
-                </div>
-
-
-                <div class="risk">
-
-                    <div class="risk-name">
-                        Water Stress
-                    </div>
-
-                    <div class="risk-status medium">
-                        ● MEDIUM
-                    </div>
-
-                </div>
-
-
-                <div class="risk">
-
-                    <div class="risk-name">
-                        Reservoir Risk
-                    </div>
-
-                    <div class="risk-status low">
-                        ● LOW
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- QUICK ACTIONS -->
-
-        <section class="actions">
-
-
-            <a href="/rainfall" class="action">
-
-                <div class="action-icon">
-                    🌧
-                </div>
-
-                <div class="action-title">
-                    Rainfall Intelligence
-                </div>
-
-                <div class="action-text">
-                    Analyze rainfall and predictions.
-                </div>
-
-            </a>
-
-
-            <a href="/rivers" class="action">
-
-                <div class="action-icon">
-                    🌊
-                </div>
-
-                <div class="action-title">
-                    Global Rivers
-                </div>
-
-                <div class="action-text">
-                    Explore global river data.
-                </div>
-
-            </a>
-
-
-            <a href="/dams" class="action">
-
-                <div class="action-icon">
-                    🏗
-                </div>
-
-                <div class="action-title">
-                    Global Dams
-                </div>
-
-                <div class="action-text">
-                    Explore dams and reservoirs.
-                </div>
-
-            </a>
-
-
-            <a href="/demand" class="action">
-
-                <div class="action-icon">
-                    💧
-                </div>
-
-                <div class="action-title">
-                    Water Demand
-                </div>
-
-                <div class="action-text">
-                    Predict future water demand.
-                </div>
-
-            </a>
-
-
-            <a href="/digital-twin" class="action">
-
-                <div class="action-icon">
-                    🪞
-                </div>
-
-                <div class="action-title">
-                    Digital Twin
-                </div>
-
-                <div class="action-text">
-                    Run water-system scenarios.
-                </div>
-
-            </a>
-
-
-            <a href="/sustainability" class="action">
-
-                <div class="action-icon">
-                    🌱
-                </div>
-
-                <div class="action-title">
-                    Sustainability
-                </div>
-
-                <div class="action-text">
-                    Analyze water sustainability.
-                </div>
-
-            </a>
-
-
-        </section>
-
-    </main>
-
-
-    <!-- FOOTER -->
-
-    <footer class="footer">
-
-        © 2026 Aethera | Planetary Water Intelligence
-
-    </footer>
-
-
-</body>
-</html>
-```
+:root{
+    --ink:#102327;
+    --muted:#607275;
+    --paper:#f6f6f1;
+    --line:#d9e0db;
+    --blue:#157f91;
+    --aqua:#33c3d8;
+    --green:#6bc785;
+    --night:#09282d;
+    --cream:#f4efe4;
+    --warning:#e5a93d;
+    --danger:#d95c5c;
+    --serif:"Playfair Display",Georgia,serif;
+    --sans:Manrope,Arial,sans-serif;
+    --mono:"DM Mono",monospace;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font:15px/1.65 var(--sans);
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+.atmosphere{
+    pointer-events:none;
+    position:fixed;
+    z-index:-1;
+    inset:0;
+    background:
+        radial-gradient(circle at 83% 15%,#d9f3ed 0,transparent 24rem),
+        radial-gradient(circle at 8% 78%,#e3eef1 0,transparent 24rem);
+}
+
+.container{
+    width:min(1180px,calc(100% - 48px));
+    margin-inline:auto;
+}
+
+/* ================= HEADER ================= */
+
+.site-header{
+    height:82px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:min(1360px,calc(100% - 48px));
+    margin:auto;
+    border-bottom:1px solid var(--line);
+}
+
+.brand{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.16em;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+}
+
+.brand-mark{
+    width:27px;
+    height:27px;
+    display:grid;
+    place-items:center;
+    border-radius:50% 50% 50% 8%;
+    background:var(--blue);
+    color:#fff;
+    font:italic 18px var(--serif);
+    letter-spacing:0;
+}
+
+.site-nav{
+    display:flex;
+    gap:29px;
+    font-size:12px;
+    font-weight:700;
+    color:#526467;
+}
+
+.site-nav a:hover,
+.text-link:hover{
+    color:var(--blue);
+}
+
+.header-cta{
+    font-size:12px;
+    font-weight:800;
+}
+
+.header-cta span,
+.text-link span{
+    color:var(--aqua);
+    font-size:18px;
+}
+
+.menu-toggle{
+    display:none;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    min-height:680px;
+    padding:105px 0 55px;
+    position:relative;
+    overflow:hidden;
+}
+
+.eyebrow,
+.section-number{
+    font:11px var(--mono);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#5c7172;
+}
+
+.eyebrow>span{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--aqua);
+    margin-right:8px;
+}
+
+.hero h1,
+.about-hero h1{
+    position:relative;
+    z-index:1;
+    font:700 clamp(54px,8vw,112px)/.97 var(--serif);
+    letter-spacing:-.06em;
+    margin:20px 0 25px;
+    max-width:800px;
+}
+
+.hero h1 em,
+h2 em,
+.about-hero em{
+    font-weight:600;
+    color:var(--blue);
+}
+
+.hero-copy{
+    font-size:17px;
+    max-width:500px;
+    color:#526467;
+    position:relative;
+    z-index:1;
+}
+
+.hero-actions{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    margin-top:35px;
+    position:relative;
+    z-index:1;
+}
+
+.button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:24px;
+    padding:13px 18px;
+    font-size:12px;
+    font-weight:800;
+    border:1px solid transparent;
+    transition:.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+}
+
+.button-primary{
+    background:var(--night);
+    color:#fff;
+}
+
+.button-light{
+    background:var(--cream);
+    color:var(--night);
+}
+
+.text-link{
+    font-size:12px;
+    font-weight:800;
+}
+
+/* ================= GLOBE ================= */
+
+.hero-orbit{
+    position:absolute;
+    width:610px;
+    height:610px;
+    right:-12px;
+    top:47px;
+}
+
+.orbit-ring{
+    position:absolute;
+    border:1px solid #a5d7d6;
+    border-radius:50%;
+    inset:8%;
+}
+
+.ring-two{
+    inset:22%;
+    border-color:#d1e6de;
+}
+
+.globe{
+    position:absolute;
+    inset:27%;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#8de7e3,#197788 52%,#075261);
+    box-shadow:0 20px 55px #0f72754d;
+    overflow:hidden;
+}
+
+.globe:before,
+.globe:after{
+    content:"";
+    position:absolute;
+    border:1px solid #b7eeee80;
+    border-radius:50%;
+    inset:16% -20%;
+}
+
+.globe:after{
+    inset:-25% 20%;
+    transform:rotate(38deg);
+}
+
+.globe i{
+    position:absolute;
+    display:block;
+    background:#d9f3c299;
+    border-radius:50% 40% 60% 30%;
+    width:36%;
+    height:20%;
+    transform:rotate(-25deg);
+}
+
+.globe i:nth-child(1){
+    left:8%;
+    top:26%;
+}
+
+.globe i:nth-child(2){
+    right:3%;
+    top:55%;
+    transform:rotate(25deg);
+    height:27%;
+}
+
+.globe i:nth-child(3){
+    left:42%;
+    top:8%;
+    width:17%;
+}
+
+.signal{
+    position:absolute;
+    border:2px solid var(--aqua);
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    box-shadow:0 0 0 8px #33c3d822;
+}
+
+.s1{
+    left:18%;
+    top:34%;
+}
+
+.s2{
+    right:19%;
+    top:39%;
+}
+
+.s3{
+    left:38%;
+    bottom:23%;
+}
+
+.trust-line{
+    position:absolute;
+    bottom:50px;
+    font-size:11px;
+    color:#647476;
+}
+
+.trust-line span{
+    margin:0 8px;
+    color:var(--aqua);
+}
+
+/* ================= COMMON SECTIONS ================= */
+
+.statement{
+    background:var(--night);
+    color:#eaf5f1;
+    padding:118px 0;
+}
+
+.split-statement{
+    display:grid;
+    grid-template-columns:2fr 5fr;
+    gap:8%;
+}
+
+.statement .section-number{
+    color:#a6c8c4;
+}
+
+.kicker{
+    font:italic 19px var(--serif);
+    color:var(--aqua);
+    margin:0;
+}
+
+.statement h2,
+.section-heading h2,
+.scale-section h2,
+.callout h2,
+.about-hero h1{
+    font:600 clamp(37px,5vw,64px)/1.1 var(--serif);
+    letter-spacing:-.045em;
+    margin:14px 0 20px;
+}
+
+.statement h2{
+    max-width:800px;
+}
+
+.statement p:last-child{
+    max-width:630px;
+    color:#bbcfca;
+}
+
+.capabilities{
+    padding:125px 0;
+}
+
+.section-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    margin-bottom:45px;
+}
+
+.section-heading h2{
+    margin:13px 0 0;
+}
+
+.section-heading>p{
+    max-width:290px;
+    color:var(--muted);
+}
+
+.capability-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--line);
+}
+
+.capability-card{
+    padding:28px 28px 35px 0;
+    border-right:1px solid var(--line);
+    min-height:240px;
+}
+
+.capability-card:not(:first-child){
+    padding-left:28px;
+}
+
+.capability-card:last-child{
+    border:0;
+}
+
+.capability-card>span,
+.architecture b{
+    font:11px var(--mono);
+    color:var(--blue);
+}
+
+.capability-card h3{
+    font:600 30px var(--serif);
+    margin:20px 0 6px;
+}
+
+.capability-card p{
+    color:var(--muted);
+    max-width:230px;
+}
+
+.capability-card b{
+    display:block;
+    margin-top:22px;
+    font:10px var(--mono);
+    text-transform:uppercase;
+    color:#597579;
+}
+
+/* ================= DASHBOARD ================= */
+
+.workspace{
+    padding:70px 0 90px;
+}
+
+.workspace-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    margin-bottom:36px;
+}
+
+.workspace h1{
+    font:600 clamp(38px,5vw,58px)/1 var(--serif);
+    letter-spacing:-.05em;
+    margin:15px 0 8px;
+}
+
+.workspace-head p{
+    color:var(--muted);
+    margin:0;
+}
+
+.live-indicator{
+    font:10px var(--mono);
+    text-transform:uppercase;
+    color:#557174;
+}
+
+.live-indicator i{
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#45c984;
+    margin-right:5px;
+}
+
+/* ================= METRIC CARDS ================= */
+
+.metric-grid{
+    display:grid;
+    grid-template-columns:1.45fr repeat(3,1fr);
+    gap:12px;
+}
+
+.metric-card,
+.panel{
+    background:#fff;
+    border:1px solid #e2e8e3;
+    padding:23px;
+}
+
+.metric-card{
+    transition:.25s ease;
+}
+
+.metric-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 15px 30px #0a4d5712;
+}
+
+.metric-card span,
+.panel>.section-number,
+.panel .section-number{
+    font:10px var(--mono);
+    color:#718083;
+    text-transform:uppercase;
+}
+
+.metric-card strong{
+    font:600 44px/1.1 var(--serif);
+    display:block;
+    margin:18px 0 9px;
+}
+
+.metric-card strong small,
+.big-number small,
+.forecast-number small,
+.impact-score small{
+    font:18px var(--sans);
+    letter-spacing:0;
+}
+
+.metric-card p{
+    font-size:11px;
+    color:var(--muted);
+    margin:0;
+}
+
+.metric-card a,
+.reservoir-card a{
+    display:block;
+    margin-top:17px;
+    font-size:11px;
+    font-weight:800;
+    color:var(--blue);
+}
+
+.metric-card.primary{
+    background:var(--night);
+    color:white;
+    position:relative;
+    overflow:hidden;
+}
+
+.metric-card.primary span,
+.metric-card.primary p{
+    color:#bbd7d3;
+}
+
+.sparkline{
+    height:2px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        #36c7d7 25%,
+        #b5f1db 60%,
+        transparent
+    );
+    margin-top:24px;
+}
+
+/* ================= DASHBOARD MAP ================= */
+
+.dashboard-columns{
+    display:grid;
+    grid-template-columns:1.65fr 1fr;
+    gap:12px;
+    margin-top:12px;
+}
+
+.panel-title{
+    display:flex;
+    justify-content:space-between;
+}
+
+.panel h2{
+    font:600 27px/1.15 var(--serif);
+    letter-spacing:-.035em;
+    margin:6px 0 15px;
+}
+
+.quiet-button{
+    background:none;
+    border:1px solid var(--line);
+    font:10px var(--mono);
+    padding:6px 9px;
+    color:var(--muted);
+}
+
+.map-visual{
+    height:385px;
+    position:relative;
+    margin-top:18px;
+    background:linear-gradient(135deg,#e3eee7,#dcebe8);
+    overflow:hidden;
+}
+
+.map-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(#8eaaa42d 1px,transparent 1px),
+        linear-gradient(90deg,#8eaaa42d 1px,transparent 1px);
+    background-size:38px 38px;
+}
+
+.river{
+    position:absolute;
+    background:transparent;
+    border:10px solid #4ebdce;
+    border-color:#4ebdce transparent transparent;
+    border-radius:60%;
+    transform:rotate(35deg);
+    opacity:.8;
+}
+
+.r-a{
+    width:420px;
+    height:280px;
+    left:50px;
+    top:70px;
+}
+
+.r-b{
+    width:220px;
+    height:175px;
+    left:210px;
+    top:12px;
+    transform:rotate(77deg);
+}
+
+.map-node{
+    position:absolute;
+    background:var(--night);
+    color:#d8f3ed;
+    font:9px var(--mono);
+    padding:8px;
+}
+
+.map-node b{
+    color:white;
+}
+
+.n1{
+    top:65px;
+    left:23%;
+}
+
+.n2{
+    top:51%;
+    left:54%;
+}
+
+.n3{
+    bottom:53px;
+    right:13%;
+}
+
+.map-key{
+    position:absolute;
+    bottom:16px;
+    left:18px;
+    font:10px var(--mono);
+    color:#506b69;
+}
+
+.map-key i{
+    display:inline-block;
+    width:7px;
+    height:7px;
+    background:var(--aqua);
+    border-radius:50%;
+    margin-right:5px;
+}
+
+.insight-panel{
+    background:#edf8f3;
+}
+
+.insight-panel>p{
+    color:#526467;
+}
+
+.confidence{
+    margin:40px 0 22px;
+    font-size:11px;
+    color:var(--muted);
+}
+
+.confidence strong{
+    float:right;
+    color:var(--ink);
+}
+
+.confidence div,
+.progress{
+    height:5px;
+    background:#d6e6df;
+    margin-top:8px;
+}
+
+.confidence i{
+    display:block;
+    width:87%;
+    height:100%;
+    background:var(--green);
+}
+
+.full{
+    width:100%;
+}
+
+/* =========================================================
+   NEW AETHERA GLOBAL WATER INTELLIGENCE
+   ========================================================= */
+
+.global-intelligence{
+    margin-top:12px;
+    background:#fff;
+    border:1px solid #e2e8e3;
+    padding:30px;
+}
+
+.global-intelligence-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.global-intelligence-header h2{
+    margin:8px 0 0;
+    font:600 34px/1.1 var(--serif);
+}
+
+.global-intelligence-header p{
+    max-width:420px;
+    margin:0;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.global-badges{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.global-badge{
+    padding:7px 10px;
+    border:1px solid var(--line);
+    font:9px var(--mono);
+    color:var(--blue);
+    background:#f5faf8;
+}
+
+.world-water-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.world-water-card{
+    padding:20px;
+    background:#f5f8f5;
+    border:1px solid #e3e9e5;
+    transition:.2s;
+}
+
+.world-water-card:hover{
+    transform:translateY(-3px);
+    border-color:#a8d8d2;
+}
+
+.world-water-card .country{
+    font:11px var(--mono);
+    color:var(--muted);
+    text-transform:uppercase;
+}
+
+.world-water-card h3{
+    margin:10px 0 2px;
+    font:600 25px var(--serif);
+}
+
+.water-use-number{
+    font:600 34px var(--serif);
+    color:var(--blue);
+}
+
+.water-use-label{
+    color:var(--muted);
+    font-size:10px;
+}
+
+.use-bar{
+    height:7px;
+    background:#dfe9e5;
+    margin-top:14px;
+    overflow:hidden;
+}
+
+.use-bar i{
+    display:block;
+    height:100%;
+    background:linear-gradient(90deg,var(--aqua),var(--blue));
+}
+
+/* ================= WORLD WATER TABLE ================= */
+
+.global-table{
+    margin-top:12px;
+    overflow-x:auto;
+}
+
+.global-table table{
+    min-width:700px;
+}
+
+.global-table th{
+    padding:14px 10px;
+}
+
+.global-table td{
+    padding:13px 10px;
+}
+
+.country-name{
+    font-weight:800;
+}
+
+.sector-value{
+    font:11px var(--mono);
+}
+
+.sector-value.agriculture{
+    color:#3f9c65;
+}
+
+.sector-value.industry{
+    color:#8068b8;
+}
+
+.sector-value.domestic{
+    color:#157f91;
+}
+
+/* ================= YEAR COMPARISON ================= */
+
+.year-comparison{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.comparison-card{
+    background:#fff;
+    border:1px solid #e2e8e3;
+    padding:28px;
+}
+
+.comparison-card h2{
+    font:600 27px var(--serif);
+    margin:8px 0;
+}
+
+.comparison-subtitle{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.year-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:22px;
+}
+
+.year-box{
+    padding:18px;
+    background:#f4f8f6;
+}
+
+.year-box span{
+    display:block;
+    font:10px var(--mono);
+    color:var(--muted);
+}
+
+.year-box strong{
+    display:block;
+    margin-top:6px;
+    font:600 30px var(--serif);
+}
+
+.year-box.current{
+    background:#e4f5ef;
+}
+
+.year-box.previous{
+    background:#edf3f3;
+}
+
+.change-positive{
+    color:#299765;
+    font:11px var(--mono);
+}
+
+.change-negative{
+    color:var(--danger);
+    font:11px var(--mono);
+}
+
+/* ================= AI ALERTS ================= */
+
+.ai-alerts{
+    margin-top:12px;
+    background:var(--night);
+    color:white;
+    padding:30px;
+}
+
+.ai-alerts-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.ai-alerts-header h2{
+    margin:7px 0 0;
+    font:600 30px var(--serif);
+}
+
+.ai-status{
+    font:9px var(--mono);
+    padding:7px 10px;
+    background:#16454d;
+    color:#a9eee0;
+}
+
+.alert-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.alert-card{
+    padding:18px;
+    background:#10343a;
+    border:1px solid #28545a;
+}
+
+.alert-card .alert-icon{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#1a5058;
+    margin-bottom:12px;
+}
+
+.alert-card h3{
+    margin:0 0 5px;
+    font:600 20px var(--serif);
+}
+
+.alert-card p{
+    margin:0;
+    color:#b7d0cc;
+    font-size:11px;
+}
+
+.alert-card.warning{
+    border-color:#735e32;
+}
+
+.alert-card.danger{
+    border-color:#754545;
+}
+
+.alert-card.success{
+    border-color:#356a50;
+}
+
+/* ================= QUICK ACCESS ================= */
+
+.quick-access{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+}
+
+.quick-card{
+    background:#fff;
+    border:1px solid #e2e8e3;
+    padding:20px;
+    transition:.2s;
+}
+
+.quick-card:hover{
+    background:#edf8f3;
+    transform:translateY(-3px);
+}
+
+.quick-card span{
+    font:9px var(--mono);
+    color:var(--blue);
+}
+
+.quick-card h3{
+    margin:9px 0 3px;
+    font:600 20px var(--serif);
+}
+
+.quick-card p{
+    margin:0;
+    color:var(--muted);
+    font-size:10px;
+}
+
+/* ================= CHARTS ================= */
+
+.forecast-panel{
+    padding:30px;
+}
+
+.chart-title{
+    display:flex;
+    justify-content:space-between;
+}
+
+.chart-title h2{
+    margin-bottom:0;
+}
+
+.chart-title>div:last-child{
+    text-align:right;
+}
+
+.big-number{
+    display:block;
+    font:600 34px var(--serif);
+}
+
+.chart-title small{
+    font:10px var(--mono);
+    color:var(--muted);
+}
+
+.bar-chart{
+    height:300px;
+    display:flex;
+    align-items:end;
+    gap:19px;
+    border-bottom:1px solid var(--line);
+    margin-top:30px;
+    padding:0 12px;
+}
+
+.bar-chart>div{
+    height:100%;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:end;
+    align-items:center;
+    position:relative;
+}
+
+.bar-chart i{
+    display:block;
+    width:100%;
+    max-width:42px;
+    background:linear-gradient(var(--aqua),var(--blue));
+    min-height:5px;
+}
+
+.bar-chart span{
+    font:10px var(--mono);
+    color:var(--muted);
+    padding:9px 0;
+}
+
+.bar-chart b{
+    font:10px var(--mono);
+    position:absolute;
+    bottom:35px;
+}
+
+/* ================= THREE UP ================= */
+
+.three-up{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-top:12px;
+}
+
+.three-up .panel h2{
+    margin:14px 0 4px;
+}
+
+.three-up p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* ================= DEMAND ================= */
+
+.allocation-layout,
+.twin-layout{
+    display:grid;
+    grid-template-columns:1.3fr .7fr;
+    gap:12px;
+}
+
+.allocation-panel h2{
+    margin-bottom:34px;
+}
+
+.allocation-row{
+    margin:20px 0;
+}
+
+.allocation-row>div:first-child{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+}
+
+.allocation-row b{
+    font:11px var(--mono);
+}
+
+.progress i{
+    display:block;
+    height:100%;
+}
+
+/* ================= FORECAST ================= */
+
+.forecast-number{
+    display:block;
+    font:600 62px/1 var(--serif);
+    margin:25px 0 10px;
+}
+
+.panel p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.panel hr{
+    border:0;
+    border-top:1px solid var(--line);
+    margin:30px 0;
+}
+
+.muted{
+    color:var(--muted);
+}
+
+.principle-panel,
+.twin-note{
+    margin-top:12px;
+    background:var(--cream);
+    display:grid;
+    grid-template-columns:1fr 1.7fr;
+    gap:40px;
+}
+
+.principle-panel h2,
+.twin-note h2{
+    grid-column:2;
+    margin:0;
+}
+
+.principle-panel p,
+.twin-note p{
+    grid-column:2;
+    margin:0;
+}
+
+/* ================= RESERVOIR ================= */
+
+.reservoir-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.reservoir-card{
+    display:flex;
+    gap:24px;
+    align-items:center;
+}
+
+.water-orb{
+    width:110px;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#dff2ef;
+    position:relative;
+    overflow:hidden;
+    flex:none;
+    display:grid;
+    place-items:center;
+}
+
+.water-orb i{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:var(--fill);
+    background:#3dbcd0;
+}
+
+.water-orb b{
+    position:relative;
+    font:600 24px var(--serif);
+    color:var(--night);
+}
+
+.reservoir-card h2{
+    margin:7px 0;
+}
+
+/* ================= TABLE ================= */
+
+.table-panel{
+    margin-top:12px;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:12px;
+}
+
+th{
+    text-align:left;
+    font:10px var(--mono);
+    color:var(--muted);
+    padding:20px 0 10px;
+    border-bottom:1px solid var(--line);
+}
+
+td{
+    padding:14px 0;
+    border-bottom:1px solid #eef1ee;
+}
+
+.table-bar{
+    height:4px;
+    width:90px;
+    background:#e3ece7;
+    display:inline-block;
+    margin-right:8px;
+}
+
+.table-bar i{
+    display:block;
+    height:100%;
+    background:var(--aqua);
+}
+
+.status{
+    font:10px var(--mono);
+    padding:4px 7px;
+    background:#e1f3e9;
+    color:#287b55;
+}
+
+.status.watch{
+    background:#f9eed9;
+    color:#8c6826;
+}
+
+/* ================= DIGITAL TWIN ================= */
+
+.scenario-controls label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    margin:28px 0;
+}
+
+.scenario-controls output{
+    float:right;
+    font:11px var(--mono);
+    color:var(--blue);
+}
+
+input[type=range]{
+    display:block;
+    width:100%;
+    accent-color:var(--blue);
+    margin-top:10px;
+}
+
+.twin-results{
+    min-height:510px;
+    background:#e6f2ed;
+    overflow:hidden;
+    position:relative;
+}
+
+.twin-planet{
+    height:180px;
+    position:relative;
+    margin:-50px auto 0;
+    width:250px;
+}
+
+.twin-planet .globe{
+    inset:26%;
+}
+
+.results-copy{
+    position:relative;
+}
+
+.result-metrics{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    border-top:1px solid #b8d5ca;
+    border-bottom:1px solid #b8d5ca;
+    margin:22px 0;
+    padding:14px 0;
+    gap:8px;
+}
+
+.result-metrics span{
+    font:9px var(--mono);
+    color:var(--muted);
+}
+
+.result-metrics strong{
+    display:block;
+    font:600 24px var(--serif);
+}
+
+.results-copy small{
+    font:9px var(--mono);
+    color:var(--muted);
+}
+
+.impact-score{
+    background:var(--night);
+    color:#fff;
+    padding:43px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.impact-score strong{
+    font:600 90px/.9 var(--serif);
+    display:block;
+    margin:12px 0;
+}
+
+.impact-score p{
+    color:#b9d6d0;
+    max-width:280px;
+}
+
+.score-rings{
+    width:260px;
+    height:180px;
+    position:relative;
+}
+
+.score-rings i{
+    position:absolute;
+    border:1px solid #78b2a6;
+    border-radius:50%;
+    inset:5px 34px;
+}
+
+.score-rings i:nth-child(2){
+    inset:22px 50px;
+}
+
+.score-rings i:nth-child(3){
+    inset:39px 66px;
+}
+
+.score-rings b{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    font:600 24px/1 var(--serif);
+    color:#baf2df;
+}
+
+/* ================= ABOUT ================= */
+
+.about-hero{
+    padding:110px 0 80px;
+}
+
+.about-hero h1{
+    margin:20px 0;
+}
+
+.about-hero>p{
+    max-width:580px;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.architecture{
+    padding:105px 0;
+}
+
+.architecture-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);
+    margin-top:25px;
+}
+
+.architecture-grid article{
+    padding:25px 22px 0 0;
+    border-right:1px solid var(--line);
+}
+
+.architecture-grid article:not(:first-child){
+    padding-left:22px;
+}
+
+.architecture-grid article:last-child{
+    border:0;
+}
+
+.architecture-grid h3{
+    font:600 27px var(--serif);
+    margin:19px 0 4px;
+}
+
+.architecture-grid p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.company-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#e5f1ec;
+    padding:48px;
+    margin-bottom:75px;
+    gap:30px;
+}
+
+.company-card h2{
+    font:600 35px var(--serif);
+    margin:10px 0;
+}
+
+.company-card p{
+    max-width:580px;
+    color:var(--muted);
+}
+
+/* ================= FOOTER ================= */
+
+.site-footer{
+    width:min(1360px,calc(100% - 48px));
+    margin:auto;
+    border-top:1px solid var(--line);
+    padding:30px 0 45px;
+    display:flex;
+    justify-content:space-between;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.site-footer p{
+    margin:8px 0;
+}
+
+.footer-meta{
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+}
+
+.footer-meta strong{
+    color:var(--ink);
+}
+
+.footer-meta small{
+    margin-top:9px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:900px){
+
+    .world-water-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .quick-access{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .alert-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .year-comparison{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:760px){
+
+    .site-header{
+        width:calc(100% - 32px);
+        height:68px;
+    }
+
+    .site-nav,
+    .header-cta{
+        display:none;
+    }
+
+    .menu-toggle{
+        display:block;
+        border:0;
+        background:none;
+        font:11px var(--mono);
+        text-transform:uppercase;
+    }
+
+    .hero{
+        padding-top:72px;
+        min-height:640px;
+    }
+
+    .hero-orbit{
+        opacity:.43;
+        right:-175px;
+        top:96px;
+    }
+
+    .hero h1{
+        font-size:61px;
+    }
+
+    .trust-line{
+        bottom:25px;
+        max-width:250px;
+    }
+
+    .split-statement,
+    .scale-section,
+    .allocation-layout,
+    .twin-layout{
+        grid-template-columns:1fr;
+        gap:32px;
+    }
+
+    .statement{
+        padding:75px 0;
+    }
+
+    .section-heading,
+    .workspace-head,
+    .company-card{
+        display:block;
+    }
+
+    .section-heading>p{
+        margin-top:20px;
+    }
+
+    .capability-grid,
+    .metric-grid,
+    .three-up,
+    .reservoir-grid{
+        grid-template-columns:1fr;
+    }
+
+    .capability-card,
+    .capability-card:not(:first-child){
+        padding:24px 0;
+        border-right:0;
+        border-bottom:1px solid var(--line);
+        min-height:auto;
+    }
+
+    .dashboard-columns{
+        grid-template-columns:1fr;
+    }
+
+    .workspace{
+        padding:52px 0;
+    }
+
+    .live-indicator{
+        margin-top:15px;
+    }
+
+    .metric-grid{
+        gap:8px;
+    }
+
+    .metric-card strong{
+        font-size:38px;
+    }
+
+    .map-visual{
+        height:290px;
+    }
+
+    .principle-panel,
+    .twin-note{
+        display:block;
+    }
+
+    .principle-panel h2,
+    .principle-panel p,
+    .twin-note h2,
+    .twin-note p{
+        margin-top:15px;
+    }
+
+    .bar-chart{
+        gap:8px;
+        height:220px;
+    }
+
+    .reservoir-card{
+        padding:18px;
+    }
+
+    .impact-score{
+        padding:28px;
+        display:block;
+    }
+
+    .impact-score strong{
+        font-size:70px;
+    }
+
+    .score-rings{
+        margin:10px auto -20px;
+    }
+
+    .architecture-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .architecture-grid article{
+        padding:20px 15px 20px 0;
+        border-bottom:1px solid var(--line);
+    }
+
+    .architecture-grid article:nth-child(even){
+        padding-left:15px;
+        border-right:0;
+    }
+
+    .company-card{
+        padding:29px;
+    }
+
+    .company-card .button{
+        margin-top:20px;
+    }
+
+    .site-footer{
+        width:calc(100% - 32px);
+        display:block;
+    }
+
+    .footer-meta{
+        text-align:left;
+        margin-top:20px;
+    }
+
+    .forecast-panel{
+        padding:20px;
+    }
+
+    .chart-title{
+        display:block;
+    }
+
+    .chart-title>div:last-child{
+        text-align:left;
+        margin-top:12px;
+    }
+
+    .global-intelligence{
+        padding:20px;
+    }
+
+    .global-intelligence-header{
+        display:block;
+    }
+
+    .global-intelligence-header p{
+        margin-top:15px;
+    }
+
+    .world-water-grid{
+        grid-template-columns:1fr;
+    }
+
+    .quick-access{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .alert-grid{
+        grid-template-columns:1fr;
+    }
+
+    .ai-alerts{
+        padding:22px;
+    }
+
+    .year-grid{
+        grid-template-columns:1fr;
+    }
+}

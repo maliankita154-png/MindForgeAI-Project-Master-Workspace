@@ -1,3 +1,16 @@
+
+<!-- Search and Filter Bar -->
+<div class="flex flex-col sm:flex-row gap-4 justify-between items-center mb-4">
+    <div class="relative w-full sm:w-72">
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search country..." 
+            class="w-full bg-slate-800 border border-dark-border text-white text-sm rounded-lg px-4 py-2 pl-9 focus:outline-none focus:border-brand-500">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+    </div>
+    <div class="text-xs text-slate-400">
+        Showing all available global datasets
+    </div>
+</div>
+
 {% extends "base.html" %}
 {% block title %}Aethera · Planetary water intelligence{% endblock %}
 {% block content %}

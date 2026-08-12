@@ -1,5 +1,497 @@
-{% extends "base.html" %}{% block title %}Command center{% endblock %}{% block content %}
-<section class="workspace container"><div class="workspace-head"><div><span class="eyebrow"><span></span> Operational workspace</span><h1>Command center</h1><p>{{ data.region }}</p></div><div class="live-indicator"><i></i> {{ data.data_label }} · latest date: {{ data.updated_at }}</div></div>
-<div class="metric-grid"><article class="metric-card primary"><span>Latest reservoir storage</span><strong>{{ data.availability }}<small>%</small></strong><p>Calculated from latest CSV row</p><div class="sparkline"></div></article><article class="metric-card"><span>Recent 7-day rainfall</span><strong>{{ data.rainfall }}<small>mm</small></strong><p>Sum of the latest seven CSV rows</p><a href="{{ url_for('rainfall') }}">View rainfall data →</a></article><article class="metric-card"><span>Latest water demand</span><strong>{{ data.demand }}<small>MLD</small></strong><p>Latest domestic demand CSV value</p><a href="{{ url_for('demand') }}">View allocation →</a></article><article class="metric-card"><span>Reservoir capacity</span><strong>{{ data.reservoir }}<small>%</small></strong><p>Ujani demonstration dataset</p><a href="{{ url_for('reservoir') }}">View assets →</a></article></div>
-<div class="dashboard-columns"><section class="panel basin-panel"><div class="panel-title"><div><span class="section-number">BASIN OVERVIEW</span><h2>Solapur demonstration</h2></div><button class="quiet-button">CSV-backed</button></div><div class="map-visual"><div class="map-grid"></div><div class="river r-a"></div><div class="river r-b"></div><span class="map-node n1">Ujani<br><b>{{ data.reservoir }}%</b></span><span class="map-node n2">Demand<br><b>{{ data.demand }}</b></span><span class="map-node n3">Rain<br><b>{{ data.rainfall }}mm</b></span><div class="map-key"><i></i> Synthetic practice signals</div></div></section><aside class="panel insight-panel"><span class="section-number">DATA STATUS</span><h2>CSV integration active</h2><p>The dashboard now reads the latest values from your three practice datasets. Replace them with approved real data only after validation.</p><div class="confidence"><span>Dataset type</span><strong>Synthetic</strong><div><i></i></div></div><a class="button button-primary full" href="{{ url_for('rainfall') }}">Inspect rainfall data →</a></aside></div>
-</section>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}AETHERA | Global Water Intelligence{% endblock %}
+
+{% block content %}
+
+<section class="workspace container">
+
+    <!-- HEADER -->
+    <div class="workspace-head">
+        <div>
+            <span class="eyebrow">
+                <span></span> AETHERA WATER INTELLIGENCE
+            </span>
+
+            <h1>Global Water Dashboard</h1>
+
+            <p>
+                Monitor rainfall, water demand, reservoirs and global water use.
+            </p>
+        </div>
+
+        <div class="live-indicator">
+            <i></i> LIVE DATA
+        </div>
+    </div>
+
+    <!-- MAIN METRICS -->
+    <div class="metric-grid">
+
+        <article class="metric-card primary">
+            <span>Reservoir Availability</span>
+
+            <strong>
+                {{ data.reservoir }}<small>%</small>
+            </strong>
+
+            <p>Latest reservoir storage</p>
+
+            <div class="sparkline"></div>
+        </article>
+
+        <article class="metric-card">
+            <span>Recent Rainfall</span>
+
+            <strong>
+                {{ data.rainfall }}<small> mm</small>
+            </strong>
+
+            <p>Latest rainfall records</p>
+
+            <a href="{{ url_for('rainfall') }}">
+                View rainfall →
+            </a>
+        </article>
+
+        <article class="metric-card">
+            <span>Water Demand</span>
+
+            <strong>
+                {{ data.demand }}<small> MLD</small>
+            </strong>
+
+            <p>Current demonstration demand</p>
+
+            <a href="{{ url_for('demand') }}">
+                View demand →
+            </a>
+        </article>
+
+        <article class="metric-card">
+            <span>Global Countries</span>
+
+            <strong>
+                {{ water_summary.countries }}
+            </strong>
+
+            <p>Countries in water-use dataset</p>
+
+            <a href="{{ url_for('global_water') }}">
+                Explore global data →
+            </a>
+        </article>
+
+    </div>
+
+    <!-- GLOBAL WATER USE -->
+    <section class="panel" style="margin-top:12px;">
+
+        <div class="panel-title">
+            <div>
+                <span class="section-number">
+                    GLOBAL WATER USE
+                </span>
+
+                <h2>Where is water being used?</h2>
+            </div>
+
+            <button class="quiet-button">
+                CSV DATA
+            </button>
+        </div>
+
+        <p>
+            Water consumption is divided into agriculture,
+            industry and domestic use.
+        </p>
+
+        <div class="three-up">
+
+            <!-- AGRICULTURE -->
+            <article class="panel">
+
+                <span class="section-number">
+                    AGRICULTURE
+                </span>
+
+                <h2>
+                    {{ water_summary.agriculture }}%
+                </h2>
+
+                <p>
+                    Average agricultural water-use share.
+                </p>
+
+                <div class="progress">
+                    <i style="width:{{ water_summary.agriculture }}%;"></i>
+                </div>
+
+            </article>
+
+            <!-- INDUSTRY -->
+            <article class="panel">
+
+                <span class="section-number">
+                    INDUSTRY
+                </span>
+
+                <h2>
+                    {{ water_summary.industry }}%
+                </h2>
+
+                <p>
+                    Average industrial water-use share.
+                </p>
+
+                <div class="progress">
+                    <i style="width:{{ water_summary.industry }}%;"></i>
+                </div>
+
+            </article>
+
+            <!-- DOMESTIC -->
+            <article class="panel">
+
+                <span class="section-number">
+                    DOMESTIC
+                </span>
+
+                <h2>
+                    {{ water_summary.domestic }}%
+                </h2>
+
+                <p>
+                    Average domestic water-use share.
+                </p>
+
+                <div class="progress">
+                    <i style="width:{{ water_summary.domestic }}%;"></i>
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+    <!-- COUNTRY DATA -->
+    <section class="panel table-panel">
+
+        <div class="panel-title">
+
+            <div>
+                <span class="section-number">
+                    COUNTRY DATA
+                </span>
+
+                <h2>Water use by country</h2>
+            </div>
+
+        </div>
+
+        <div style="overflow-x:auto;">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>COUNTRY</th>
+                        <th>YEAR</th>
+                        <th>AGRICULTURE</th>
+                        <th>INDUSTRY</th>
+                        <th>DOMESTIC</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for country in countries %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ country.Country }}</strong>
+                        </td>
+
+                        <td>
+                            {{ country.Year }}
+                        </td>
+
+                        <td>
+                            <div class="table-bar">
+                                <i style="width:{{ country.Agriculture }}%;"></i>
+                            </div>
+
+                            {{ country.Agriculture }}%
+                        </td>
+
+                        <td>
+                            <div class="table-bar">
+                                <i style="width:{{ country.Industry }}%;"></i>
+                            </div>
+
+                            {{ country.Industry }}%
+                        </td>
+
+                        <td>
+                            <div class="table-bar">
+                                <i style="width:{{ country.Domestic }}%;"></i>
+                            </div>
+
+                            {{ country.Domestic }}%
+                        </td>
+
+                        <td>
+                            {{ country.Total }}%
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="6">
+                            No water-use data available.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- WATER INTELLIGENCE -->
+    <div class="dashboard-columns">
+
+        <section class="panel">
+
+            <span class="section-number">
+                WATER INTELLIGENCE
+            </span>
+
+            <h2>How is water being used?</h2>
+
+            <p>
+                <strong>Agriculture:</strong>
+                irrigation and food production.
+            </p>
+
+            <p>
+                <strong>Industry:</strong>
+                manufacturing, processing and cooling.
+            </p>
+
+            <p>
+                <strong>Domestic:</strong>
+                drinking, sanitation, cooking and household use.
+            </p>
+
+            <a
+                class="button button-primary"
+                href="{{ url_for('global_water') }}"
+            >
+                Explore Global Water →
+            </a>
+
+        </section>
+
+        <aside class="panel insight-panel">
+
+            <span class="section-number">
+                AETHERA INSIGHT
+            </span>
+
+            <h2>Connected water management</h2>
+
+            <p>
+                Rainfall affects availability.
+                Availability affects reservoirs.
+                Reservoirs affect supply.
+                Supply and demand determine water stress.
+            </p>
+
+            <div class="confidence">
+
+                <span>Dataset coverage</span>
+
+                <strong>
+                    {{ water_summary.countries }} countries
+                </strong>
+
+                <div>
+                    <i style="width:100%;"></i>
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- SOLAPUR -->
+    <div class="dashboard-columns">
+
+        <section class="panel basin-panel">
+
+            <div class="panel-title">
+
+                <div>
+
+                    <span class="section-number">
+                        BASIN OVERVIEW
+                    </span>
+
+                    <h2>Solapur demonstration</h2>
+
+                </div>
+
+                <button class="quiet-button">
+                    CSV-BACKED
+                </button>
+
+            </div>
+
+            <div class="map-visual">
+
+                <div class="map-grid"></div>
+
+                <div class="river r-a"></div>
+
+                <div class="river r-b"></div>
+
+                <span class="map-node n1">
+                    Ujani
+                    <br>
+                    <b>{{ data.reservoir }}%</b>
+                </span>
+
+                <span class="map-node n2">
+                    Demand
+                    <br>
+                    <b>{{ data.demand }}</b>
+                </span>
+
+                <span class="map-node n3">
+                    Rain
+                    <br>
+                    <b>{{ data.rainfall }}mm</b>
+                </span>
+
+                <div class="map-key">
+                    <i></i>
+                    Demonstration signals
+                </div>
+
+            </div>
+
+        </section>
+
+        <aside class="panel insight-panel">
+
+            <span class="section-number">
+                DATA STATUS
+            </span>
+
+            <h2>Monitoring active</h2>
+
+            <p>
+                AETHERA is connecting rainfall,
+                reservoir and water-use datasets.
+            </p>
+
+            <div class="confidence">
+
+                <span>Data source</span>
+
+                <strong>CSV</strong>
+
+                <div>
+                    <i></i>
+                </div>
+
+            </div>
+
+            <a
+                class="button button-primary full"
+                href="{{ url_for('rainfall') }}"
+            >
+                Inspect Rainfall →
+            </a>
+
+        </aside>
+
+    </div>
+
+    <!-- MODULES -->
+    <section class="panel" style="margin-top:12px;">
+
+        <span class="section-number">
+            AETHERA MODULES
+        </span>
+
+        <h2>Water Intelligence Modules</h2>
+
+        <div class="three-up">
+
+            <a class="panel" href="{{ url_for('rainfall') }}">
+                <span class="section-number">01</span>
+                <h2>Rainfall</h2>
+                <p>
+                    Analyse rainfall observations and trends.
+                </p>
+            </a>
+
+            <a class="panel" href="{{ url_for('demand') }}">
+                <span class="section-number">02</span>
+                <h2>Water Demand</h2>
+                <p>
+                    Understand water demand by sector.
+                </p>
+            </a>
+
+            <a class="panel" href="{{ url_for('reservoir') }}">
+                <span class="section-number">03</span>
+                <h2>Reservoir</h2>
+                <p>
+                    Monitor reservoir availability.
+                </p>
+            </a>
+
+            <a class="panel" href="{{ url_for('digital_twin') }}">
+                <span class="section-number">04</span>
+                <h2>Digital Twin</h2>
+                <p>
+                    Simulate future water scenarios.
+                </p>
+            </a>
+
+            <a class="panel" href="{{ url_for('sustainability') }}">
+                <span class="section-number">05</span>
+                <h2>Sustainability</h2>
+                <p>
+                    Explore sustainable water management.
+                </p>
+            </a>
+
+            <a class="panel" href="{{ url_for('global_water') }}">
+                <span class="section-number">06</span>
+                <h2>Global Water</h2>
+                <p>
+                    Compare water use across countries.
+                </p>
+            </a>
+
+        </div>
+
+    </section>
+
+</section>
+
+{% endblock %}

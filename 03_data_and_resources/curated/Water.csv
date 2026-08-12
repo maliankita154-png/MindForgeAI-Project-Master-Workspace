@@ -1,0 +1,22 @@
+id,country,region,population_millions,renewable_freshwater_bcm,annual_withdrawal_bcm,per_capita_daily_liters,water_stress_level,agricultural_pct,industrial_pct,domestic_pct
+ind,India,South Asia,1428,1911,761,140,High,84,6,10
+usa,United States,North America,339,2818,444,310,Medium,40,46,14
+chn,China,East Asia,1411,2840,591,160,High,62,22,16
+bra,Brazil,South America,216,8233,75,180,Low,60,18,22
+egy,Egypt,North Africa,112,58,77,120,Extremely High,86,6,8
+deu,Germany,Europe,84,188,25,125,Low,2,84,14
+aus,Australia,Oceania,26,492,16,290,Medium,68,16,16
+jpn,Japan,East Asia,124,430,78,200,Low,66,18,16
+sau,Saudi Arabia,Middle East,36,2.4,23,270,Extremely High,82,5,13
+zaf,South Africa,Sub-Saharan Africa,60,50,15,210,High,63,11,26
+Country,Year,Agriculture,Industry,Domestic,Total
+India,2025,80,10,10,100
+USA,2025,40,30,30,100
+China,2025,60,25,15,100
+Brazil,2025,70,15,15,100
+Australia,2025,35,40,25,100
+Canada,2025,30,40,30,100
+Germany,2025,25,45,30,100
+France,2025,30,40,30,100
+Japan,2025,35,35,30,100
+South Africa,2025,65,20,15,100

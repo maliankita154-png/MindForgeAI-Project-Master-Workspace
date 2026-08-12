@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Global Water Intelligence{% endblock %}
+
+{% block content %}
+
+<section class="workspace container">
+
+    <div class="workspace-head">
+
+        <div>
+            <span class="eyebrow">
+                <span></span> GLOBAL WATER INTELLIGENCE
+            </span>
+
+            <h1>Global Water</h1>
+
+            <p>
+                Water use by country and sector
+            </p>
+        </div>
+
+        <div class="live-indicator">
+            <i></i> Water-use dataset active
+        </div>
+
+    </div>
+
+
+    <!-- COUNTRY SELECTION -->
+
+    <section class="panel">
+
+        <div class="panel-title">
+
+            <div>
+                <span class="section-number">
+                    LOCATION
+                </span>
+
+                <h2>Select Country</h2>
+            </div>
+
+        </div>
+
+        <form method="GET" action="{{ url_for('global_water') }}">
+
+            <select name="country" class="water-select">
+
+                {% for country in countries %}
+
+                <option
+                    value="{{ country }}"
+                    {% if country == selected_country %}
+                    selected
+                    {% endif %}
+                >
+                    {{ country }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                View Water Data →
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- COUNTRY RESULT -->
+
+    {% if selected_data %}
+
+    <div class="metric-grid">
+
+        <article class="metric-card primary">
+
+            <span>🌍 Country</span>
+
+            <strong>
+                {{ selected_data.Country }}
+            </strong>
+
+            <p>
+                Year: {{ selected_data.Year }}
+            </p>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>🌾 Agriculture</span>
+
+            <strong>
+                {{ selected_data.Agriculture }}<small>%</small>
+            </strong>
+
+            <p>
+                Water withdrawal
+            </p>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>🏭 Industry</span>
+
+            <strong>
+                {{ selected_data.Industry }}<small>%</small>
+            </strong>
+
+            <p>
+                Water withdrawal
+            </p>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>🏠 Domestic</span>
+
+            <strong>
+                {{ selected_data.Domestic }}<small>%</small>
+            </strong>
+
+            <p>
+                Water withdrawal
+            </p>
+
+        </article>
+
+    </div>
+
+
+    <!-- TOTAL WATER -->
+
+    <section class="panel global-result">
+
+        <span class="section-number">
+            WATER WITHDRAWAL
+        </span>
+
+        <h2>
+            {{ selected_data.Country }} Water Use
+        </h2>
+
+        <div class="water-total">
+
+            <strong>
+                {{ selected_data.Total }}
+            </strong>
+
+            <span>
+                Total index
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- SECTOR CHART -->
+
+    <section class="panel">
+
+        <div class="panel-title">
+
+            <div>
+
+                <span class="section-number">
+                    WATER USE ANALYTICS
+                </span>
+
+                <h2>
+                    Sector Distribution
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div style="height:350px;">
+
+            <canvas id="waterUseChart"></canvas>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+{% if selected_data %}
+
+<script>
+
+const ctx =
+    document.getElementById("waterUseChart");
+
+
+new Chart(ctx, {
+
+    type: "doughnut",
+
+    data: {
+
+        labels: [
+            "Agriculture",
+            "Industry",
+            "Domestic"
+        ],
+
+        datasets: [{
+
+            data: [
+
+                {{ selected_data.Agriculture }},
+
+                {{ selected_data.Industry }},
+
+                {{ selected_data.Domestic }}
+
+            ]
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false
+
+    }
+
+});
+
+</script>
+
+{% endif %}
+
+{% endblock %}

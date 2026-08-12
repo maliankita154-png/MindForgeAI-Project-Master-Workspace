@@ -1,1 +1,449 @@
-{% extends "base.html" %}{% block title %}Rainfall intelligence{% endblock %}{% block content %}<section class="workspace container"><div class="workspace-head"><div><span class="eyebrow"><span></span> Rainfall data module</span><h1>Rainfall intelligence</h1><p>Latest seven daily values read from <code>rainfall_demo.csv</code>.</p></div><div class="live-indicator"><i></i> Synthetic practice data</div></div><section class="panel forecast-panel"><div class="chart-title"><div><span class="section-number">RAINFALL / MM</span><h2>Recent rainfall history</h2></div><div><b class="big-number">{{ rainfall | map(attribute='rainfall_mm') | max }} mm</b><small>Highest value in this seven-day slice</small></div></div><div class="bar-chart">{% for item in rainfall %}<div><i style="height: {{ [item.rainfall_mm * 3, 5] | max }}px"></i><span>{{ item.day }}</span><b>{{ item.rainfall_mm }}</b></div>{% endfor %}</div></section><div class="three-up"><article class="panel"><span class="section-number">SOURCE</span><h2>CSV dataset</h2><p>Rows are read from the curated practice-data folder.</p></article><article class="panel"><span class="section-number">STATUS</span><h2>Synthetic</h2><p>Use this data to learn the pipeline, not as a real forecast.</p></article><article class="panel"><span class="section-number">NEXT TASK</span><h2>Build baseline</h2><p>Predict the next day using previous rainfall values.</p></article></div></section>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Rainfall Intelligence{% endblock %}
+
+{% block content %}
+
+<section class="workspace container">
+
+    <!-- HEADER -->
+    <div class="workspace-head">
+
+        <div>
+            <span class="eyebrow">
+                <span></span>
+                Rainfall Data Module
+            </span>
+
+            <h1>Rainfall Intelligence</h1>
+
+            <p>
+                Recent rainfall observations from
+                <code>rainfall_demo.csv</code>.
+            </p>
+        </div>
+
+        <div class="live-indicator">
+            <i></i>
+            Synthetic Practice Data
+        </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- RAINFALL CHART -->
+    <!-- ============================= -->
+
+    <section class="panel forecast-panel">
+
+        <div class="chart-title">
+
+            <div>
+                <span class="section-number">
+                    RAINFALL / MM
+                </span>
+
+                <h2>Recent Rainfall History</h2>
+            </div>
+
+        </div>
+
+
+        {% if rainfall %}
+
+        <div class="bar-chart">
+
+            {% for item in rainfall[:7] %}
+
+            <div class="rainfall-bar">
+
+                <i
+                    style="height: {{ [item.rainfall_mm * 3, 5] | max }}px;">
+                </i>
+
+                <span>
+                    {{ item.date }}
+                </span>
+
+                <b>
+                    {{ item.rainfall_mm }} mm
+                </b>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p>No rainfall data available.</p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ============================= -->
+    <!-- VALUES BELOW CHART -->
+    <!-- ============================= -->
+
+    {% if rainfall %}
+
+    <section class="rainfall-values">
+
+        <div class="value-card">
+
+            <span>HIGHEST RAINFALL</span>
+
+            <strong>
+                {{ rainfall | map(attribute='rainfall_mm') | max }} mm
+            </strong>
+
+        </div>
+
+
+        <div class="value-card">
+
+            <span>LOCATION</span>
+
+            <strong>
+                {{ rainfall[0].location }}
+            </strong>
+
+        </div>
+
+
+        <div class="value-card">
+
+            <span>STATION</span>
+
+            <strong>
+                {{ rainfall[0].station_id }}
+            </strong>
+
+        </div>
+
+
+        <div class="value-card">
+
+            <span>HUMIDITY</span>
+
+            <strong>
+                {{ rainfall[0].humidity_pct }}%
+            </strong>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- ============================= -->
+    <!-- DATA TABLE -->
+    <!-- ============================= -->
+
+    <section class="panel rainfall-data-panel">
+
+        <div class="chart-title">
+
+            <div>
+
+                <span class="section-number">
+                    OBSERVATIONS
+                </span>
+
+                <h2>Recent Rainfall Data</h2>
+
+            </div>
+
+        </div>
+
+
+        {% if rainfall %}
+
+        <div class="rainfall-table-wrapper">
+
+            <table class="rainfall-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Station</th>
+                        <th>Location</th>
+                        <th>Rainfall</th>
+                        <th>Temperature</th>
+                        <th>Humidity</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in rainfall[:10] %}
+
+                    <tr>
+
+                        <td>{{ item.date }}</td>
+
+                        <td>{{ item.station_id }}</td>
+
+                        <td>{{ item.location }}</td>
+
+                        <td>
+                            <strong>
+                                {{ item.rainfall_mm }} mm
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ item.temperature_c }} °C
+                        </td>
+
+                        <td>
+                            {{ item.humidity_pct }} %
+                        </td>
+
+                        <td>
+                            <span class="status-badge">
+                                {{ item.quality_flag }}
+                            </span>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <p>No rainfall observations available.</p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ============================= -->
+    <!-- INFORMATION CARDS -->
+    <!-- ============================= -->
+
+    <div class="three-up">
+
+        <article class="panel">
+
+            <span class="section-number">
+                SOURCE
+            </span>
+
+            <h2>CSV Dataset</h2>
+
+            <p>
+                Data is loaded directly from the existing
+                rainfall_demo.csv dataset.
+            </p>
+
+        </article>
+
+
+        <article class="panel">
+
+            <span class="section-number">
+                STATUS
+            </span>
+
+            <h2>Synthetic</h2>
+
+            <p>
+                Practice dataset used for AETHERA
+                rainfall intelligence development.
+            </p>
+
+        </article>
+
+
+        <article class="panel">
+
+            <span class="section-number">
+                NEXT TASK
+            </span>
+
+            <h2>Build Baseline</h2>
+
+            <p>
+                Predict the next day's rainfall using
+                historical observations.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- ============================= -->
+<!-- PAGE CSS -->
+<!-- ============================= -->
+
+<style>
+
+.forecast-panel {
+    width: 100%;
+    display: block;
+}
+
+.bar-chart {
+    width: 100%;
+    min-height: 280px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 18px;
+    padding: 30px 20px;
+    overflow-x: auto;
+}
+
+.rainfall-bar {
+    min-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.rainfall-bar i {
+    display: block;
+    width: 42px;
+    min-height: 8px;
+    border-radius: 8px 8px 2px 2px;
+    background: linear-gradient(
+        to top,
+        #33c3d8,
+        #6bc785
+    );
+}
+
+.rainfall-bar span {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.rainfall-bar b {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+
+/* VALUES BELOW CHART */
+
+.rainfall-values {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.value-card {
+    padding: 22px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.value-card span {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+}
+
+.value-card strong {
+    display: block;
+    font-size: 24px;
+}
+
+
+/* TABLE */
+
+.rainfall-data-panel {
+    width: 100%;
+    display: block;
+    margin-top: 24px;
+}
+
+.rainfall-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rainfall-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+}
+
+.rainfall-table th,
+.rainfall-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+}
+
+.rainfall-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.rainfall-table td {
+    font-size: 14px;
+}
+
+.rainfall-table tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+    .rainfall-values {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .rainfall-values {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+{% endblock %}
