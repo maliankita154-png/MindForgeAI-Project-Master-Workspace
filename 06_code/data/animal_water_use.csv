@@ -1,0 +1,6 @@
+animal,animals_count,daily_water_litres_per_animal
+Cow,20,50
+Buffalo,15,60
+Goat,30,5
+Sheep,25,5
+Chicken,500,0.25

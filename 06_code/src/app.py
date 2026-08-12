@@ -1,575 +1,584 @@
-"""AETHERA - Interactive Water Intelligence Demonstration Platform."""
-
-from __future__ import annotations
-
-from datetime import datetime
-from pathlib import Path
-import csv
-
+from flask import Flask, render_template
+import os
 import pandas as pd
-from flask import Flask, jsonify, render_template, request
-
-from services.data_service import overview_metrics
 
 
-# =========================================================
-# PATHS
-# =========================================================
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-CODE_DIR = BASE_DIR / "06_code"
-DATA_DIR = CODE_DIR / "data"
-
-WATER_USE_FILE = DATA_DIR / "water_use.csv"
-
-RAINFALL_FILE = (
-    BASE_DIR
-    / "03_data_and_resources"
-    / "curated"
-    / "rainfall_demo.csv"
-)
+app = Flask(__name__)
 
 
-# =========================================================
-# CREATE APP
-# =========================================================
+# ============================================================
+# PROJECT PATHS
+# ============================================================
 
-def create_app() -> Flask:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
-    app = Flask(__name__)
+RAINFALL_FILE = os.path.join(DATA_DIR, "rainfall_demo.csv")
+DEMAND_FILE = os.path.join(DATA_DIR, "demand_demo.csv")
+RESERVOIR_FILE = os.path.join(DATA_DIR, "reservoir_demo.csv")
+ANIMAL_WATER_FILE = os.path.join(DATA_DIR, "animal_water_use.csv")
+GLOBAL_WATER_FILE = os.path.join(DATA_DIR, "water_use.csv")
 
-    app.config.from_mapping(
-        SECRET_KEY="development-only-change-me"
-    )
 
-    # =====================================================
-    # LOAD RAINFALL DATA
-    # =====================================================
+# ============================================================
+# SAFE CSV LOADER
+# ============================================================
 
-    if not RAINFALL_FILE.exists():
-        raise FileNotFoundError(
-            f"Rainfall CSV not found: {RAINFALL_FILE}"
-        )
+def load_csv(file_path):
 
-    rainfall_df = pd.read_csv(RAINFALL_FILE)
+    if os.path.exists(file_path):
 
-    print("=" * 60)
-    print("AETHERA")
-    print("Rainfall data loaded successfully!")
-    print("Rainfall file:", RAINFALL_FILE)
-    print("Columns:", list(rainfall_df.columns))
-    print("Rows:", len(rainfall_df))
-    print("=" * 60)
+        try:
+            return pd.read_csv(file_path)
 
-    print(rainfall_df.head())
+        except Exception as e:
 
-    # =====================================================
-    # GLOBAL BRAND DATA
-    # =====================================================
+            print(f"Error reading {file_path}: {e}")
 
-    @app.context_processor
-    def inject_brand():
+    else:
 
-        return {
-            "current_year": datetime.now().year
-        }
+        print(f"File not found: {file_path}")
 
-    # =====================================================
-    # HOME
-    # =====================================================
+    return pd.DataFrame()
 
-    @app.get("/")
-    def home():
 
-        return render_template(
-            "index.html"
-        )
+# ============================================================
+# HOME
+# ============================================================
 
-    # =====================================================
-    # DASHBOARD
-    # =====================================================
+@app.route("/")
+def home():
 
-    @app.get("/dashboard")
-    def dashboard():
+    return render_template("index.html")
 
-        # ---------------------------------------------
-        # AETHERA metrics
-        # ---------------------------------------------
 
-        data = overview_metrics()
+# ============================================================
+# ABOUT
+# ============================================================
 
-        # ---------------------------------------------
-        # Default values
-        # ---------------------------------------------
+@app.route("/about")
+def about():
 
-        water_data = []
+    return render_template("about.html")
 
-        # ---------------------------------------------
-        # Read water-use CSV
-        # ---------------------------------------------
 
-        if WATER_USE_FILE.exists():
+# ============================================================
+# DASHBOARD
+# ============================================================
 
-            with open(
-                WATER_USE_FILE,
-                mode="r",
-                encoding="utf-8-sig",
-                newline=""
-            ) as file:
+@app.route("/dashboard")
+def dashboard():
 
-                reader = csv.DictReader(file)
+    # --------------------------------------------------------
+    # LOAD DATASETS
+    # --------------------------------------------------------
 
-                for row in reader:
+    rainfall_df = load_csv(RAINFALL_FILE)
+    demand_df = load_csv(DEMAND_FILE)
+    reservoir_df = load_csv(RESERVOIR_FILE)
+    animal_df = load_csv(ANIMAL_WATER_FILE)
+    global_df = load_csv(GLOBAL_WATER_FILE)
 
-                    country = row.get("Country", "").strip()
 
-                    if not country:
-                        continue
+    # ========================================================
+    # RAINFALL VALUE
+    # ========================================================
 
-                    try:
+    rainfall_value = 0
 
-                        agriculture = float(
-                            row.get("Agriculture", 0) or 0
-                        )
+    if not rainfall_df.empty:
 
-                        industry = float(
-                            row.get("Industry", 0) or 0
-                        )
+        rainfall_columns = [
+            "rainfall_mm",
+            "rainfall",
+            "Rainfall",
+            "precipitation_mm",
+            "precipitation"
+        ]
 
-                        domestic = float(
-                            row.get("Domestic", 0) or 0
-                        )
+        for column in rainfall_columns:
 
-                        total = float(
-                            row.get("Total", 0) or 0
-                        )
+            if column in rainfall_df.columns:
 
-                        year = int(
-                            float(
-                                row.get("Year", 0) or 0
-                            )
-                        )
+                rainfall_value = rainfall_df[column].iloc[-1]
 
-                    except (ValueError, TypeError):
+                break
 
-                        continue
 
-                    water_data.append(
-                        {
-                            "Country": country,
-                            "Year": year,
-                            "Agriculture": agriculture,
-                            "Industry": industry,
-                            "Domestic": domestic,
-                            "Total": total,
-                        }
-                    )
+    # ========================================================
+    # DEMAND VALUE
+    # ========================================================
 
-        # ---------------------------------------------
-        # Calculate water summary
-        # ---------------------------------------------
+    demand_value = 0
 
-        if water_data:
+    if not demand_df.empty:
 
-            total_rows = len(water_data)
+        demand_columns = [
+            "demand_mld",
+            "demand",
+            "Demand",
+            "water_demand_mld",
+            "water_demand"
+        ]
 
-            agriculture = round(
-                sum(
-                    item["Agriculture"]
-                    for item in water_data
-                ) / total_rows,
-                1
+        for column in demand_columns:
+
+            if column in demand_df.columns:
+
+                demand_value = demand_df[column].iloc[-1]
+
+                break
+
+
+    # ========================================================
+    # RESERVOIR VALUE
+    # ========================================================
+
+    reservoir_value = 0
+
+    if not reservoir_df.empty:
+
+        reservoir_columns = [
+            "availability_pct",
+            "availability",
+            "reservoir_pct",
+            "storage_pct",
+            "storage",
+            "level_pct"
+        ]
+
+        for column in reservoir_columns:
+
+            if column in reservoir_df.columns:
+
+                reservoir_value = reservoir_df[column].iloc[-1]
+
+                break
+
+
+    # ========================================================
+    # ANIMAL WATER CALCULATION
+    # ========================================================
+
+    total_animals = 0
+    total_daily_water = 0
+    total_monthly_water = 0
+    highest_consumer = "N/A"
+
+    animal_data = []
+
+
+    if not animal_df.empty:
+
+        required_columns = [
+            "animals_count",
+            "daily_water_litres_per_animal"
+        ]
+
+        if all(
+            column in animal_df.columns
+            for column in required_columns
+        ):
+
+            animal_df["animals_count"] = pd.to_numeric(
+                animal_df["animals_count"],
+                errors="coerce"
+            ).fillna(0)
+
+            animal_df["daily_water_litres_per_animal"] = pd.to_numeric(
+                animal_df["daily_water_litres_per_animal"],
+                errors="coerce"
+            ).fillna(0)
+
+
+            # Total water per animal category
+
+            animal_df["total_daily_water"] = (
+                animal_df["animals_count"]
+                *
+                animal_df[
+                    "daily_water_litres_per_animal"
+                ]
             )
 
-            industry = round(
-                sum(
-                    item["Industry"]
-                    for item in water_data
-                ) / total_rows,
-                1
+
+            # Total animals
+
+            total_animals = int(
+                animal_df["animals_count"].sum()
             )
 
-            domestic = round(
-                sum(
-                    item["Domestic"]
-                    for item in water_data
-                ) / total_rows,
-                1
+
+            # Total daily water
+
+            total_daily_water = float(
+                animal_df["total_daily_water"].sum()
             )
 
-        else:
 
-            agriculture = 0
-            industry = 0
-            domestic = 0
+            # Monthly water
 
-        # ---------------------------------------------
-        # IMPORTANT:
-        # This object is sent to dashboard.html
-        # ---------------------------------------------
+            total_monthly_water = (
+                total_daily_water * 30
+            )
 
-        water_summary = {
-            "countries": len(
-                set(
-                    item["Country"]
-                    for item in water_data
+
+            # Highest water consuming animal
+
+            if not animal_df.empty:
+
+                highest_index = (
+                    animal_df[
+                        "total_daily_water"
+                    ].idxmax()
                 )
-            ),
-            "agriculture": agriculture,
-            "industry": industry,
-            "domestic": domestic,
-        }
 
-        print("Dashboard water summary:")
-        print(water_summary)
+                highest_consumer = str(
+                    animal_df.loc[
+                        highest_index,
+                        "animal"
+                    ]
+                )
 
-        # ---------------------------------------------
-        # Render dashboard
-        # ---------------------------------------------
 
-        return render_template(
-            "dashboard.html",
-            data=data,
-            countries=water_data,
-            water_summary=water_summary,
-        )
+            # Convert dataframe to records
 
-    # =====================================================
-    # RAINFALL
-    # =====================================================
+            animal_data = animal_df.to_dict(
+                orient="records"
+            )
 
-    @app.get("/rainfall")
-    def rainfall():
 
-        data = rainfall_df.to_dict(
+    # ========================================================
+    # ANIMAL SUMMARY
+    # ========================================================
+
+    animal_summary = {
+
+        "total_animals": total_animals,
+
+        "daily_water": round(
+            total_daily_water,
+            2
+        ),
+
+        "monthly_water": round(
+            total_monthly_water,
+            2
+        ),
+
+        "highest_consumer": highest_consumer
+    }
+
+
+    # ========================================================
+    # GLOBAL WATER SUMMARY
+    # ========================================================
+
+    countries = []
+
+    water_summary = {
+
+        "countries": 0,
+
+        "agriculture": 0,
+
+        "industry": 0,
+
+        "domestic": 0
+    }
+
+
+    if not global_df.empty:
+
+        # ----------------------------------------------------
+        # Country records
+        # ----------------------------------------------------
+
+        countries = global_df.to_dict(
             orient="records"
         )
 
-        return render_template(
-            "rainfall.html",
-            rainfall=data
-        )
 
-    # =====================================================
-    # DEMAND
-    # =====================================================
+        # ----------------------------------------------------
+        # Number of countries
+        # ----------------------------------------------------
 
-    @app.get("/demand")
-    def demand():
+        if "Country" in global_df.columns:
 
-        sectors = [
-            {
-                "label": "Domestic",
-                "value": 42,
-                "color": "#33c3d8"
-            },
-            {
-                "label": "Agriculture",
-                "value": 35,
-                "color": "#6bc785"
-            },
-            {
-                "label": "Industry",
-                "value": 15,
-                "color": "#a78bfa"
-            },
-            {
-                "label": "Ecological",
-                "value": 8,
-                "color": "#e5c36a"
-            },
-        ]
-
-        return render_template(
-            "demand.html",
-            sectors=sectors
-        )
-
-    # =====================================================
-    # RESERVOIR
-    # =====================================================
-
-    @app.get("/reservoir")
-    def reservoir():
-
-        metrics = overview_metrics()
-
-        reservoirs = [
-            (
-                "Ujani demonstration",
-                metrics.get("reservoir", 0),
-                "Synthetic"
-            )
-        ]
-
-        return render_template(
-            "reservoir.html",
-            reservoirs=reservoirs
-        )
-
-    # =====================================================
-    # DIGITAL TWIN
-    # =====================================================
-
-    @app.get("/digital-twin")
-    def digital_twin():
-
-        return render_template(
-            "digital_twin.html"
-        )
-
-    # =====================================================
-    # SUSTAINABILITY
-    # =====================================================
-
-    @app.get("/sustainability")
-    def sustainability():
-
-        return render_template(
-            "sustainability.html"
-        )
-
-    # =====================================================
-    # ABOUT
-    # =====================================================
-
-    @app.get("/about")
-    def about():
-
-        return render_template(
-            "about.html"
-        )
-
-    # =====================================================
-    # GLOBAL WATER
-    # =====================================================
-
-    @app.get("/global-water")
-    def global_water():
-
-        countries = []
-        water_data = []
-
-        if WATER_USE_FILE.exists():
-
-            with open(
-                WATER_USE_FILE,
-                mode="r",
-                encoding="utf-8-sig",
-                newline=""
-            ) as file:
-
-                reader = csv.DictReader(file)
-
-                for row in reader:
-
-                    country = row.get(
-                        "Country",
-                        ""
-                    ).strip()
-
-                    if not country:
-                        continue
-
-                    try:
-
-                        row["Agriculture"] = float(
-                            row.get("Agriculture", 0) or 0
-                        )
-
-                        row["Industry"] = float(
-                            row.get("Industry", 0) or 0
-                        )
-
-                        row["Domestic"] = float(
-                            row.get("Domestic", 0) or 0
-                        )
-
-                        row["Total"] = float(
-                            row.get("Total", 0) or 0
-                        )
-
-                        row["Year"] = int(
-                            float(
-                                row.get("Year", 0) or 0
-                            )
-                        )
-
-                    except (ValueError, TypeError):
-
-                        continue
-
-                    water_data.append(row)
-
-                    if country not in countries:
-                        countries.append(country)
-
-        countries.sort()
-
-        selected_country = request.args.get(
-            "country",
-            countries[0] if countries else ""
-        )
-
-        selected_data = None
-
-        for row in water_data:
-
-            if row["Country"] == selected_country:
-
-                selected_data = row
-                break
-
-        return render_template(
-            "global_water.html",
-            countries=countries,
-            selected_country=selected_country,
-            selected_data=selected_data,
-            water_data=water_data,
-        )
-
-    # =====================================================
-    # HEALTH
-    # =====================================================
-
-    @app.get("/health")
-    def health():
-
-        return jsonify(
-            status="ok",
-            service="aethera",
-            environment="demo"
-        )
-
-    # =====================================================
-    # API OVERVIEW
-    # =====================================================
-
-    @app.get("/api/overview")
-    def api_overview():
-
-        return jsonify(
-            overview_metrics()
-        )
-
-    # =====================================================
-    # DIGITAL TWIN SIMULATION API
-    # =====================================================
-
-    @app.post("/api/twin/simulate")
-    def simulate_twin():
-
-        payload = request.get_json(
-            silent=True
-        ) or {}
-
-        drought = min(
-            max(
-                float(
-                    payload.get(
-                        "drought",
-                        25
-                    )
-                ),
-                0
-            ),
-            100
-        )
-
-        growth = min(
-            max(
-                float(
-                    payload.get(
-                        "growth",
-                        12
-                    )
-                ),
-                0
-            ),
-            100
-        )
-
-        conservation = min(
-            max(
-                float(
-                    payload.get(
-                        "conservation",
-                        18
-                    )
-                ),
-                0
-            ),
-            100
-        )
-
-        availability = round(
-            max(
-                0,
-                78
-                - drought * 0.43
-                + conservation * 0.18
-            )
-        )
-
-        demand_index = round(
-            62
-            + growth * 0.35
-            - conservation * 0.27
-        )
-
-        resilience = round(
-            min(
-                100,
-                max(
-                    0,
-                    91
-                    - drought * 0.31
-                    - growth * 0.12
-                    + conservation * 0.42
-                )
-            )
-        )
-
-        if availability < 60:
-
-            recommendation = (
-                "Activate equitable demand measures "
-                "and protect ecological minimum flows."
+            water_summary["countries"] = int(
+                global_df["Country"]
+                .nunique()
             )
 
-        else:
 
-            recommendation = (
-                "Maintain monitored allocation; "
-                "prioritise recharge and leakage reduction."
+        # ----------------------------------------------------
+        # Agriculture
+        # ----------------------------------------------------
+
+        if "Agriculture" in global_df.columns:
+
+            water_summary["agriculture"] = round(
+                pd.to_numeric(
+                    global_df["Agriculture"],
+                    errors="coerce"
+                ).mean(),
+                2
             )
 
-        return jsonify(
-            availability=availability,
-            demand=demand_index,
-            resilience=resilience,
-            recommendation=recommendation,
-            is_demo=True
+
+        # ----------------------------------------------------
+        # Industry
+        # ----------------------------------------------------
+
+        if "Industry" in global_df.columns:
+
+            water_summary["industry"] = round(
+                pd.to_numeric(
+                    global_df["Industry"],
+                    errors="coerce"
+                ).mean(),
+                2
+            )
+
+
+        # ----------------------------------------------------
+        # Domestic
+        # ----------------------------------------------------
+
+        if "Domestic" in global_df.columns:
+
+            water_summary["domestic"] = round(
+                pd.to_numeric(
+                    global_df["Domestic"],
+                    errors="coerce"
+                ).mean(),
+                2
+            )
+
+
+    # ========================================================
+    # DASHBOARD DATA
+    # ========================================================
+
+    data = {
+
+        "rainfall": rainfall_value,
+
+        "demand": demand_value,
+
+        "reservoir": reservoir_value
+    }
+
+
+    # ========================================================
+    # DASHBOARD TEMPLATE
+    # ========================================================
+
+    return render_template(
+
+        "dashboard.html",
+
+        data=data,
+
+        water_summary=water_summary,
+
+        countries=countries,
+
+        rainfall_data=rainfall_df.to_dict(
+            orient="records"
+        ),
+
+        demand_data=demand_df.to_dict(
+            orient="records"
+        ),
+
+        reservoir_data=reservoir_df.to_dict(
+            orient="records"
+        ),
+
+        animal_data=animal_data,
+
+        animal_summary=animal_summary,
+
+        total_animals=total_animals,
+
+        total_daily_water=total_daily_water,
+
+        total_monthly_water=total_monthly_water,
+
+        highest_consumer=highest_consumer
+    )
+
+
+# ============================================================
+# RAINFALL
+# ============================================================
+
+@app.route("/rainfall")
+def rainfall():
+
+    df = load_csv(RAINFALL_FILE)
+
+    return render_template(
+
+        "rainfall.html",
+
+        rainfall_data=df.to_dict(
+            orient="records"
         )
-
-    # =====================================================
-    # RETURN APP
-    # =====================================================
-
-    return app
+    )
 
 
-# =========================================================
-# START APPLICATION
-# =========================================================
+# ============================================================
+# DEMAND
+# ============================================================
 
-app = create_app()
+@app.route("/demand")
+def demand():
 
+    df = load_csv(DEMAND_FILE)
+
+    return render_template(
+
+        "demand.html",
+
+        demand_data=df.to_dict(
+            orient="records"
+        )
+    )
+
+
+# ============================================================
+# RESERVOIR
+# ============================================================
+
+@app.route("/reservoir")
+def reservoir():
+
+    df = load_csv(RESERVOIR_FILE)
+
+    return render_template(
+
+        "reservoir.html",
+
+        reservoir_data=df.to_dict(
+            orient="records"
+        )
+    )
+
+
+# ============================================================
+# GLOBAL WATER
+# ============================================================
+
+@app.route("/global-water")
+def global_water():
+
+    df = load_csv(GLOBAL_WATER_FILE)
+
+    countries = df.to_dict(
+        orient="records"
+    )
+
+    water_summary = {
+
+        "countries": 0,
+
+        "agriculture": 0,
+
+        "industry": 0,
+
+        "domestic": 0
+    }
+
+
+    if not df.empty:
+
+        if "Country" in df.columns:
+
+            water_summary["countries"] = int(
+                df["Country"].nunique()
+            )
+
+
+        if "Agriculture" in df.columns:
+
+            water_summary["agriculture"] = round(
+                pd.to_numeric(
+                    df["Agriculture"],
+                    errors="coerce"
+                ).mean(),
+                2
+            )
+
+
+        if "Industry" in df.columns:
+
+            water_summary["industry"] = round(
+                pd.to_numeric(
+                    df["Industry"],
+                    errors="coerce"
+                ).mean(),
+                2
+            )
+
+
+        if "Domestic" in df.columns:
+
+            water_summary["domestic"] = round(
+                pd.to_numeric(
+                    df["Domestic"],
+                    errors="coerce"
+                ).mean(),
+                2
+            )
+
+
+    return render_template(
+
+        "global_water.html",
+
+        countries=countries,
+
+        water_summary=water_summary
+    )
+
+
+# ============================================================
+# SUSTAINABILITY
+# ============================================================
+
+@app.route("/sustainability")
+def sustainability():
+
+    return render_template(
+        "sustainability.html"
+    )
+
+
+# ============================================================
+# DIGITAL TWIN
+# ============================================================
+
+@app.route("/digital-twin")
+def digital_twin():
+
+    return render_template(
+        "digital_twin.html"
+    )
+
+
+# ============================================================
+# RUN APPLICATION
+# ============================================================
 
 if __name__ == "__main__":
 
     app.run(
+
+        debug=True,
+
         host="127.0.0.1",
-        port=5000,
-        debug=True
+
+        port=5000
     )

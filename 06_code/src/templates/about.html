@@ -1,1 +1,42 @@
-{% extends "base.html" %}{% block title %}About Aethera{% endblock %}{% block content %}<section class="about-hero container"><span class="eyebrow"><span></span> About the initiative</span><h1>The intelligence<br>of <em>every drop.</em></h1><p>Aethera is an AI-powered water-intelligence platform conceived during the MindforgeAI internship ecosystem at Chatake Innoworks Pvt. Ltd.</p></section><section class="statement"><div class="container split-statement"><span class="section-number">OUR AMBITION</span><div><p class="kicker">A platform, not a prediction.</p><h2>Help communities predict, allocate, govern and safeguard freshwater with evidence and care.</h2><p>Aethera brings together time-series forecasting, geospatial analysis, optimization, explainability and scenario simulation. The prototype establishes an honest foundation for a future research platform—one that can grow from local water systems to global context.</p></div></div></section><section class="container architecture"><span class="section-number">PLATFORM BLUEPRINT</span><div class="architecture-grid"><article><b>01</b><h3>Observe</h3><p>Sensors, satellites, public datasets and local records.</p></article><article><b>02</b><h3>Understand</h3><p>Validated hydrology, GIS and AI modelling.</p></article><article><b>03</b><h3>Decide</h3><p>Transparent scenarios, policies and allocation trade-offs.</p></article><article><b>04</b><h3>Learn</h3><p>Monitor outcomes, audit decisions and improve models.</p></article></div></section><section class="container company-card"><div><span class="section-number">INDUSTRY CONTEXT</span><h2>Built in an engineering culture.</h2><p>Chatake Innoworks Pvt. Ltd. creates industry-facing learning and engineering initiatives through its MindforgeAI division. Aethera is positioned as an internship research and product-development project.</p></div><a class="button button-primary" href="https://internship.chatakeinnoworks.com" target="_blank" rel="noreferrer">Visit MindforgeAI <span>↗</span></a></section></section>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}AETHERA | About{% endblock %}
+
+{% block content %}
+
+<section class="workspace container">
+
+    <div class="panel">
+
+        <span class="section-number">
+            ABOUT AETHERA
+        </span>
+
+        <h1>
+            AETHERA Water Intelligence
+        </h1>
+
+        <p>
+            AETHERA is an AI-powered planetary water
+            intelligence platform designed to monitor,
+            predict and support sustainable water management.
+        </p>
+
+        <p>
+            The platform connects rainfall, reservoirs,
+            water demand, global water use and animal
+            water consumption.
+        </p>
+
+        <a
+            class="button button-primary"
+            href="{{ url_for('dashboard') }}"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}
