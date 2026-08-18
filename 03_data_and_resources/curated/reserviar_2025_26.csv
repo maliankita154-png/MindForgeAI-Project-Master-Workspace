@@ -1,0 +1,21 @@
+date	year	month	reservoir_id	reservoir_name	storage_pct	capacity_mcm	inflow_mcm	outflow_mcm	quality_flag
+2025-01-31	2025	Jan	UJANI-DEMO-001	Ujani Demonstration	61.5	100	18.2	11.4	synthetic
+2025-02-28	2025	Feb	UJANI-DEMO-001	Ujani Demonstration	58.2	100	15.6	12.1	synthetic
+2025-03-31	2025	Mar	UJANI-DEMO-001	Ujani Demonstration	55.8	100	14.3	13.2	synthetic
+2025-04-30	2025	Apr	UJANI-DEMO-001	Ujani Demonstration	51.4	100	11.8	14.5	synthetic
+2025-05-31	2025	May	UJANI-DEMO-001	Ujani Demonstration	48.7	100	10.4	15.1	synthetic
+2025-06-30	2025	Jun	UJANI-DEMO-001	Ujani Demonstration	57.9	100	31.6	17.8	synthetic
+2025-07-31	2025	Jul	UJANI-DEMO-001	Ujani Demonstration	72.6	100	48.2	21.5	synthetic
+2025-08-31	2025	Aug	UJANI-DEMO-001	Ujani Demonstration	78.4	100	42.7	24.3	synthetic
+2025-09-30	2025	Sep	UJANI-DEMO-001	Ujani Demonstration	75.1	100	31.5	24.8	synthetic
+2025-10-31	2025	Oct	UJANI-DEMO-001	Ujani Demonstration	70.4	100	24.6	25.7	synthetic
+2025-11-30	2025	Nov	UJANI-DEMO-001	Ujani Demonstration	66.8	100	20.4	23.9	synthetic
+2025-12-31	2025	Dec	UJANI-DEMO-001	Ujani Demonstration	63.7	100	18.8	22.6	synthetic
+2026-01-31	2026	Jan	UJANI-DEMO-001	Ujani Demonstration	64.2	100	20.1	12.0	synthetic
+2026-02-28	2026	Feb	UJANI-DEMO-001	Ujani Demonstration	61.8	100	17.4	12.8	synthetic
+2026-03-31	2026	Mar	UJANI-DEMO-001	Ujani Demonstration	59.6	100	16.2	13.5	synthetic
+2026-04-30	2026	Apr	UJANI-DEMO-001	Ujani Demonstration	55.3	100	13.7	14.8	synthetic
+2026-05-31	2026	May	UJANI-DEMO-001	Ujani Demonstration	52.1	100	12.5	15.4	synthetic
+2026-06-30	2026	Jun	UJANI-DEMO-001	Ujani Demonstration	63.7	100	34.8	18.2	synthetic
+2026-07-31	2026	Jul	UJANI-DEMO-001	Ujani Demonstration	79.8	100	51.6	22.1	synthetic
+2026-08-12	2026	Aug	UJANI-DEMO-001	Ujani Demonstration	84.3	100	46.9	25.7	synthetic

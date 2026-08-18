@@ -1,1073 +1,1324 @@
-{% extends "base.html" %}
-
-{% block title %}AETHERA | Global Water Intelligence{% endblock %}
-
-{% block content %}
-
-<section class="workspace container">
-
-    <!-- ===================================================== -->
-    <!-- HEADER -->
-    <!-- ===================================================== -->
-
-    <div class="workspace-head">
-
-        <div>
-
-            <span class="eyebrow">
-                <span></span> AETHERA WATER INTELLIGENCE
-            </span>
-
-            <h1>Global Water Dashboard</h1>
-
-            <p>
-                Monitor rainfall, water demand, reservoirs,
-                animals and global water use.
-            </p>
-
-        </div>
-
-        <div class="live-indicator">
-            <i></i> LIVE DATA
-        </div>
-
-    </div>
+from flask import Flask, render_template, request
+import os
+import pandas as pd
 
 
-    <!-- ===================================================== -->
-    <!-- MAIN METRICS -->
-    <!-- ===================================================== -->
+# ============================================================
+# AETHERA APPLICATION
+# ============================================================
 
-    <div class="metric-grid">
-
-
-        <!-- RESERVOIR -->
-
-        <article class="metric-card primary">
-
-            <span>Reservoir Availability</span>
-
-            <strong>
-                {{ data.reservoir }}<small>%</small>
-            </strong>
-
-            <p>
-                Latest reservoir storage
-            </p>
-
-            <div class="sparkline"></div>
-
-        </article>
+app = Flask(__name__)
 
 
-        <!-- RAINFALL -->
+# ============================================================
+# PROJECT PATHS
+# ============================================================
 
-        <article class="metric-card">
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
-            <span>Recent Rainfall</span>
+DATA_DIR = os.path.join(
+    BASE_DIR,
+    "data"
+)
 
-            <strong>
-                {{ data.rainfall }}<small> mm</small>
-            </strong>
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-            <p>
-                Latest rainfall records
-            </p>
-
-            <a href="{{ url_for('rainfall') }}">
-                View rainfall →
-            </a>
-
-        </article>
-
-
-        <!-- WATER DEMAND -->
-
-        <article class="metric-card">
-
-            <span>Water Demand</span>
-
-            <strong>
-                {{ data.demand }}<small> MLD</small>
-            </strong>
-
-            <p>
-                Current demonstration demand
-            </p>
-
-            <a href="{{ url_for('demand') }}">
-                View demand →
-            </a>
-
-        </article>
+CURATED_DIR = os.path.join(
+    PROJECT_ROOT,
+    "03_data_and_resources",
+    "curated"
+)
 
 
-        <!-- GLOBAL COUNTRIES -->
+# ============================================================
+# DATA FILES
+# ============================================================
 
-        <article class="metric-card">
+RAINFALL_FILE = os.path.join(
+    CURATED_DIR,
+    "rainfall_2026.csv"
+)
 
-            <span>Global Countries</span>
+WATER_USE_2026_FILE = os.path.join(
+    CURATED_DIR,
+    "water_use_2026.csv"
+)
 
-            <strong>
-                {{ water_summary.countries }}
-            </strong>
+RAINFALL_2025_FILE = os.path.join(
+    CURATED_DIR,
+    "rainfall_2025.csv"
+)
 
-            <p>
-                Countries in water-use dataset
-            </p>
+WATER_USE_2025_FILE = os.path.join(
+    CURATED_DIR,
+    "water_use_2025.csv"
+)
 
-            <a href="{{ url_for('global_water') }}">
-                Explore global data →
-            </a>
+DEMAND_FILE = os.path.join(
+    DATA_DIR,
+    "demand_demo.csv"
+)
 
-        </article>
+RESERVOIR_FILE = os.path.join(
+    CURATED_DIR,
+    "reservoir_2025_2026.csv"
+)
 
-    </div>
+ANIMAL_WATER_FILE = os.path.join(
+    DATA_DIR,
+    "animal_water_use.csv"
+)
+
+GLOBAL_WATER_FILE = os.path.join(
+    DATA_DIR,
+    "water_use.csv"
+)
 
 
-    <!-- ===================================================== -->
-    <!-- ANIMAL WATER INTELLIGENCE -->
-    <!-- ===================================================== -->
+# ============================================================
+# SAFE CSV LOADER
+# ============================================================
 
-    <section class="panel animal-water-panel"
-             style="margin-top:12px;">
+def load_csv(file_path):
 
-        <div class="panel-title">
+    if os.path.exists(file_path):
 
-            <div>
+        try:
 
-                <span class="section-number">
-                    ANIMAL WATER INTELLIGENCE
-                </span>
+            df = pd.read_csv(file_path)
 
-                <h2>How much water do animals use?</h2>
+            # Clean column names
+            df.columns = (
+                df.columns
+                .astype(str)
+                .str.strip()
+            )
 
-            </div>
+            return df
 
-            <button class="quiet-button">
-                LIVESTOCK DATA
-            </button>
+        except Exception as e:
 
-        </div>
+            print(
+                f"Error reading file: {file_path}"
+            )
 
+            print(e)
+
+    else:
+
+        print(
+            f"File not found: {file_path}"
+        )
+
+    return pd.DataFrame()
+
+
+# ============================================================
+# HOME
+# ============================================================
+
+@app.route("/")
+def home():
+
+    return render_template(
+        "index.html"
+    )
+
+
+# ============================================================
+# ABOUT
+# ============================================================
+
+@app.route("/about")
+def about():
+
+    return render_template(
+        "about.html"
+    )
+
+
+# ============================================================
+# DASHBOARD
+# ============================================================
+
+@app.route("/dashboard")
+def dashboard():
+
+    # --------------------------------------------------------
+    # LOAD DATASETS
+    # --------------------------------------------------------
+
+    rainfall_df = load_csv(
+        RAINFALL_FILE
+    )
+
+    rainfall_2025_df = load_csv(
+        RAINFALL_2025_FILE
+    )
+
+    water_use_2026_df = load_csv(
+        WATER_USE_2026_FILE
+    )
+
+    water_use_2025_df = load_csv(
+        WATER_USE_2025_FILE
+    )
+
+    demand_df = load_csv(
+        DEMAND_FILE
+    )
+
+    reservoir_df = load_csv(
+        RESERVOIR_FILE
+    )
+
+    animal_df = load_csv(
+        ANIMAL_WATER_FILE
+    )
+
+    global_df = load_csv(
+        GLOBAL_WATER_FILE
+    )
+
+
+    # --------------------------------------------------------
+    # RAINFALL
+    # --------------------------------------------------------
+
+    rainfall_value = 0
+
+    if not rainfall_df.empty:
+
+        rainfall_columns = [
+
+            "rainfall_mm",
+            "rainfall",
+            "Rainfall",
+            "precipitation_mm",
+            "precipitation"
+
+        ]
+
+        for column in rainfall_columns:
+
+            if column in rainfall_df.columns:
+
+                rainfall_value = rainfall_df[
+                    column
+                ].iloc[-1]
+
+                break
+
+
+    # --------------------------------------------------------
+    # DEMAND
+    # --------------------------------------------------------
+
+    demand_value = 0
+
+    if not demand_df.empty:
+
+        demand_columns = [
+
+            "demand_mld",
+            "demand",
+            "Demand",
+            "water_demand_mld",
+            "water_demand"
+
+        ]
+
+        for column in demand_columns:
+
+            if column in demand_df.columns:
+
+                demand_value = demand_df[
+                    column
+                ].iloc[-1]
+
+                break
+
+
+    # --------------------------------------------------------
+    # RESERVOIR
+    # --------------------------------------------------------
+
+    reservoir_value = 0
+
+    if not reservoir_df.empty:
+
+        reservoir_columns = [
+
+            "availability_pct",
+            "availability",
+            "reservoir_pct",
+            "storage_pct",
+            "storage",
+            "level_pct"
+
+        ]
+
+        for column in reservoir_columns:
+
+            if column in reservoir_df.columns:
+
+                reservoir_value = reservoir_df[
+                    column
+                ].iloc[-1]
+
+                break
+
+
+    # --------------------------------------------------------
+    # ANIMAL WATER
+    # --------------------------------------------------------
+
+    total_animals = 0
+
+    total_daily_water = 0
+
+    total_monthly_water = 0
+
+    highest_consumer = "N/A"
+
+    animal_data = []
+
+
+    if not animal_df.empty:
+
+        required_columns = [
+
+            "animals_count",
+            "daily_water_litres_per_animal"
+
+        ]
+
+        if all(
+            column in animal_df.columns
+            for column in required_columns
+        ):
+
+            animal_df[
+                "animals_count"
+            ] = pd.to_numeric(
+                animal_df[
+                    "animals_count"
+                ],
+                errors="coerce"
+            ).fillna(0)
+
+
+            animal_df[
+                "daily_water_litres_per_animal"
+            ] = pd.to_numeric(
+                animal_df[
+                    "daily_water_litres_per_animal"
+                ],
+                errors="coerce"
+            ).fillna(0)
+
+
+            # Total daily water
+
+            animal_df[
+                "total_daily_water"
+            ] = (
+
+                animal_df[
+                    "animals_count"
+                ]
+
+                *
+
+                animal_df[
+                    "daily_water_litres_per_animal"
+                ]
+
+            )
+
+
+            # Total animals
+
+            total_animals = int(
+                animal_df[
+                    "animals_count"
+                ].sum()
+            )
+
+
+            # Total daily water
+
+            total_daily_water = float(
+                animal_df[
+                    "total_daily_water"
+                ].sum()
+            )
+
+
+            # Monthly water
+
+            total_monthly_water = (
+                total_daily_water * 30
+            )
+
+
+            # Highest consumer
+
+            if not animal_df.empty:
+
+                highest_index = (
+                    animal_df[
+                        "total_daily_water"
+                    ].idxmax()
+                )
+
+                if "animal" in animal_df.columns:
+
+                    highest_consumer = str(
+                        animal_df.loc[
+                            highest_index,
+                            "animal"
+                        ]
+                    )
+
+
+            # Records
+
+            animal_data = animal_df.to_dict(
+                orient="records"
+            )
+
+
+    # --------------------------------------------------------
+    # ANIMAL SUMMARY
+    # --------------------------------------------------------
+
+    animal_summary = {
+
+        "total_animals": total_animals,
+
+        "daily_water": round(
+            total_daily_water,
+            2
+        ),
+
+        "monthly_water": round(
+            total_monthly_water,
+            2
+        ),
+
+        "highest_consumer": highest_consumer
+
+    }
+
+
+    # --------------------------------------------------------
+    # GLOBAL WATER SUMMARY
+    # --------------------------------------------------------
+
+    countries = []
+
+    water_summary = {
+
+        "countries": 0,
+
+        "agriculture": 0,
+
+        "industry": 0,
+
+        "domestic": 0
+
+    }
+
+
+    if not global_df.empty:
+
+        if "Country" in global_df.columns:
+
+            countries = (
+                global_df[
+                    "Country"
+                ]
+                .dropna()
+                .astype(str)
+                .str.strip()
+                .unique()
+                .tolist()
+            )
+
+            countries.sort(
+                key=str.lower
+            )
+
+            water_summary[
+                "countries"
+            ] = len(countries)
+
+
+        if "Agriculture" in global_df.columns:
+
+            water_summary[
+                "agriculture"
+            ] = round(
+
+                pd.to_numeric(
+                    global_df[
+                        "Agriculture"
+                    ],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .mean(),
+
+                2
+            )
+
+
+        if "Industry" in global_df.columns:
+
+            water_summary[
+                "industry"
+            ] = round(
+
+                pd.to_numeric(
+                    global_df[
+                        "Industry"
+                    ],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .mean(),
+
+                2
+            )
+
+
+        if "Domestic" in global_df.columns:
+
+            water_summary[
+                "domestic"
+            ] = round(
+
+                pd.to_numeric(
+                    global_df[
+                        "Domestic"
+                    ],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .mean(),
+
+                2
+            )
+
+
+    # --------------------------------------------------------
+    # 2026 WATER USE SUMMARY
+    # --------------------------------------------------------
+
+    water_use_2026_summary = {
+
+        "agriculture": 0,
+        "industry": 0,
+        "domestic": 0,
+        "power": 0,
+        "animal": 0,
+        "environment": 0,
+        "other": 0,
+        "total": 0
+
+    }
+
+
+    if not water_use_2026_df.empty:
+
+        columns_map = {
+
+            "agriculture":
+                "agriculture_mcm",
+
+            "industry":
+                "industry_mcm",
+
+            "domestic":
+                "domestic_mcm",
+
+            "power":
+                "power_mcm",
+
+            "animal":
+                "animal_husbandry_mcm",
+
+            "environment":
+                "environment_mcm",
+
+            "other":
+                "other_mcm",
+
+            "total":
+                "total_use_mcm"
+
+        }
+
+
+        for key, column in columns_map.items():
+
+            if column in water_use_2026_df.columns:
+
+                water_use_2026_summary[
+                    key
+                ] = round(
+
+                    pd.to_numeric(
+                        water_use_2026_df[
+                            column
+                        ],
+                        errors="coerce"
+                    )
+                    .fillna(0)
+                    .sum(),
+
+                    2
+
+                )
+
+
+
+    # --------------------------------------------------------
+    # 2025/2026 GRAPH DATA
+    # --------------------------------------------------------
+
+    rainfall_compare_df = pd.concat(
+        [
+            rainfall_2025_df,
+            rainfall_df
+        ],
+        ignore_index=True
+    )
+
+    water_use_compare_df = pd.concat(
+        [
+            water_use_2025_df,
+            water_use_2026_df
+        ],
+        ignore_index=True
+    )
+
+    rainfall_compare_data = rainfall_compare_df.to_dict(
+        orient="records"
+    )
+
+    water_use_compare_data = water_use_compare_df.to_dict(
+        orient="records"
+    )
+
+    reservoir_compare_data = reservoir_df.to_dict(
+        orient="records"
+    )
+
+    # --------------------------------------------------------
+    # DASHBOARD DATA
+    # --------------------------------------------------------
+
+    data = {
+
+        "rainfall": rainfall_value,
+
+        "demand": demand_value,
+
+        "reservoir": reservoir_value
+
+    }
+
+
+    # --------------------------------------------------------
+    # RENDER DASHBOARD
+    # --------------------------------------------------------
+
+    return render_template(
+
+        "dashboard.html",
+
+        data=data,
+
+        water_summary=water_summary,
+
+        countries=countries,
+
+        rainfall_2026_data=(
+            rainfall_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        rainfall_compare_data=rainfall_compare_data,
+
+        water_use_compare_data=water_use_compare_data,
+
+        reservoir_compare_data=reservoir_compare_data,
+
+        water_use_2025_data=(
+            water_use_2025_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        water_use_2026_data=(
+            water_use_2026_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        water_use_2026_summary=(
+            water_use_2026_summary
+        ),
+
+        rainfall_data=(
+            rainfall_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        demand_data=(
+            demand_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        reservoir_data=(
+            reservoir_df.to_dict(
+                orient="records"
+            )
+        ),
+
+        animal_data=animal_data,
+
+        animal_summary=animal_summary,
+
+        total_animals=total_animals,
+
+        total_daily_water=total_daily_water,
+
+        total_monthly_water=total_monthly_water,
+
+        highest_consumer=highest_consumer
+
+    )
+
+
+# ============================================================
+# RAINFALL
+# ============================================================
+
+@app.route("/rainfall")
+def rainfall():
+
+    df = load_csv(
+        RAINFALL_FILE
+    )
+
+    return render_template(
+
+        "rainfall.html",
+
+        rainfall_data=df.to_dict(
+            orient="records"
+        )
+
+    )
+
+
+# ============================================================
+# DEMAND
+# ============================================================
+
+@app.route("/demand")
+def demand():
+
+    df = load_csv(
+        DEMAND_FILE
+    )
+
+    return render_template(
+
+        "demand.html",
+
+        demand_data=df.to_dict(
+            orient="records"
+        )
+
+    )
+
+
+# ============================================================
+# RESERVOIR
+# ============================================================
+
+@app.route("/reservoir")
+def reservoir():
+
+    df = load_csv(
+        RESERVOIR_FILE
+    )
+
+    return render_template(
+
+        "reservoir.html",
+
+        reservoir_data=df.to_dict(
+            orient="records"
+        )
+
+    )
+
+
+# ============================================================
+# GLOBAL WATER INTELLIGENCE
+# ============================================================
+
+@app.route("/global-water")
+def global_water():
+
+    # --------------------------------------------------------
+    # LOAD DATA
+    # --------------------------------------------------------
+
+    df = load_csv(
+        GLOBAL_WATER_FILE
+    )
+
+
+    countries = []
+
+    selected_country = ""
+
+    selected_data = None
+
+
+    # --------------------------------------------------------
+    # NORMALIZE DATA
+    # --------------------------------------------------------
+
+    if not df.empty:
+
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.strip()
+        )
+
+
+    # --------------------------------------------------------
+    # COUNTRY LIST
+    # --------------------------------------------------------
+
+    if (
+        not df.empty
+        and "Country" in df.columns
+    ):
+
+        countries = (
+
+            df[
+                "Country"
+            ]
+
+            .dropna()
+
+            .astype(str)
+
+            .str.strip()
+
+            .unique()
+
+            .tolist()
+
+        )
+
+        countries.sort(
+            key=str.lower
+        )
+
+
+    # --------------------------------------------------------
+    # GET COUNTRY FROM URL
+    # --------------------------------------------------------
+
+    selected_country = request.args.get(
+        "country",
+        ""
+    ).strip()
+
+
+    # --------------------------------------------------------
+    # DEFAULT COUNTRY
+    # --------------------------------------------------------
+
+    if (
+        not selected_country
+        and countries
+    ):
+
+        selected_country = countries[0]
+
+
+    # --------------------------------------------------------
+    # SELECT COUNTRY
+    # --------------------------------------------------------
+
+    if (
+        not df.empty
+        and selected_country
+        and "Country" in df.columns
+    ):
+
+        selected_rows = df[
+
+            df[
+                "Country"
+            ]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+
+            ==
+
+            selected_country.lower()
+
+        ]
+
+
+        if not selected_rows.empty:
+
+            row = selected_rows.iloc[0]
+
+
+            # ------------------------------------------------
+            # SAFE NUMBER FUNCTION
+            # ------------------------------------------------
+
+            def number_value(
+                column_name
+            ):
+
+                if column_name not in row.index:
+
+                    return 0
+
+
+                value = pd.to_numeric(
+
+                    row[
+                        column_name
+                    ],
+
+                    errors="coerce"
+
+                )
+
+
+                if pd.isna(value):
+
+                    return 0
+
+
+                return round(
+                    float(value),
+                    2
+                )
+
+
+            # ------------------------------------------------
+            # COUNTRY DATA
+            # ------------------------------------------------
+
+            agriculture = number_value(
+                "Agriculture"
+            )
+
+            industry = number_value(
+                "Industry"
+            )
+
+            domestic = number_value(
+                "Domestic"
+            )
+
+            total = number_value(
+                "Total"
+            )
+
+
+            # ------------------------------------------------
+            # AUTO TOTAL
+            # ------------------------------------------------
+
+            if total == 0:
+
+                total = round(
+
+                    agriculture
+                    +
+                    industry
+                    +
+                    domestic,
+
+                    2
+
+                )
+
+
+            # ------------------------------------------------
+            # YEAR
+            # ------------------------------------------------
+
+            year = row.get(
+                "Year",
+                "N/A"
+            )
+
+
+            if pd.isna(year):
+
+                year = "N/A"
+
+
+            # ------------------------------------------------
+            # SELECTED DATA
+            # ------------------------------------------------
+
+            selected_data = {
+
+                "Country": str(
+                    row.get(
+                        "Country",
+                        selected_country
+                    )
+                ),
+
+                "Year": str(
+                    year
+                ),
+
+                "Agriculture":
+                    agriculture,
+
+                "Industry":
+                    industry,
+
+                "Domestic":
+                    domestic,
+
+                "Total":
+                    total
+
+            }
+
+
+    # --------------------------------------------------------
+    # GLOBAL WATER SUMMARY
+    # --------------------------------------------------------
+
+    water_summary = {
+
+        "countries":
+            len(countries),
+
+        "agriculture": 0,
+
+        "industry": 0,
+
+        "domestic": 0
+
+    }
+
+
+    if not df.empty:
+
+
+        # ----------------------------------------------------
+        # AGRICULTURE
+        # ----------------------------------------------------
+
+        if "Agriculture" in df.columns:
+
+            agriculture_values = (
+                pd.to_numeric(
+                    df["Agriculture"],
+                    errors="coerce"
+                )
+                .dropna()
+            )
+
+            if not agriculture_values.empty:
+
+                water_summary[
+                    "agriculture"
+                ] = round(
+
+                    float(
+                        agriculture_values.mean()
+                    ),
+
+                    2
+
+                )
+
+
+        # ----------------------------------------------------
+        # INDUSTRY
+        # ----------------------------------------------------
+
+        if "Industry" in df.columns:
+
+            industry_values = (
+                pd.to_numeric(
+                    df["Industry"],
+                    errors="coerce"
+                )
+                .dropna()
+            )
+
+            if not industry_values.empty:
+
+                water_summary[
+                    "industry"
+                ] = round(
+
+                    float(
+                        industry_values.mean()
+                    ),
+
+                    2
+
+                )
+
+
+        # ----------------------------------------------------
+        # DOMESTIC
+        # ----------------------------------------------------
+
+        if "Domestic" in df.columns:
+
+            domestic_values = (
+                pd.to_numeric(
+                    df["Domestic"],
+                    errors="coerce"
+                )
+                .dropna()
+            )
+
+            if not domestic_values.empty:
+
+                water_summary[
+                    "domestic"
+                ] = round(
+
+                    float(
+                        domestic_values.mean()
+                    ),
+
+                    2
+
+                )
+
+
+    # --------------------------------------------------------
+    # COMPLETE GLOBAL WATER DATA
+    # --------------------------------------------------------
+
+    global_water_data = []
+
+
+    if not df.empty:
+
+        global_water_data = (
+            df.to_dict(
+                orient="records"
+            )
+        )
+
+
+    # --------------------------------------------------------
+    # DEBUG INFORMATION
+    # --------------------------------------------------------
+
+    print(
+        "\n========================================"
+    )
+
+    print(
+        "AETHERA | GLOBAL WATER INTELLIGENCE"
+    )
+
+    print(
+        "========================================"
+    )
+
+    print(
+        "Dataset:",
+        GLOBAL_WATER_FILE
+    )
+
+    print(
+        "Rows:",
+        len(df)
+    )
+
+    print(
+        "Columns:",
+        df.columns.tolist()
+        if not df.empty
+        else []
+    )
+
+    print(
+        "Countries:",
+        len(countries)
+    )
+
+    print(
+        "Selected Country:",
+        selected_country
+    )
+
+    print(
+        "Selected Data:",
+        selected_data
+    )
+
+    print(
+        "========================================\n"
+    )
+
+
+    # --------------------------------------------------------
+    # RENDER GLOBAL WATER PAGE
+    # --------------------------------------------------------
+
+    return render_template(
+
+        "global_water.html",
+
+        countries=countries,
+
+        global_water_data=global_water_data,
+
+        selected_country=selected_country,
+
+        selected_data=selected_data,
+
+        water_summary=water_summary
+
+    )
+
+
+# ============================================================
+# SUSTAINABILITY
+# ============================================================
+
+@app.route("/sustainability")
+def sustainability():
+
+    return render_template(
+        "sustainability.html"
+    )
+
+
+# ============================================================
+# DIGITAL TWIN
+# ============================================================
+
+@app.route("/digital-twin")
+def digital_twin():
+
+    return render_template(
+        "digital_twin.html"
+    )
+
+
+# ============================================================
+# ERROR HANDLERS
+# ============================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return render_template(
+        "404.html"
+    ), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+
+    return """
+
+    <div style="
+        font-family: Arial;
+        padding: 40px;
+        text-align: center;
+    ">
+
+        <h1>
+            AETHERA Server Error
+        </h1>
 
         <p>
-            Monitor estimated daily water consumption for
-            livestock and poultry to understand
-            animal-related water demand.
+            Something went wrong while
+            loading this page.
         </p>
 
-
-        <!-- ================================================= -->
-        <!-- ANIMAL SUMMARY CARDS -->
-        <!-- ================================================= -->
-
-        <div class="three-up animal-summary">
-
-
-            <!-- TOTAL ANIMALS -->
-
-            <article class="panel animal-card">
-
-                <span class="section-number">
-                    TOTAL ANIMALS
-                </span>
-
-                <h2>
-                    {{ animal_summary.total_animals }}
-                </h2>
-
-                <p>
-                    Animals monitored in the
-                    demonstration dataset.
-                </p>
-
-            </article>
-
-
-            <!-- DAILY WATER -->
-
-            <article class="panel animal-card">
-
-                <span class="section-number">
-                    DAILY WATER DEMAND
-                </span>
-
-                <h2>
-                    {{ animal_summary.daily_water }} L
-                </h2>
-
-                <p>
-                    Estimated water requirement
-                    per day.
-                </p>
-
-            </article>
-
-
-            <!-- MONTHLY WATER -->
-
-            <article class="panel animal-card">
-
-                <span class="section-number">
-                    MONTHLY WATER DEMAND
-                </span>
-
-                <h2>
-                    {{ animal_summary.monthly_water }} L
-                </h2>
-
-                <p>
-                    Estimated water requirement
-                    for 30 days.
-                </p>
-
-            </article>
-
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- ANIMAL TABLE -->
-        <!-- ================================================= -->
-
-        <div class="table-panel"
-             style="margin-top:20px;">
-
-            <div class="panel-title">
-
-                <div>
-
-                    <span class="section-number">
-                        ANIMAL-WISE DATA
-                    </span>
-
-                    <h2>
-                        Water consumption by animal
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div style="overflow-x:auto;">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                ANIMAL
-                            </th>
-
-                            <th>
-                                NUMBER
-                            </th>
-
-                            <th>
-                                L / ANIMAL / DAY
-                            </th>
-
-                            <th>
-                                TOTAL L / DAY
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        {% for animal in animal_data %}
-
-                        <tr>
-
-                            <td>
-
-                                <strong>
-                                    {{ animal.animal }}
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-
-                                {{ animal.animals_count }}
-
-                            </td>
-
-
-                            <td>
-
-                                {{ "%.2f"|format(
-                                    animal.daily_water_litres_per_animal
-                                ) }}
-
-                                L
-
-                            </td>
-
-
-                            <td>
-
-                                <strong>
-
-                                    {{ "%.2f"|format(
-                                        animal.total_daily_water
-                                    ) }}
-
-                                    L
-
-                                </strong>
-
-                            </td>
-
-                        </tr>
-
-
-                        {% else %}
-
-                        <tr>
-
-                            <td colspan="4">
-
-                                No animal water-use data available.
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ===================================================== -->
-    <!-- GLOBAL WATER USE -->
-    <!-- ===================================================== -->
-
-    <section class="panel"
-             style="margin-top:12px;">
-
-        <div class="panel-title">
-
-            <div>
-
-                <span class="section-number">
-                    GLOBAL WATER USE
-                </span>
-
-                <h2>
-                    Where is water being used?
-                </h2>
-
-            </div>
-
-            <button class="quiet-button">
-                CSV DATA
-            </button>
-
-        </div>
-
-
-        <p>
-            Water consumption is divided into agriculture,
-            industry and domestic use.
-        </p>
-
-
-        <div class="three-up">
-
-
-            <!-- AGRICULTURE -->
-
-            <article class="panel">
-
-                <span class="section-number">
-                    AGRICULTURE
-                </span>
-
-                <h2>
-                    {{ water_summary.agriculture }}%
-                </h2>
-
-                <p>
-                    Average agricultural water-use share.
-                </p>
-
-                <div class="progress">
-
-                    <i
-                        style="width:{{ water_summary.agriculture }}%;">
-                    </i>
-
-                </div>
-
-            </article>
-
-
-            <!-- INDUSTRY -->
-
-            <article class="panel">
-
-                <span class="section-number">
-                    INDUSTRY
-                </span>
-
-                <h2>
-                    {{ water_summary.industry }}%
-                </h2>
-
-                <p>
-                    Average industrial water-use share.
-                </p>
-
-                <div class="progress">
-
-                    <i
-                        style="width:{{ water_summary.industry }}%;">
-                    </i>
-
-                </div>
-
-            </article>
-
-
-            <!-- DOMESTIC -->
-
-            <article class="panel">
-
-                <span class="section-number">
-                    DOMESTIC
-                </span>
-
-                <h2>
-                    {{ water_summary.domestic }}%
-                </h2>
-
-                <p>
-                    Average domestic water-use share.
-                </p>
-
-                <div class="progress">
-
-                    <i
-                        style="width:{{ water_summary.domestic }}%;">
-                    </i>
-
-                </div>
-
-            </article>
-
-        </div>
-
-    </section>
-
-
-    <!-- ===================================================== -->
-    <!-- COUNTRY DATA -->
-    <!-- ===================================================== -->
-
-    <section class="panel table-panel">
-
-        <div class="panel-title">
-
-            <div>
-
-                <span class="section-number">
-                    COUNTRY DATA
-                </span>
-
-                <h2>
-                    Water use by country
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div style="overflow-x:auto;">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            COUNTRY
-                        </th>
-
-                        <th>
-                            YEAR
-                        </th>
-
-                        <th>
-                            AGRICULTURE
-                        </th>
-
-                        <th>
-                            INDUSTRY
-                        </th>
-
-                        <th>
-                            DOMESTIC
-                        </th>
-
-                        <th>
-                            TOTAL
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    {% for country in countries %}
-
-                    <tr>
-
-                        <td>
-
-                            <strong>
-                                {{ country.Country }}
-                            </strong>
-
-                        </td>
-
-
-                        <td>
-                            {{ country.Year }}
-                        </td>
-
-
-                        <td>
-
-                            <div class="table-bar">
-
-                                <i
-                                    style="width:{{ country.Agriculture }}%;">
-                                </i>
-
-                            </div>
-
-                            {{ country.Agriculture }}%
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="table-bar">
-
-                                <i
-                                    style="width:{{ country.Industry }}%;">
-                                </i>
-
-                            </div>
-
-                            {{ country.Industry }}%
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="table-bar">
-
-                                <i
-                                    style="width:{{ country.Domestic }}%;">
-                                </i>
-
-                            </div>
-
-                            {{ country.Domestic }}%
-
-                        </td>
-
-
-                        <td>
-
-                            {{ country.Total }}%
-
-                        </td>
-
-                    </tr>
-
-
-                    {% else %}
-
-                    <tr>
-
-                        <td colspan="6">
-
-                            No water-use data available.
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-
-    <!-- ===================================================== -->
-    <!-- WATER INTELLIGENCE -->
-    <!-- ===================================================== -->
-
-    <div class="dashboard-columns">
-
-
-        <section class="panel">
-
-            <span class="section-number">
-                WATER INTELLIGENCE
-            </span>
-
-            <h2>
-                How is water being used?
-            </h2>
-
-
-            <p>
-
-                <strong>
-                    Agriculture:
-                </strong>
-
-                irrigation and food production.
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Industry:
-                </strong>
-
-                manufacturing, processing and cooling.
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Domestic:
-                </strong>
-
-                drinking, sanitation, cooking
-                and household use.
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Animals:
-                </strong>
-
-                livestock and poultry water
-                consumption.
-
-            </p>
-
-
-            <a
-                class="button button-primary"
-                href="{{ url_for('global_water') }}"
-            >
-
-                Explore Global Water →
-
-            </a>
-
-        </section>
-
-
-        <aside class="panel insight-panel">
-
-            <span class="section-number">
-                AETHERA INSIGHT
-            </span>
-
-            <h2>
-                Connected water management
-            </h2>
-
-
-            <p>
-
-                Rainfall affects availability.
-                Availability affects reservoirs.
-                Reservoirs affect supply.
-                Supply and demand determine
-                water stress.
-
-            </p>
-
-
-            <div class="confidence">
-
-                <span>
-                    Dataset coverage
-                </span>
-
-
-                <strong>
-                    {{ water_summary.countries }}
-                    countries
-                </strong>
-
-
-                <div>
-
-                    <i style="width:100%;"></i>
-
-                </div>
-
-            </div>
-
-        </aside>
+        <a href="/">
+            Return to Home
+        </a>
 
     </div>
 
+    """, 500
 
-    <!-- ===================================================== -->
-    <!-- SOLAPUR -->
-    <!-- ===================================================== -->
 
-    <div class="dashboard-columns">
+# ============================================================
+# RUN APPLICATION
+# ============================================================
 
+if __name__ == "__main__":
 
-        <section class="panel basin-panel">
+    print(
+        "\n========================================"
+    )
 
+    print(
+        "        AETHERA WATER INTELLIGENCE"
+    )
 
-            <div class="panel-title">
+    print(
+        "========================================"
+    )
 
-                <div>
+    print(
+        "Server:"
+    )
 
-                    <span class="section-number">
-                        BASIN OVERVIEW
-                    </span>
+    print(
+        "http://127.0.0.1:5000"
+    )
 
-                    <h2>
-                        Solapur demonstration
-                    </h2>
+    print(
+        "========================================\n"
+    )
 
-                </div>
 
+    app.run(
 
-                <button class="quiet-button">
-                    CSV-BACKED
-                </button>
+        debug=True,
 
-            </div>
+        host="127.0.0.1",
 
+        port=5000
 
-            <div class="map-visual">
-
-                <div class="map-grid"></div>
-
-                <div class="river r-a"></div>
-
-                <div class="river r-b"></div>
-
-
-                <span class="map-node n1">
-
-                    Ujani
-
-                    <br>
-
-                    <b>
-                        {{ data.reservoir }}%
-                    </b>
-
-                </span>
-
-
-                <span class="map-node n2">
-
-                    Demand
-
-                    <br>
-
-                    <b>
-                        {{ data.demand }}
-                    </b>
-
-                </span>
-
-
-                <span class="map-node n3">
-
-                    Rain
-
-                    <br>
-
-                    <b>
-                        {{ data.rainfall }}mm
-                    </b>
-
-                </span>
-
-
-                <div class="map-key">
-
-                    <i></i>
-
-                    Demonstration signals
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <aside class="panel insight-panel">
-
-
-            <span class="section-number">
-                DATA STATUS
-            </span>
-
-
-            <h2>
-                Monitoring active
-            </h2>
-
-
-            <p>
-
-                AETHERA is connecting rainfall,
-                reservoir, animal and water-use
-                datasets.
-
-            </p>
-
-
-            <div class="confidence">
-
-                <span>
-                    Data source
-                </span>
-
-
-                <strong>
-                    CSV
-                </strong>
-
-
-                <div>
-
-                    <i></i>
-
-                </div>
-
-            </div>
-
-
-            <a
-                class="button button-primary full"
-                href="{{ url_for('rainfall') }}"
-            >
-
-                Inspect Rainfall →
-
-            </a>
-
-        </aside>
-
-    </div>
-
-
-    <!-- ===================================================== -->
-    <!-- MODULES -->
-    <!-- ===================================================== -->
-
-    <section class="panel"
-             style="margin-top:12px;">
-
-        <span class="section-number">
-            AETHERA MODULES
-        </span>
-
-
-        <h2>
-            Water Intelligence Modules
-        </h2>
-
-
-        <div class="three-up">
-
-
-            <!-- 01 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('rainfall') }}"
-            >
-
-                <span class="section-number">
-                    01
-                </span>
-
-                <h2>
-                    Rainfall
-                </h2>
-
-                <p>
-                    Analyse rainfall observations
-                    and trends.
-                </p>
-
-            </a>
-
-
-            <!-- 02 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('demand') }}"
-            >
-
-                <span class="section-number">
-                    02
-                </span>
-
-                <h2>
-                    Water Demand
-                </h2>
-
-                <p>
-                    Understand water demand
-                    by sector.
-                </p>
-
-            </a>
-
-
-            <!-- 03 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('reservoir') }}"
-            >
-
-                <span class="section-number">
-                    03
-                </span>
-
-                <h2>
-                    Reservoir
-                </h2>
-
-                <p>
-                    Monitor reservoir availability.
-                </p>
-
-            </a>
-
-
-            <!-- 04 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('digital_twin') }}"
-            >
-
-                <span class="section-number">
-                    04
-                </span>
-
-                <h2>
-                    Digital Twin
-                </h2>
-
-                <p>
-                    Simulate future water scenarios.
-                </p>
-
-            </a>
-
-
-            <!-- 05 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('sustainability') }}"
-            >
-
-                <span class="section-number">
-                    05
-                </span>
-
-                <h2>
-                    Sustainability
-                </h2>
-
-                <p>
-                    Explore sustainable water
-                    management.
-                </p>
-
-            </a>
-
-
-            <!-- 06 -->
-
-            <a
-                class="panel"
-                href="{{ url_for('global_water') }}"
-            >
-
-                <span class="section-number">
-                    06
-                </span>
-
-                <h2>
-                    Global Water
-                </h2>
-
-                <p>
-                    Compare water use
-                    across countries.
-                </p>
-
-            </a>
-
-        </div>
-
-    </section>
-
-</section>
-
-{% endblock %}
+    )

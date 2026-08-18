@@ -6,11 +6,17 @@
 
 <section class="workspace container">
 
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
     <div class="workspace-head">
 
         <div>
+
             <span class="eyebrow">
-                <span></span> GLOBAL WATER INTELLIGENCE
+                <span></span>
+                GLOBAL WATER INTELLIGENCE
             </span>
 
             <h1>Global Water</h1>
@@ -18,104 +24,144 @@
             <p>
                 Water use by country and sector
             </p>
+
         </div>
 
         <div class="live-indicator">
-            <i></i> Water-use dataset active
+            <i></i>
+            Water-use dataset active
         </div>
 
     </div>
 
 
-    <!-- COUNTRY SELECTION -->
+    <!-- =====================================================
+         COUNTRY SELECTION
+    ====================================================== -->
 
     <section class="panel">
 
         <div class="panel-title">
 
             <div>
+
                 <span class="section-number">
                     LOCATION
                 </span>
 
-                <h2>Select Country</h2>
+                <h2>
+                    Select Country
+                </h2>
+
             </div>
 
         </div>
 
-        <form method="GET" action="{{ url_for('global_water') }}">
 
-            <select name="country" class="water-select">
+        <form
+            method="GET"
+            action="{{ url_for('global_water') }}"
+        >
 
-                {% for country in countries %}
-
-                <option
-                    value="{{ country }}"
-                    {% if country == selected_country %}
-                    selected
-                    {% endif %}
-                >
-                    {{ country }}
-                </option>
-
-                {% endfor %}
-
-            </select>
-
-            <button
-                type="submit"
-                class="button button-primary"
+            <div
+                style="
+                    display:flex;
+                    gap:12px;
+                    align-items:center;
+                    flex-wrap:wrap;
+                "
             >
-                View Water Data →
-            </button>
+
+                <select
+                    name="country"
+                    class="water-select"
+                    style="
+                        flex:1;
+                        min-width:280px;
+                    "
+                    required
+                >
+
+                    {% if countries %}
+
+                        {% for country in countries %}
+
+                            <option
+                                value="{{ country }}"
+                                {% if country|string == selected_country|string %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ country }}
+                            </option>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <option value="">
+                            No country data available
+                        </option>
+
+                    {% endif %}
+
+                </select>
+
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    View Water Data →
+                </button>
+
+            </div>
 
         </form>
 
     </section>
 
 
-    <!-- COUNTRY RESULT -->
+    <!-- =====================================================
+         SELECTED COUNTRY DATA
+    ====================================================== -->
 
     {% if selected_data %}
 
     <div class="metric-grid">
 
+
+        <!-- COUNTRY -->
+
         <article class="metric-card primary">
 
-            <span>🌍 Country</span>
+            <span>
+                🌍 Country
+            </span>
 
             <strong>
-                {{ selected_data.Country }}
+                {{ selected_data.Country|default("N/A", true) }}
             </strong>
 
             <p>
-                Year: {{ selected_data.Year }}
+                Year:
+                {{ selected_data.Year|default("N/A", true) }}
             </p>
 
         </article>
 
 
-        <article class="metric-card">
-
-            <span>🌾 Agriculture</span>
-
-            <strong>
-                {{ selected_data.Agriculture }}<small>%</small>
-            </strong>
-
-            <p>
-                Water withdrawal
-            </p>
-
-        </article>
-
+        <!-- AGRICULTURE -->
 
         <article class="metric-card">
 
-            <span>🏭 Industry</span>
+            <span>
+                🌾 Agriculture
+            </span>
 
             <strong>
-                {{ selected_data.Industry }}<small>%</small>
+                {{ selected_data.Agriculture|default(0, true) }}
+                <small>%</small>
             </strong>
 
             <p>
@@ -125,12 +171,37 @@
         </article>
 
 
+        <!-- INDUSTRY -->
+
         <article class="metric-card">
 
-            <span>🏠 Domestic</span>
+            <span>
+                🏭 Industry
+            </span>
 
             <strong>
-                {{ selected_data.Domestic }}<small>%</small>
+                {{ selected_data.Industry|default(0, true) }}
+                <small>%</small>
+            </strong>
+
+            <p>
+                Water withdrawal
+            </p>
+
+        </article>
+
+
+        <!-- DOMESTIC -->
+
+        <article class="metric-card">
+
+            <span>
+                🏠 Domestic
+            </span>
+
+            <strong>
+                {{ selected_data.Domestic|default(0, true) }}
+                <small>%</small>
             </strong>
 
             <p>
@@ -142,7 +213,9 @@
     </div>
 
 
-    <!-- TOTAL WATER -->
+    <!-- =====================================================
+         TOTAL WATER
+    ====================================================== -->
 
     <section class="panel global-result">
 
@@ -151,13 +224,14 @@
         </span>
 
         <h2>
-            {{ selected_data.Country }} Water Use
+            {{ selected_data.Country|default("N/A", true) }}
+            Water Use
         </h2>
 
         <div class="water-total">
 
             <strong>
-                {{ selected_data.Total }}
+                {{ selected_data.Total|default(0, true) }}
             </strong>
 
             <span>
@@ -169,7 +243,9 @@
     </section>
 
 
-    <!-- SECTOR CHART -->
+    <!-- =====================================================
+         SECTOR DISTRIBUTION
+    ====================================================== -->
 
     <section class="panel">
 
@@ -189,67 +265,305 @@
 
         </div>
 
-        <div style="height:350px;">
 
-            <canvas id="waterUseChart"></canvas>
+        <div
+            style="
+                height:350px;
+                position:relative;
+            "
+        >
+
+            <canvas
+                id="waterUseChart"
+            ></canvas>
 
         </div>
 
     </section>
+
+
+    <!-- =====================================================
+         SELECTED COUNTRY TABLE
+    ====================================================== -->
+
+    <section class="panel">
+
+        <div class="panel-title">
+
+            <div>
+
+                <span class="section-number">
+                    COUNTRY DATA
+                </span>
+
+                <h2>
+                    {{ selected_data.Country|default("Country", true) }}
+                    Water Use Details
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            style="
+                width:100%;
+                overflow-x:auto;
+            "
+        >
+
+            <table
+                style="
+                    width:100%;
+                    border-collapse:collapse;
+                "
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            COUNTRY
+                        </th>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            YEAR
+                        </th>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            AGRICULTURE
+                        </th>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            INDUSTRY
+                        </th>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            DOMESTIC
+                        </th>
+
+                        <th
+                            style="
+                                padding:15px;
+                                text-align:left;
+                            "
+                        >
+                            TOTAL
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Country|default("N/A", true) }}
+                        </td>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Year|default("N/A", true) }}
+                        </td>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Agriculture|default(0, true) }}%
+                        </td>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Industry|default(0, true) }}%
+                        </td>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Domestic|default(0, true) }}%
+                        </td>
+
+                        <td style="padding:15px;">
+                            {{ selected_data.Total|default(0, true) }}%
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    {% else %}
+
+
+    <!-- =====================================================
+         NO DATA
+    ====================================================== -->
+
+    <section class="panel">
+
+        <div
+            style="
+                padding:50px;
+                text-align:center;
+            "
+        >
+
+            <h2>
+                No Water Data Available
+            </h2>
+
+            <p>
+                Please select a country to view
+                water-use information.
+            </p>
+
+        </div>
+
+    </section>
+
 
     {% endif %}
 
 </section>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- =========================================================
+     CHART.JS
+========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js"
+></script>
 
 
 {% if selected_data %}
 
 <script>
 
-const ctx =
-    document.getElementById("waterUseChart");
+document.addEventListener(
+    "DOMContentLoaded",
+    function()
+    {
+
+        const chartElement =
+            document.getElementById(
+                "waterUseChart"
+            );
 
 
-new Chart(ctx, {
+        if (!chartElement)
+        {
+            return;
+        }
 
-    type: "doughnut",
 
-    data: {
+        const agriculture =
+            Number(
+                "{{ selected_data.Agriculture|default(0, true) }}"
+            );
 
-        labels: [
-            "Agriculture",
-            "Industry",
-            "Domestic"
-        ],
 
-        datasets: [{
+        const industry =
+            Number(
+                "{{ selected_data.Industry|default(0, true) }}"
+            );
 
-            data: [
 
-                {{ selected_data.Agriculture }},
+        const domestic =
+            Number(
+                "{{ selected_data.Domestic|default(0, true) }}"
+            );
 
-                {{ selected_data.Industry }},
 
-                {{ selected_data.Domestic }}
+        new Chart(
+            chartElement,
+            {
 
-            ]
+                type: "doughnut",
 
-        }]
+                data:
+                {
 
-    },
+                    labels:
+                    [
+                        "Agriculture",
+                        "Industry",
+                        "Domestic"
+                    ],
 
-    options: {
+                    datasets:
+                    [
+                        {
 
-        responsive: true,
+                            data:
+                            [
+                                agriculture,
+                                industry,
+                                domestic
+                            ],
 
-        maintainAspectRatio: false
+                            borderWidth: 1
+
+                        }
+                    ]
+
+                },
+
+                options:
+                {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins:
+                    {
+
+                        legend:
+                        {
+                            position: "bottom"
+                        }
+
+                    }
+
+                }
+
+            }
+        );
 
     }
 
-});
+);
 
 </script>
 

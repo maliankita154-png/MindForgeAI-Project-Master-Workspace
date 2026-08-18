@@ -1726,3 +1726,715 @@ input[type=range]{
         grid-template-columns:1fr;
     }
 }
+/* =========================================================
+   AETHERA DASHBOARD - FINAL POLISH
+   Better spacing + margins + cards + tables + 2026 section
+   ========================================================= */
+
+/* ---------- GLOBAL SPACING ---------- */
+
+.container {
+    width: min(1180px, calc(100% - 64px));
+}
+
+.workspace {
+    padding: 75px 0 110px;
+}
+
+/* ---------- DASHBOARD HEADER ---------- */
+
+.workspace-head {
+    margin-bottom: 42px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+}
+
+.workspace h1 {
+    margin-bottom: 12px;
+}
+
+.workspace-head p {
+    max-width: 650px;
+    line-height: 1.7;
+}
+
+/* ---------- METRIC CARDS ---------- */
+
+.metric-grid {
+    gap: 16px;
+}
+
+.metric-card {
+    min-height: 180px;
+    padding: 25px;
+    border-radius: 4px;
+}
+
+.metric-card strong {
+    margin: 20px 0 10px;
+}
+
+.metric-card p {
+    line-height: 1.6;
+}
+
+/* ---------- MAIN DASHBOARD COLUMNS ---------- */
+
+.dashboard-columns {
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.panel {
+    padding: 28px;
+    border-radius: 4px;
+}
+
+.panel h2 {
+    margin-top: 9px;
+    margin-bottom: 16px;
+}
+
+/* ---------- MAP ---------- */
+
+.map-visual {
+    margin-top: 22px;
+    border-radius: 4px;
+}
+
+/* ---------- GLOBAL WATER INTELLIGENCE ---------- */
+
+.global-intelligence {
+    margin-top: 16px;
+    padding: 32px;
+    border-radius: 4px;
+}
+
+.global-intelligence-header {
+    margin-bottom: 30px;
+}
+
+.global-intelligence-header h2 {
+    margin-bottom: 10px;
+}
+
+/* ---------- COUNTRY CARDS ---------- */
+
+.world-water-grid {
+    gap: 14px;
+}
+
+.world-water-card {
+    padding: 22px;
+    min-height: 175px;
+    border-radius: 4px;
+}
+
+.world-water-card h3 {
+    margin-top: 12px;
+}
+
+.use-bar {
+    margin-top: 17px;
+}
+
+/* ---------- TABLE ---------- */
+
+.global-table {
+    margin-top: 18px;
+}
+
+.global-table table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.global-table th {
+    padding: 15px 12px;
+    background: #f4f8f6;
+}
+
+.global-table td {
+    padding: 15px 12px;
+}
+
+.global-table tr:hover td {
+    background: #f8fbf9;
+}
+
+/* ---------- YEAR COMPARISON ---------- */
+
+.year-comparison {
+    margin-top: 16px;
+    gap: 16px;
+}
+
+.comparison-card {
+    padding: 30px;
+    border-radius: 4px;
+}
+
+.year-grid {
+    gap: 12px;
+}
+
+/* ---------- AI ALERTS ---------- */
+
+.ai-alerts {
+    margin-top: 16px;
+    padding: 32px;
+    border-radius: 4px;
+}
+
+.alert-grid {
+    gap: 14px;
+}
+
+.alert-card {
+    padding: 21px;
+    border-radius: 3px;
+}
+
+/* ---------- QUICK ACCESS ---------- */
+
+.quick-access {
+    margin-top: 16px;
+    gap: 14px;
+}
+
+.quick-card {
+    padding: 22px;
+    min-height: 145px;
+    border-radius: 4px;
+}
+
+/* ---------- 2026 WATER INTELLIGENCE ---------- */
+
+.workspace > .panel,
+.workspace > .global-intelligence,
+.workspace > .year-comparison,
+.workspace > .ai-alerts,
+.workspace > .quick-access {
+    margin-bottom: 16px;
+}
+
+/* ---------- 2026 DATA TABLE ---------- */
+
+.table-panel {
+    margin-top: 16px;
+    overflow-x: auto;
+    padding: 28px;
+}
+
+.table-panel table {
+    min-width: 850px;
+}
+
+.table-panel th {
+    padding: 15px 12px;
+    background: #f4f8f6;
+    white-space: nowrap;
+}
+
+.table-panel td {
+    padding: 15px 12px;
+    white-space: nowrap;
+}
+
+/* ---------- ANIMAL WATER SECTION ---------- */
+
+.animal-section,
+.animal-intelligence,
+.animal-water,
+.animal-data {
+    margin-top: 16px;
+}
+
+.animal-card,
+.animal-panel {
+    background: #fff;
+    border: 1px solid #e2e8e3;
+    padding: 28px;
+    border-radius: 4px;
+}
+
+.animal-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.animal-card strong {
+    display: block;
+    font: 600 34px var(--serif);
+    margin: 12px 0 5px;
+}
+
+.animal-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* ---------- SECTION SEPARATION ---------- */
+
+.workspace .section-number {
+    margin-bottom: 8px;
+}
+
+/* ---------- BETTER LINKS ---------- */
+
+.metric-card a,
+.reservoir-card a,
+.text-link {
+    transition: .2s ease;
+}
+
+.metric-card a:hover,
+.reservoir-card a:hover,
+.text-link:hover {
+    transform: translateX(3px);
+}
+
+/* ---------- BETTER BUTTONS ---------- */
+
+.button {
+    border-radius: 3px;
+}
+
+.button-primary {
+    box-shadow: 0 8px 20px rgba(9, 40, 45, .12);
+}
+
+/* ---------- DATA STATUS ---------- */
+
+.status {
+    border-radius: 2px;
+}
+
+/* ---------- RESPONSIVE IMPROVEMENT ---------- */
+
+@media (max-width: 1100px) {
+
+    .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .animal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 760px) {
+
+    .container {
+        width: calc(100% - 32px);
+    }
+
+    .workspace {
+        padding: 48px 0 70px;
+    }
+
+    .workspace-head {
+        margin-bottom: 28px;
+    }
+
+    .metric-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .metric-card {
+        min-height: 150px;
+        padding: 21px;
+    }
+
+    .dashboard-columns {
+        gap: 10px;
+    }
+
+    .panel {
+        padding: 21px;
+    }
+
+    .global-intelligence {
+        padding: 21px;
+    }
+
+    .animal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-panel {
+        padding: 20px;
+    }
+
+    .ai-alerts {
+        padding: 22px;
+    }
+
+    .quick-access {
+        gap: 10px;
+    }
+
+}
+/* =========================================================
+   AETHERA DASHBOARD FINAL POLISH
+   ========================================================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin: 28px 0 42px;
+}
+
+.dashboard-grid .card {
+    background: #ffffff;
+    border: 1px solid #dfe8e3;
+    border-radius: 14px;
+    padding: 26px;
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(9, 40, 45, 0.05);
+    transition: all 0.25s ease;
+}
+
+.dashboard-grid .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--aqua),
+        var(--blue),
+        var(--green)
+    );
+}
+
+.dashboard-grid .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(9, 40, 45, 0.10);
+    border-color: #b8d8d2;
+}
+
+.card-label {
+    display: block;
+    font: 10px var(--mono);
+    letter-spacing: .08em;
+    color: #6b7d7e;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.dashboard-grid .card h3 {
+    font: 600 25px var(--serif);
+    margin: 8px 0 8px;
+    color: var(--ink);
+}
+
+.dashboard-grid .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.metric {
+    font: 600 40px/1.1 var(--serif);
+    color: var(--blue);
+    margin: 12px 0 10px;
+    letter-spacing: -0.03em;
+}
+
+.dashboard-grid .card a {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.dashboard-grid .card a:hover {
+    color: var(--night);
+}
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section {
+    padding: 72px 0;
+}
+
+.section + .section {
+    border-top: 1px solid #e0e7e3;
+}
+
+.section-heading {
+    margin-bottom: 28px;
+}
+
+.section-heading h2 {
+    margin: 10px 0 0;
+    font: 600 clamp(34px, 4vw, 52px)/1.1 var(--serif);
+    letter-spacing: -0.04em;
+}
+
+
+/* =========================================================
+   INFO BOX
+   ========================================================= */
+
+.info-box {
+    background: linear-gradient(
+        135deg,
+        #edf8f4,
+        #f7faf8
+    );
+    border: 1px solid #d8e8e2;
+    border-left: 4px solid var(--aqua);
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin: 0 0 28px;
+}
+
+.info-box p {
+    margin: 8px 0 0;
+    max-width: 780px;
+    color: #536668;
+}
+
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.panel {
+    background: #ffffff;
+    border: 1px solid #dfe8e3;
+    border-radius: 14px;
+    padding: 28px;
+    margin-top: 18px;
+    box-shadow: 0 5px 18px rgba(9, 40, 45, 0.04);
+}
+
+.panel-title {
+    margin-bottom: 20px;
+}
+
+.panel-title h2 {
+    margin: 8px 0 0;
+    font: 600 28px/1.15 var(--serif);
+    letter-spacing: -0.03em;
+}
+
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.panel table {
+    min-width: 720px;
+}
+
+.panel th {
+    background: #f4f8f6;
+    padding: 14px 15px;
+    border-bottom: 1px solid #dbe5e0;
+}
+
+.panel td {
+    padding: 15px;
+    border-bottom: 1px solid #edf1ef;
+    color: #425658;
+}
+
+.panel tbody tr:hover {
+    background: #f7fbf9;
+}
+
+.panel td:first-child {
+    font-weight: 700;
+    color: var(--ink);
+}
+
+
+/* =========================================================
+   2026 SECTION CARDS
+   ========================================================= */
+
+.section > .dashboard-grid {
+    margin-top: 25px;
+}
+
+.section > .dashboard-grid .card {
+    min-height: 165px;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    padding: 85px 0 70px;
+    margin-bottom: 10px;
+}
+
+.hero h1 {
+    max-width: 900px;
+    margin-top: 16px;
+}
+
+.hero p {
+    max-width: 600px;
+    font-size: 17px;
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   LIVE DATA SPECIAL CARD
+   ========================================================= */
+
+.dashboard-grid .card:first-child {
+    background: linear-gradient(
+        145deg,
+        #09282d,
+        #104b53
+    );
+    color: white;
+}
+
+.dashboard-grid .card:first-child .card-label,
+.dashboard-grid .card:first-child p {
+    color: #b9d6d1;
+}
+
+.dashboard-grid .card:first-child h3 {
+    color: white;
+}
+
+.dashboard-grid .card:first-child .metric {
+    color: #8de7df;
+}
+
+
+/* =========================================================
+   GLOBAL WATER / ANIMAL DATA
+   ========================================================= */
+
+.section .dashboard-grid {
+    align-items: stretch;
+}
+
+.section .dashboard-grid .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+.section > a {
+    display: inline-flex;
+    margin-top: 22px;
+    padding: 12px 18px;
+    background: var(--night);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 6px;
+    transition: .2s ease;
+}
+
+.section > a:hover {
+    background: var(--blue);
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .container {
+        width: min(100% - 30px, 1180px);
+    }
+
+    .section {
+        padding: 52px 0;
+    }
+
+    .hero {
+        padding: 65px 0 50px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-grid .card {
+        min-height: 150px;
+        padding: 22px;
+    }
+
+    .metric {
+        font-size: 36px;
+    }
+
+    .panel {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .info-box {
+        padding: 20px;
+    }
+
+}
+
+
+/* =========================================================
+   FINAL SPACING FIX
+   ========================================================= */
+
+.dashboard-grid + .panel {
+    margin-top: 10px;
+}
+
+.panel + .panel {
+    margin-top: 18px;
+}
+
+.section-heading + .info-box {
+    margin-top: 5px;
+}
+
+.section-heading + .dashboard-grid {
+    margin-top: 20px;
+}
