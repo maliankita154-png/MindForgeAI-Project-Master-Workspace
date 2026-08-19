@@ -1,1324 +1,2190 @@
-from flask import Flask, render_template, request
-import os
-import pandas as pd
+{% extends "base.html" %}
 
+{% block title %}
+AETHERA | 2026 Water Command Center
+{% endblock %}
 
-# ============================================================
-# AETHERA APPLICATION
-# ============================================================
 
-app = Flask(__name__)
+{% block head %}
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 
-# ============================================================
-# PROJECT PATHS
-# ============================================================
+<style>
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
+* {
+    box-sizing: border-box;
+}
 
-DATA_DIR = os.path.join(
-    BASE_DIR,
-    "data"
-)
+.command-center {
 
-PROJECT_ROOT = os.path.dirname(BASE_DIR)
+    width: min(
+        1450px,
+        calc(100% - 40px)
+    );
 
-CURATED_DIR = os.path.join(
-    PROJECT_ROOT,
-    "03_data_and_resources",
-    "curated"
-)
+    margin: 45px auto 90px;
 
+}
 
-# ============================================================
-# DATA FILES
-# ============================================================
 
-RAINFALL_FILE = os.path.join(
-    CURATED_DIR,
-    "rainfall_2026.csv"
-)
+/* =========================================================
+   HERO
+   ========================================================= */
 
-WATER_USE_2026_FILE = os.path.join(
-    CURATED_DIR,
-    "water_use_2026.csv"
-)
+.cc-hero {
 
-RAINFALL_2025_FILE = os.path.join(
-    CURATED_DIR,
-    "rainfall_2025.csv"
-)
+    display: flex;
 
-WATER_USE_2025_FILE = os.path.join(
-    CURATED_DIR,
-    "water_use_2025.csv"
-)
+    justify-content: space-between;
 
-DEMAND_FILE = os.path.join(
-    DATA_DIR,
-    "demand_demo.csv"
-)
+    align-items: flex-end;
 
-RESERVOIR_FILE = os.path.join(
-    CURATED_DIR,
-    "reservoir_2025_2026.csv"
-)
+    gap: 30px;
 
-ANIMAL_WATER_FILE = os.path.join(
-    DATA_DIR,
-    "animal_water_use.csv"
-)
+    margin-bottom: 30px;
 
-GLOBAL_WATER_FILE = os.path.join(
-    DATA_DIR,
-    "water_use.csv"
-)
+}
 
+.cc-eyebrow {
 
-# ============================================================
-# SAFE CSV LOADER
-# ============================================================
+    font-size: 11px;
 
-def load_csv(file_path):
+    font-weight: 800;
 
-    if os.path.exists(file_path):
+    letter-spacing: .16em;
 
-        try:
+    opacity: .55;
 
-            df = pd.read_csv(file_path)
+}
 
-            # Clean column names
-            df.columns = (
-                df.columns
-                .astype(str)
-                .str.strip()
-            )
+.cc-hero h1 {
 
-            return df
+    margin: 10px 0;
 
-        except Exception as e:
+    font-size: clamp(
+        38px,
+        6vw,
+        72px
+    );
 
-            print(
-                f"Error reading file: {file_path}"
-            )
+    line-height: .95;
 
-            print(e)
+}
 
-    else:
+.cc-hero p {
 
-        print(
-            f"File not found: {file_path}"
-        )
+    max-width: 720px;
 
-    return pd.DataFrame()
+    opacity: .65;
 
+    line-height: 1.7;
 
-# ============================================================
-# HOME
-# ============================================================
+}
 
-@app.route("/")
-def home():
+.system-status {
 
-    return render_template(
-        "index.html"
-    )
+    padding: 12px 18px;
 
+    border: 1px solid
+        rgba(20,50,45,.15);
 
-# ============================================================
-# ABOUT
-# ============================================================
+    border-radius: 999px;
 
-@app.route("/about")
-def about():
+    font-size: 10px;
 
-    return render_template(
-        "about.html"
-    )
+    font-weight: 800;
 
+    letter-spacing: .1em;
 
-# ============================================================
-# DASHBOARD
-# ============================================================
+    white-space: nowrap;
 
-@app.route("/dashboard")
-def dashboard():
+}
 
-    # --------------------------------------------------------
-    # LOAD DATASETS
-    # --------------------------------------------------------
+.status-dot {
 
-    rainfall_df = load_csv(
-        RAINFALL_FILE
-    )
+    display: inline-block;
 
-    rainfall_2025_df = load_csv(
-        RAINFALL_2025_FILE
-    )
+    width: 8px;
 
-    water_use_2026_df = load_csv(
-        WATER_USE_2026_FILE
-    )
+    height: 8px;
 
-    water_use_2025_df = load_csv(
-        WATER_USE_2025_FILE
-    )
+    border-radius: 50%;
 
-    demand_df = load_csv(
-        DEMAND_FILE
-    )
+    background: #39a86f;
 
-    reservoir_df = load_csv(
-        RESERVOIR_FILE
-    )
+    margin-right: 8px;
 
-    animal_df = load_csv(
-        ANIMAL_WATER_FILE
-    )
+}
 
-    global_df = load_csv(
-        GLOBAL_WATER_FILE
-    )
 
+/* =========================================================
+   DATA NOTICE
+   ========================================================= */
 
-    # --------------------------------------------------------
-    # RAINFALL
-    # --------------------------------------------------------
+.data-notice {
 
-    rainfall_value = 0
+    margin-bottom: 22px;
 
-    if not rainfall_df.empty:
+    padding: 17px 20px;
 
-        rainfall_columns = [
+    border-radius: 16px;
 
-            "rainfall_mm",
-            "rainfall",
-            "Rainfall",
-            "precipitation_mm",
-            "precipitation"
+    background: #fff8e8;
 
-        ]
+    border: 1px solid #f0dfb1;
 
-        for column in rainfall_columns:
+    color: #614d1e;
 
-            if column in rainfall_df.columns:
+    font-size: 13px;
 
-                rainfall_value = rainfall_df[
-                    column
-                ].iloc[-1]
+    line-height: 1.6;
 
-                break
+}
 
 
-    # --------------------------------------------------------
-    # DEMAND
-    # --------------------------------------------------------
+/* =========================================================
+   KPI GRID
+   ========================================================= */
 
-    demand_value = 0
+.kpi-grid {
 
-    if not demand_df.empty:
+    display: grid;
 
-        demand_columns = [
+    grid-template-columns:
+        repeat(4, 1fr);
 
-            "demand_mld",
-            "demand",
-            "Demand",
-            "water_demand_mld",
-            "water_demand"
+    gap: 15px;
 
-        ]
+    margin-bottom: 20px;
 
-        for column in demand_columns:
+}
 
-            if column in demand_df.columns:
+.kpi-card {
 
-                demand_value = demand_df[
-                    column
-                ].iloc[-1]
+    padding: 23px;
 
-                break
+    border-radius: 20px;
 
+    background: #f5f8f6;
 
-    # --------------------------------------------------------
-    # RESERVOIR
-    # --------------------------------------------------------
+    border: 1px solid
+        rgba(20,50,45,.08);
 
-    reservoir_value = 0
+}
 
-    if not reservoir_df.empty:
+.kpi-card span {
 
-        reservoir_columns = [
+    display: block;
 
-            "availability_pct",
-            "availability",
-            "reservoir_pct",
-            "storage_pct",
-            "storage",
-            "level_pct"
+    font-size: 10px;
 
-        ]
+    font-weight: 800;
 
-        for column in reservoir_columns:
+    letter-spacing: .08em;
 
-            if column in reservoir_df.columns:
+    opacity: .55;
 
-                reservoir_value = reservoir_df[
-                    column
-                ].iloc[-1]
+    margin-bottom: 15px;
 
-                break
+}
 
+.kpi-card strong {
 
-    # --------------------------------------------------------
-    # ANIMAL WATER
-    # --------------------------------------------------------
+    display: block;
 
-    total_animals = 0
+    font-size: 31px;
 
-    total_daily_water = 0
+    line-height: 1.05;
 
-    total_monthly_water = 0
+    margin-bottom: 9px;
 
-    highest_consumer = "N/A"
+}
 
-    animal_data = []
+.kpi-card small {
 
+    opacity: .55;
 
-    if not animal_df.empty:
+    line-height: 1.5;
 
-        required_columns = [
+}
 
-            "animals_count",
-            "daily_water_litres_per_animal"
 
-        ]
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
 
-        if all(
-            column in animal_df.columns
-            for column in required_columns
-        ):
+.section-title {
 
-            animal_df[
-                "animals_count"
-            ] = pd.to_numeric(
-                animal_df[
-                    "animals_count"
-                ],
-                errors="coerce"
-            ).fillna(0)
+    margin: 35px 0 15px;
 
+}
 
-            animal_df[
-                "daily_water_litres_per_animal"
-            ] = pd.to_numeric(
-                animal_df[
-                    "daily_water_litres_per_animal"
-                ],
-                errors="coerce"
-            ).fillna(0)
+.section-title span {
 
+    display: block;
 
-            # Total daily water
+    font-size: 9px;
 
-            animal_df[
-                "total_daily_water"
-            ] = (
+    font-weight: 800;
 
-                animal_df[
-                    "animals_count"
-                ]
+    letter-spacing: .12em;
 
-                *
+    opacity: .5;
 
-                animal_df[
-                    "daily_water_litres_per_animal"
-                ]
+    margin-bottom: 5px;
 
-            )
+}
 
+.section-title h2 {
 
-            # Total animals
+    margin: 0;
 
-            total_animals = int(
-                animal_df[
-                    "animals_count"
-                ].sum()
-            )
+    font-size: 25px;
 
+}
 
-            # Total daily water
 
-            total_daily_water = float(
-                animal_df[
-                    "total_daily_water"
-                ].sum()
-            )
+/* =========================================================
+   CHART GRID
+   ========================================================= */
 
+.chart-grid {
 
-            # Monthly water
+    display: grid;
 
-            total_monthly_water = (
-                total_daily_water * 30
-            )
+    grid-template-columns:
+        repeat(2, 1fr);
 
+    gap: 18px;
 
-            # Highest consumer
+    margin-bottom: 20px;
 
-            if not animal_df.empty:
+}
 
-                highest_index = (
-                    animal_df[
-                        "total_daily_water"
-                    ].idxmax()
-                )
+.chart-card {
 
-                if "animal" in animal_df.columns:
+    background: #fff;
 
-                    highest_consumer = str(
-                        animal_df.loc[
-                            highest_index,
-                            "animal"
-                        ]
-                    )
+    border: 1px solid
+        rgba(20,50,45,.1);
 
+    border-radius: 22px;
 
-            # Records
+    padding: 23px;
 
-            animal_data = animal_df.to_dict(
-                orient="records"
-            )
+    min-height: 400px;
 
+}
 
-    # --------------------------------------------------------
-    # ANIMAL SUMMARY
-    # --------------------------------------------------------
+.chart-card.wide {
 
-    animal_summary = {
+    grid-column: 1 / -1;
 
-        "total_animals": total_animals,
+}
 
-        "daily_water": round(
-            total_daily_water,
-            2
-        ),
+.chart-heading {
 
-        "monthly_water": round(
-            total_monthly_water,
-            2
-        ),
+    margin-bottom: 20px;
 
-        "highest_consumer": highest_consumer
+}
+
+.chart-heading span {
+
+    display: block;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+    opacity: .5;
+
+    margin-bottom: 5px;
+
+}
+
+.chart-heading strong {
+
+    font-size: 19px;
+
+}
+
+.chart-box {
+
+    height: 300px;
+
+    position: relative;
+
+}
+
+
+/* =========================================================
+   INTELLIGENCE
+   ========================================================= */
+
+.intelligence {
+
+    display: flex;
+
+    gap: 18px;
+
+    padding: 27px;
+
+    border-radius: 22px;
+
+    background: #173f38;
+
+    color: white;
+
+    margin: 20px 0;
+
+}
+
+.ai-symbol {
+
+    width: 46px;
+
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,.12);
+
+    font-size: 22px;
+
+}
+
+.intelligence span {
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+    opacity: .6;
+
+}
+
+.intelligence h3 {
+
+    margin: 7px 0;
+
+}
+
+.intelligence p {
+
+    margin: 0;
+
+    opacity: .75;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   DATA TABLE
+   ========================================================= */
+
+.data-panel {
+
+    background: #fff;
+
+    border: 1px solid
+        rgba(20,50,45,.1);
+
+    border-radius: 22px;
+
+    padding: 25px;
+
+    overflow: hidden;
+
+    margin-top: 20px;
+
+}
+
+.data-heading {
+
+    margin-bottom: 18px;
+
+}
+
+.data-heading span {
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+    opacity: .5;
+
+}
+
+.data-heading h2 {
+
+    margin: 6px 0 0;
+
+}
+
+.data-table-wrap {
+
+    overflow-x: auto;
+
+}
+
+.data-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 13px;
+
+}
+
+.data-table th,
+.data-table td {
+
+    padding: 13px;
+
+    border-bottom:
+        1px solid
+        rgba(20,50,45,.08);
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+.data-table th {
+
+    font-size: 9px;
+
+    letter-spacing: .08em;
+
+    opacity: .55;
+
+}
+
+.data-table tbody tr:hover {
+
+    background: #f7faf8;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1000px) {
+
+    .kpi-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
 
     }
 
+}
 
-    # --------------------------------------------------------
-    # GLOBAL WATER SUMMARY
-    # --------------------------------------------------------
+@media(max-width:900px) {
 
-    countries = []
+    .command-center {
 
-    water_summary = {
-
-        "countries": 0,
-
-        "agriculture": 0,
-
-        "industry": 0,
-
-        "domestic": 0
+        width:
+            calc(100% - 24px);
 
     }
 
+    .cc-hero {
 
-    if not global_df.empty:
+        flex-direction: column;
 
-        if "Country" in global_df.columns:
-
-            countries = (
-                global_df[
-                    "Country"
-                ]
-                .dropna()
-                .astype(str)
-                .str.strip()
-                .unique()
-                .tolist()
-            )
-
-            countries.sort(
-                key=str.lower
-            )
-
-            water_summary[
-                "countries"
-            ] = len(countries)
-
-
-        if "Agriculture" in global_df.columns:
-
-            water_summary[
-                "agriculture"
-            ] = round(
-
-                pd.to_numeric(
-                    global_df[
-                        "Agriculture"
-                    ],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .mean(),
-
-                2
-            )
-
-
-        if "Industry" in global_df.columns:
-
-            water_summary[
-                "industry"
-            ] = round(
-
-                pd.to_numeric(
-                    global_df[
-                        "Industry"
-                    ],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .mean(),
-
-                2
-            )
-
-
-        if "Domestic" in global_df.columns:
-
-            water_summary[
-                "domestic"
-            ] = round(
-
-                pd.to_numeric(
-                    global_df[
-                        "Domestic"
-                    ],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .mean(),
-
-                2
-            )
-
-
-    # --------------------------------------------------------
-    # 2026 WATER USE SUMMARY
-    # --------------------------------------------------------
-
-    water_use_2026_summary = {
-
-        "agriculture": 0,
-        "industry": 0,
-        "domestic": 0,
-        "power": 0,
-        "animal": 0,
-        "environment": 0,
-        "other": 0,
-        "total": 0
+        align-items: flex-start;
 
     }
 
+    .chart-grid {
 
-    if not water_use_2026_df.empty:
-
-        columns_map = {
-
-            "agriculture":
-                "agriculture_mcm",
-
-            "industry":
-                "industry_mcm",
-
-            "domestic":
-                "domestic_mcm",
-
-            "power":
-                "power_mcm",
-
-            "animal":
-                "animal_husbandry_mcm",
-
-            "environment":
-                "environment_mcm",
-
-            "other":
-                "other_mcm",
-
-            "total":
-                "total_use_mcm"
-
-        }
-
-
-        for key, column in columns_map.items():
-
-            if column in water_use_2026_df.columns:
-
-                water_use_2026_summary[
-                    key
-                ] = round(
-
-                    pd.to_numeric(
-                        water_use_2026_df[
-                            column
-                        ],
-                        errors="coerce"
-                    )
-                    .fillna(0)
-                    .sum(),
-
-                    2
-
-                )
-
-
-
-    # --------------------------------------------------------
-    # 2025/2026 GRAPH DATA
-    # --------------------------------------------------------
-
-    rainfall_compare_df = pd.concat(
-        [
-            rainfall_2025_df,
-            rainfall_df
-        ],
-        ignore_index=True
-    )
-
-    water_use_compare_df = pd.concat(
-        [
-            water_use_2025_df,
-            water_use_2026_df
-        ],
-        ignore_index=True
-    )
-
-    rainfall_compare_data = rainfall_compare_df.to_dict(
-        orient="records"
-    )
-
-    water_use_compare_data = water_use_compare_df.to_dict(
-        orient="records"
-    )
-
-    reservoir_compare_data = reservoir_df.to_dict(
-        orient="records"
-    )
-
-    # --------------------------------------------------------
-    # DASHBOARD DATA
-    # --------------------------------------------------------
-
-    data = {
-
-        "rainfall": rainfall_value,
-
-        "demand": demand_value,
-
-        "reservoir": reservoir_value
+        grid-template-columns: 1fr;
 
     }
 
+    .chart-card.wide {
 
-    # --------------------------------------------------------
-    # RENDER DASHBOARD
-    # --------------------------------------------------------
-
-    return render_template(
-
-        "dashboard.html",
-
-        data=data,
-
-        water_summary=water_summary,
-
-        countries=countries,
-
-        rainfall_2026_data=(
-            rainfall_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        rainfall_compare_data=rainfall_compare_data,
-
-        water_use_compare_data=water_use_compare_data,
-
-        reservoir_compare_data=reservoir_compare_data,
-
-        water_use_2025_data=(
-            water_use_2025_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        water_use_2026_data=(
-            water_use_2026_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        water_use_2026_summary=(
-            water_use_2026_summary
-        ),
-
-        rainfall_data=(
-            rainfall_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        demand_data=(
-            demand_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        reservoir_data=(
-            reservoir_df.to_dict(
-                orient="records"
-            )
-        ),
-
-        animal_data=animal_data,
-
-        animal_summary=animal_summary,
-
-        total_animals=total_animals,
-
-        total_daily_water=total_daily_water,
-
-        total_monthly_water=total_monthly_water,
-
-        highest_consumer=highest_consumer
-
-    )
-
-
-# ============================================================
-# RAINFALL
-# ============================================================
-
-@app.route("/rainfall")
-def rainfall():
-
-    df = load_csv(
-        RAINFALL_FILE
-    )
-
-    return render_template(
-
-        "rainfall.html",
-
-        rainfall_data=df.to_dict(
-            orient="records"
-        )
-
-    )
-
-
-# ============================================================
-# DEMAND
-# ============================================================
-
-@app.route("/demand")
-def demand():
-
-    df = load_csv(
-        DEMAND_FILE
-    )
-
-    return render_template(
-
-        "demand.html",
-
-        demand_data=df.to_dict(
-            orient="records"
-        )
-
-    )
-
-
-# ============================================================
-# RESERVOIR
-# ============================================================
-
-@app.route("/reservoir")
-def reservoir():
-
-    df = load_csv(
-        RESERVOIR_FILE
-    )
-
-    return render_template(
-
-        "reservoir.html",
-
-        reservoir_data=df.to_dict(
-            orient="records"
-        )
-
-    )
-
-
-# ============================================================
-# GLOBAL WATER INTELLIGENCE
-# ============================================================
-
-@app.route("/global-water")
-def global_water():
-
-    # --------------------------------------------------------
-    # LOAD DATA
-    # --------------------------------------------------------
-
-    df = load_csv(
-        GLOBAL_WATER_FILE
-    )
-
-
-    countries = []
-
-    selected_country = ""
-
-    selected_data = None
-
-
-    # --------------------------------------------------------
-    # NORMALIZE DATA
-    # --------------------------------------------------------
-
-    if not df.empty:
-
-        df.columns = (
-            df.columns
-            .astype(str)
-            .str.strip()
-        )
-
-
-    # --------------------------------------------------------
-    # COUNTRY LIST
-    # --------------------------------------------------------
-
-    if (
-        not df.empty
-        and "Country" in df.columns
-    ):
-
-        countries = (
-
-            df[
-                "Country"
-            ]
-
-            .dropna()
-
-            .astype(str)
-
-            .str.strip()
-
-            .unique()
-
-            .tolist()
-
-        )
-
-        countries.sort(
-            key=str.lower
-        )
-
-
-    # --------------------------------------------------------
-    # GET COUNTRY FROM URL
-    # --------------------------------------------------------
-
-    selected_country = request.args.get(
-        "country",
-        ""
-    ).strip()
-
-
-    # --------------------------------------------------------
-    # DEFAULT COUNTRY
-    # --------------------------------------------------------
-
-    if (
-        not selected_country
-        and countries
-    ):
-
-        selected_country = countries[0]
-
-
-    # --------------------------------------------------------
-    # SELECT COUNTRY
-    # --------------------------------------------------------
-
-    if (
-        not df.empty
-        and selected_country
-        and "Country" in df.columns
-    ):
-
-        selected_rows = df[
-
-            df[
-                "Country"
-            ]
-            .astype(str)
-            .str.strip()
-            .str.lower()
-
-            ==
-
-            selected_country.lower()
-
-        ]
-
-
-        if not selected_rows.empty:
-
-            row = selected_rows.iloc[0]
-
-
-            # ------------------------------------------------
-            # SAFE NUMBER FUNCTION
-            # ------------------------------------------------
-
-            def number_value(
-                column_name
-            ):
-
-                if column_name not in row.index:
-
-                    return 0
-
-
-                value = pd.to_numeric(
-
-                    row[
-                        column_name
-                    ],
-
-                    errors="coerce"
-
-                )
-
-
-                if pd.isna(value):
-
-                    return 0
-
-
-                return round(
-                    float(value),
-                    2
-                )
-
-
-            # ------------------------------------------------
-            # COUNTRY DATA
-            # ------------------------------------------------
-
-            agriculture = number_value(
-                "Agriculture"
-            )
-
-            industry = number_value(
-                "Industry"
-            )
-
-            domestic = number_value(
-                "Domestic"
-            )
-
-            total = number_value(
-                "Total"
-            )
-
-
-            # ------------------------------------------------
-            # AUTO TOTAL
-            # ------------------------------------------------
-
-            if total == 0:
-
-                total = round(
-
-                    agriculture
-                    +
-                    industry
-                    +
-                    domestic,
-
-                    2
-
-                )
-
-
-            # ------------------------------------------------
-            # YEAR
-            # ------------------------------------------------
-
-            year = row.get(
-                "Year",
-                "N/A"
-            )
-
-
-            if pd.isna(year):
-
-                year = "N/A"
-
-
-            # ------------------------------------------------
-            # SELECTED DATA
-            # ------------------------------------------------
-
-            selected_data = {
-
-                "Country": str(
-                    row.get(
-                        "Country",
-                        selected_country
-                    )
-                ),
-
-                "Year": str(
-                    year
-                ),
-
-                "Agriculture":
-                    agriculture,
-
-                "Industry":
-                    industry,
-
-                "Domestic":
-                    domestic,
-
-                "Total":
-                    total
-
-            }
-
-
-    # --------------------------------------------------------
-    # GLOBAL WATER SUMMARY
-    # --------------------------------------------------------
-
-    water_summary = {
-
-        "countries":
-            len(countries),
-
-        "agriculture": 0,
-
-        "industry": 0,
-
-        "domestic": 0
+        grid-column: auto;
 
     }
 
+}
 
-    if not df.empty:
+@media(max-width:600px) {
 
+    .command-center {
 
-        # ----------------------------------------------------
-        # AGRICULTURE
-        # ----------------------------------------------------
+        width:
+            calc(100% - 14px);
 
-        if "Agriculture" in df.columns:
+    }
 
-            agriculture_values = (
-                pd.to_numeric(
-                    df["Agriculture"],
-                    errors="coerce"
-                )
-                .dropna()
-            )
+    .kpi-grid {
 
-            if not agriculture_values.empty:
+        grid-template-columns: 1fr;
 
-                water_summary[
-                    "agriculture"
-                ] = round(
+    }
 
-                    float(
-                        agriculture_values.mean()
-                    ),
+    .intelligence {
 
-                    2
+        flex-direction: column;
 
-                )
+    }
 
+}
 
-        # ----------------------------------------------------
-        # INDUSTRY
-        # ----------------------------------------------------
+</style>
 
-        if "Industry" in df.columns:
+{% endblock %}
 
-            industry_values = (
-                pd.to_numeric(
-                    df["Industry"],
-                    errors="coerce"
-                )
-                .dropna()
-            )
 
-            if not industry_values.empty:
+{% block content %}
 
-                water_summary[
-                    "industry"
-                ] = round(
+<div class="command-center">
 
-                    float(
-                        industry_values.mean()
-                    ),
 
-                    2
+<!-- =====================================================
+     HERO
+     ===================================================== -->
 
-                )
+<section class="cc-hero">
 
+    <div>
 
-        # ----------------------------------------------------
-        # DOMESTIC
-        # ----------------------------------------------------
-
-        if "Domestic" in df.columns:
-
-            domestic_values = (
-                pd.to_numeric(
-                    df["Domestic"],
-                    errors="coerce"
-                )
-                .dropna()
-            )
-
-            if not domestic_values.empty:
-
-                water_summary[
-                    "domestic"
-                ] = round(
-
-                    float(
-                        domestic_values.mean()
-                    ),
-
-                    2
-
-                )
-
-
-    # --------------------------------------------------------
-    # COMPLETE GLOBAL WATER DATA
-    # --------------------------------------------------------
-
-    global_water_data = []
-
-
-    if not df.empty:
-
-        global_water_data = (
-            df.to_dict(
-                orient="records"
-            )
-        )
-
-
-    # --------------------------------------------------------
-    # DEBUG INFORMATION
-    # --------------------------------------------------------
-
-    print(
-        "\n========================================"
-    )
-
-    print(
-        "AETHERA | GLOBAL WATER INTELLIGENCE"
-    )
-
-    print(
-        "========================================"
-    )
-
-    print(
-        "Dataset:",
-        GLOBAL_WATER_FILE
-    )
-
-    print(
-        "Rows:",
-        len(df)
-    )
-
-    print(
-        "Columns:",
-        df.columns.tolist()
-        if not df.empty
-        else []
-    )
-
-    print(
-        "Countries:",
-        len(countries)
-    )
-
-    print(
-        "Selected Country:",
-        selected_country
-    )
-
-    print(
-        "Selected Data:",
-        selected_data
-    )
-
-    print(
-        "========================================\n"
-    )
-
-
-    # --------------------------------------------------------
-    # RENDER GLOBAL WATER PAGE
-    # --------------------------------------------------------
-
-    return render_template(
-
-        "global_water.html",
-
-        countries=countries,
-
-        global_water_data=global_water_data,
-
-        selected_country=selected_country,
-
-        selected_data=selected_data,
-
-        water_summary=water_summary
-
-    )
-
-
-# ============================================================
-# SUSTAINABILITY
-# ============================================================
-
-@app.route("/sustainability")
-def sustainability():
-
-    return render_template(
-        "sustainability.html"
-    )
-
-
-# ============================================================
-# DIGITAL TWIN
-# ============================================================
-
-@app.route("/digital-twin")
-def digital_twin():
-
-    return render_template(
-        "digital_twin.html"
-    )
-
-
-# ============================================================
-# ERROR HANDLERS
-# ============================================================
-
-@app.errorhandler(404)
-def page_not_found(error):
-
-    return render_template(
-        "404.html"
-    ), 404
-
-
-@app.errorhandler(500)
-def internal_server_error(error):
-
-    return """
-
-    <div style="
-        font-family: Arial;
-        padding: 40px;
-        text-align: center;
-    ">
+        <span class="cc-eyebrow">
+            AETHERA WATER INTELLIGENCE
+        </span>
 
         <h1>
-            AETHERA Server Error
+            Command Center
         </h1>
 
         <p>
-            Something went wrong while
-            loading this page.
+            2026 rainfall, runoff, groundwater recharge,
+            dam/reservoir storage and sector-wise water
+            utilization in one water intelligence dashboard.
         </p>
-
-        <a href="/">
-            Return to Home
-        </a>
 
     </div>
 
-    """, 500
+    <div class="system-status">
+
+        <span class="status-dot"></span>
+
+        SYSTEM ACTIVE
+
+    </div>
+
+</section>
 
 
-# ============================================================
-# RUN APPLICATION
-# ============================================================
+<!-- =====================================================
+     RESERVOIR DATA NOTICE
+     ===================================================== -->
 
-if __name__ == "__main__":
+{% if reservoir_is_demo %}
 
-    print(
-        "\n========================================"
+<div class="data-notice">
+
+    <strong>🏞️ Reservoir data notice:</strong>
+
+    The available reservoir dataset is
+    <strong>demo/synthetic data</strong>.
+    Its current readings are from the existing
+    <strong>reservoir_demo.csv</strong> dataset and should
+    not be interpreted as actual 2026 dam readings.
+
+</div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     2026 RAINFALL KPIs
+     ===================================================== -->
+
+<div class="section-title">
+
+    <span>
+        2026 RAINFALL
+    </span>
+
+    <h2>
+        Rainfall & Water Availability
+    </h2>
+
+</div>
+
+
+<section class="kpi-grid">
+
+
+    <!-- TOTAL RAIN -->
+
+    <div class="kpi-card">
+
+        <span>
+            🌧️ TOTAL 2026 RAINFALL
+        </span>
+
+        <strong>
+            {{ rainfall_2026_total }}
+        </strong>
+
+        <small>
+            mm received from available 2026 records
+        </small>
+
+    </div>
+
+
+    <!-- LATEST RAIN -->
+
+    <div class="kpi-card">
+
+        <span>
+            🌧️ LATEST RAINFALL
+        </span>
+
+        <strong>
+            {{ latest_rainfall }}
+        </strong>
+
+        <small>
+            {{ latest_rainfall_month }} 2026
+        </small>
+
+    </div>
+
+
+    <!-- RUNOFF -->
+
+    <div class="kpi-card">
+
+        <span>
+            💧 2026 RUNOFF
+        </span>
+
+        <strong>
+            {{ runoff_2026_total }}
+        </strong>
+
+        <small>
+            MCM generated from available rainfall data
+        </small>
+
+    </div>
+
+
+    <!-- GROUNDWATER -->
+
+    <div class="kpi-card">
+
+        <span>
+            💧 GROUNDWATER RECHARGE
+        </span>
+
+        <strong>
+            {{ recharge_2026_total }}
+        </strong>
+
+        <small>
+            MCM estimated recharge
+        </small>
+
+    </div>
+
+
+    <!-- HIGHEST RAIN -->
+
+    <div class="kpi-card">
+
+        <span>
+            ⛈️ HIGHEST RAINFALL MONTH
+        </span>
+
+        <strong>
+            {{ highest_rainfall_value }} mm
+        </strong>
+
+        <small>
+            {{ highest_rainfall_month }}
+        </small>
+
+    </div>
+
+
+    <!-- DEMAND -->
+
+    <div class="kpi-card">
+
+        <span>
+            🚰 WATER DEMAND
+        </span>
+
+        <strong>
+            {{ data.demand }}
+        </strong>
+
+        <small>
+            Latest available demand indicator
+        </small>
+
+    </div>
+
+
+    <!-- DAM STORAGE -->
+
+    <div class="kpi-card">
+
+        <span>
+            🏞️ DAM STORAGE
+        </span>
+
+        <strong>
+            {{ reservoir_value }}%
+        </strong>
+
+        <small>
+            Latest available reservoir storage
+        </small>
+
+    </div>
+
+
+    <!-- DAM CAPACITY -->
+
+    <div class="kpi-card">
+
+        <span>
+            🏞️ DAM CAPACITY
+        </span>
+
+        <strong>
+            {{ reservoir_capacity }}
+        </strong>
+
+        <small>
+            MCM | {{ reservoir_name }}
+        </small>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     DAM DETAILS
+     ===================================================== -->
+
+<div class="section-title">
+
+    <span>
+        DAM / RESERVOIR MONITORING
+    </span>
+
+    <h2>
+        Current Reservoir Intelligence
+    </h2>
+
+</div>
+
+
+<section class="kpi-grid">
+
+
+    <div class="kpi-card">
+
+        <span>
+            🏞️ RESERVOIR
+        </span>
+
+        <strong style="font-size:22px;">
+            {{ reservoir_name }}
+        </strong>
+
+        <small>
+            Reservoir / dam name
+        </small>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <span>
+            💦 STORAGE
+        </span>
+
+        <strong>
+            {{ reservoir_value }}%
+        </strong>
+
+        <small>
+            Latest storage percentage
+        </small>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <span>
+            ⬆️ INFLOW
+        </span>
+
+        <strong>
+            {{ reservoir_inflow }}
+        </strong>
+
+        <small>
+            MCM latest inflow
+        </small>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <span>
+            ⬇️ OUTFLOW
+        </span>
+
+        <strong>
+            {{ reservoir_outflow }}
+        </strong>
+
+        <small>
+            MCM latest outflow
+        </small>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <span>
+            📦 CAPACITY
+        </span>
+
+        <strong>
+            {{ reservoir_capacity }}
+        </strong>
+
+        <small>
+            MCM total capacity
+        </small>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <span>
+            📅 LAST READING
+        </span>
+
+        <strong style="font-size:20px;">
+            {{ reservoir_latest_date }}
+        </strong>
+
+        <small>
+            Latest available reservoir record
+        </small>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     CHARTS
+     ===================================================== -->
+
+<div class="section-title">
+
+    <span>
+        AETHERA ANALYTICS
+    </span>
+
+    <h2>
+        Water Intelligence Charts
+    </h2>
+
+</div>
+
+
+<section class="chart-grid">
+
+
+    <!-- =================================================
+         2026 RAINFALL
+         ================================================= -->
+
+    <article class="chart-card">
+
+        <div class="chart-heading">
+
+            <span>
+                RAINFALL ANALYTICS
+            </span>
+
+            <strong>
+                2026 Monthly Rainfall
+            </strong>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="rainfall2026Chart">
+            </canvas>
+
+        </div>
+
+    </article>
+
+
+    <!-- =================================================
+         RUNOFF + RECHARGE
+         ================================================= -->
+
+    <article class="chart-card">
+
+        <div class="chart-heading">
+
+            <span>
+                WATER GENERATION
+            </span>
+
+            <strong>
+                Runoff & Groundwater Recharge
+            </strong>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="waterGenerationChart">
+            </canvas>
+
+        </div>
+
+    </article>
+
+
+    <!-- =================================================
+         DAM STORAGE
+         ================================================= -->
+
+    <article class="chart-card wide">
+
+        <div class="chart-heading">
+
+            <span>
+                DAM MONITORING
+            </span>
+
+            <strong>
+                Reservoir Storage Trend
+            </strong>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="reservoirChart">
+            </canvas>
+
+        </div>
+
+    </article>
+
+
+    <!-- =================================================
+         WATER USE
+         ================================================= -->
+
+    <article class="chart-card wide">
+
+        <div class="chart-heading">
+
+            <span>
+                WATER UTILIZATION
+            </span>
+
+            <strong>
+                2026 Sector-wise Water Use
+            </strong>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="waterUseChart">
+            </canvas>
+
+        </div>
+
+    </article>
+
+
+    <!-- =================================================
+         2025 VS 2026 RAIN
+         ================================================= -->
+
+    <article class="chart-card wide">
+
+        <div class="chart-heading">
+
+            <span>
+                YEAR COMPARISON
+            </span>
+
+            <strong>
+                2025 vs 2026 Rainfall
+            </strong>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="rainfallComparisonChart">
+            </canvas>
+
+        </div>
+
+    </article>
+
+
+</section>
+
+
+<!-- =====================================================
+     AETHERA INTELLIGENCE
+     ===================================================== -->
+
+<section class="intelligence">
+
+    <div class="ai-symbol">
+        ✦
+    </div>
+
+    <div>
+
+        <span>
+            AETHERA INTELLIGENCE
+        </span>
+
+        <h3 id="insightTitle">
+            2026 water intelligence ready
+        </h3>
+
+        <p id="insightText">
+
+            AETHERA is monitoring rainfall,
+            runoff, groundwater recharge,
+            reservoir storage and water utilization.
+
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RAINFALL DATA TABLE
+     ===================================================== -->
+
+<section class="data-panel">
+
+    <div class="data-heading">
+
+        <span>
+            2026 RAINFALL RECORDS
+        </span>
+
+        <h2>
+            Monthly Rainfall Details
+        </h2>
+
+    </div>
+
+
+    <div class="data-table-wrap">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        DATE
+                    </th>
+
+                    <th>
+                        MONTH
+                    </th>
+
+                    <th>
+                        RAINFALL
+                    </th>
+
+                    <th>
+                        RUNOFF
+                    </th>
+
+                    <th>
+                        GROUNDWATER RECHARGE
+                    </th>
+
+                    <th>
+                        QUALITY
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% if rainfall_2026_data %}
+
+                {% for row in rainfall_2026_data %}
+
+                <tr>
+
+                    <td>
+                        {{ row.date }}
+                    </td>
+
+                    <td>
+                        {{ row.month }}
+                    </td>
+
+                    <td>
+                        {{ row.rainfall_mm }}
+                        mm
+                    </td>
+
+                    <td>
+                        {{ row.runoff_mcm }}
+                        MCM
+                    </td>
+
+                    <td>
+                        {{ row.groundwater_recharge_mcm }}
+                        MCM
+                    </td>
+
+                    <td>
+                        {{ row.quality_flag }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="6">
+                        No 2026 rainfall data available.
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WATER USE TABLE
+     ===================================================== -->
+
+<section class="data-panel">
+
+    <div class="data-heading">
+
+        <span>
+            2026 WATER USE
+        </span>
+
+        <h2>
+            Sector-wise Water Utilization
+        </h2>
+
+    </div>
+
+
+    <div class="data-table-wrap">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        YEAR
+                    </th>
+
+                    <th>
+                        MONTH
+                    </th>
+
+                    <th>
+                        AGRICULTURE
+                    </th>
+
+                    <th>
+                        INDUSTRY
+                    </th>
+
+                    <th>
+                        DOMESTIC
+                    </th>
+
+                    <th>
+                        ANIMAL
+                    </th>
+
+                    <th>
+                        POWER
+                    </th>
+
+                    <th>
+                        ENVIRONMENT
+                    </th>
+
+                    <th>
+                        OTHER
+                    </th>
+
+                    <th>
+                        TOTAL
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% if water_use_2026_data %}
+
+                {% for row in water_use_2026_data %}
+
+                <tr>
+
+                    <td>
+                        {{ row.year }}
+                    </td>
+
+                    <td>
+                        {{ row.month }}
+                    </td>
+
+                    <td>
+                        {{ row.agriculture_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.industry_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.domestic_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.animal_husbandry_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.power_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.environment_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.other_mcm }}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ row.total_use_mcm }}
+                        </strong>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="10">
+                        No 2026 water-use data available.
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RESERVOIR TABLE
+     ===================================================== -->
+
+<section class="data-panel">
+
+    <div class="data-heading">
+
+        <span>
+            RESERVOIR DATA
+        </span>
+
+        <h2>
+            Dam / Reservoir Records
+        </h2>
+
+    </div>
+
+
+    <div class="data-table-wrap">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        DATE
+                    </th>
+
+                    <th>
+                        RESERVOIR
+                    </th>
+
+                    <th>
+                        STORAGE %
+                    </th>
+
+                    <th>
+                        CAPACITY MCM
+                    </th>
+
+                    <th>
+                        INFLOW MCM
+                    </th>
+
+                    <th>
+                        OUTFLOW MCM
+                    </th>
+
+                    <th>
+                        QUALITY
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% if reservoir_data %}
+
+                {% for row in reservoir_data %}
+
+                <tr>
+
+                    <td>
+                        {{ row.date }}
+                    </td>
+
+                    <td>
+                        {{ row.reservoir_name }}
+                    </td>
+
+                    <td>
+                        {{ row.storage_pct }}%
+                    </td>
+
+                    <td>
+                        {{ row.capacity_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.inflow_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.outflow_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.quality_flag }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="7">
+
+                        No reservoir data available.
+
+                    </td>
+
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT DATA
+     ===================================================== -->
+
+<script>
+
+const AETHERA = {
+
+    rainfall2026:
+        {{ rainfall_2026_data | default([], true) | tojson }},
+
+    rainfallCompare:
+        {{ rainfall_compare_data | default([], true) | tojson }},
+
+    water2026:
+        {{ water_use_2026_data | default([], true) | tojson }},
+
+    reservoir:
+        {{ reservoir_data | default([], true) | tojson }},
+
+    rainfallTotal:
+        {{ rainfall_2026_total | default(0, true) | tojson }},
+
+    runoffTotal:
+        {{ runoff_2026_total | default(0, true) | tojson }},
+
+    rechargeTotal:
+        {{ recharge_2026_total | default(0, true) | tojson }},
+
+    reservoirValue:
+        {{ reservoir_value | default(0, true) | tojson }}
+
+};
+
+
+/* =========================================================
+   HELPER
+   ========================================================= */
+
+function number(value) {
+
+    const n = Number(value);
+
+    return Number.isFinite(n)
+        ? n
+        : 0;
+
+}
+
+
+/* =========================================================
+   1. 2026 RAINFALL CHART
+   ========================================================= */
+
+const rainfallLabels =
+    AETHERA.rainfall2026.map(
+        row => row.month || row.date
+    );
+
+const rainfallValues =
+    AETHERA.rainfall2026.map(
+        row => number(row.rainfall_mm)
+    );
+
+
+new Chart(
+
+    document.getElementById(
+        "rainfall2026Chart"
+    ),
+
+    {
+
+        type: "bar",
+
+        data: {
+
+            labels: rainfallLabels,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "Rainfall (mm)",
+
+                    data:
+                        rainfallValues,
+
+                    borderWidth: 1
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    title: {
+
+                        display: true,
+
+                        text: "Rainfall (mm)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   2. RUNOFF + RECHARGE
+   ========================================================= */
+
+const generationLabels =
+    AETHERA.rainfall2026.map(
+        row => row.month || row.date
+    );
+
+const runoffValues =
+    AETHERA.rainfall2026.map(
+        row => number(row.runoff_mcm)
+    );
+
+const rechargeValues =
+    AETHERA.rainfall2026.map(
+        row =>
+            number(
+                row.groundwater_recharge_mcm
+            )
+    );
+
+
+new Chart(
+
+    document.getElementById(
+        "waterGenerationChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels: generationLabels,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "Runoff (MCM)",
+
+                    data:
+                        runoffValues,
+
+                    tension: .3,
+
+                    borderWidth: 2
+
+                },
+
+                {
+
+                    label:
+                        "Groundwater Recharge (MCM)",
+
+                    data:
+                        rechargeValues,
+
+                    tension: .3,
+
+                    borderWidth: 2
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   3. RESERVOIR STORAGE
+   ========================================================= */
+
+const reservoirLabels =
+    AETHERA.reservoir.map(
+        row => row.date
+    );
+
+const reservoirStorage =
+    AETHERA.reservoir.map(
+        row => number(
+            row.storage_pct
+        )
+    );
+
+
+new Chart(
+
+    document.getElementById(
+        "reservoirChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels:
+                reservoirLabels,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "Storage (%)",
+
+                    data:
+                        reservoirStorage,
+
+                    tension: .25,
+
+                    borderWidth: 2,
+
+                    fill: false
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    max: 100,
+
+                    title: {
+
+                        display: true,
+
+                        text: "Storage (%)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   4. WATER USE
+   ========================================================= */
+
+const waterLabels =
+    AETHERA.water2026.map(
+        row => row.month
+    );
+
+
+const agriculture =
+    AETHERA.water2026.map(
+        row => number(
+            row.agriculture_mcm
+        )
+    );
+
+
+const industry =
+    AETHERA.water2026.map(
+        row => number(
+            row.industry_mcm
+        )
+    );
+
+
+const domestic =
+    AETHERA.water2026.map(
+        row => number(
+            row.domestic_mcm
+        )
+    );
+
+
+const animal =
+    AETHERA.water2026.map(
+        row => number(
+            row.animal_husbandry_mcm
+        )
+    );
+
+
+const power =
+    AETHERA.water2026.map(
+        row => number(
+            row.power_mcm
+        )
+    );
+
+
+const environment =
+    AETHERA.water2026.map(
+        row => number(
+            row.environment_mcm
+        )
+    );
+
+
+new Chart(
+
+    document.getElementById(
+        "waterUseChart"
+    ),
+
+    {
+
+        type: "bar",
+
+        data: {
+
+            labels:
+                waterLabels,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "Agriculture",
+
+                    data:
+                        agriculture,
+
+                    borderWidth: 1
+
+                },
+
+                {
+
+                    label:
+                        "Industry",
+
+                    data:
+                        industry,
+
+                    borderWidth: 1
+
+                },
+
+                {
+
+                    label:
+                        "Domestic",
+
+                    data:
+                        domestic,
+
+                    borderWidth: 1
+
+                },
+
+                {
+
+                    label:
+                        "Animal",
+
+                    data:
+                        animal,
+
+                    borderWidth: 1
+
+                },
+
+                {
+
+                    label:
+                        "Power",
+
+                    data:
+                        power,
+
+                    borderWidth: 1
+
+                },
+
+                {
+
+                    label:
+                        "Environment",
+
+                    data:
+                        environment,
+
+                    borderWidth: 1
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                x: {
+
+                    stacked: true
+
+                },
+
+                y: {
+
+                    stacked: true,
+
+                    beginAtZero: true,
+
+                    title: {
+
+                        display: true,
+
+                        text: "Water Use (MCM)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   5. 2025 vs 2026 RAINFALL
+   ========================================================= */
+
+const comparisonLabels = [];
+
+const rainfall2025 = [];
+
+const rainfall2026 = [];
+
+
+/*
+   Collect 2025
+*/
+
+AETHERA.rainfallCompare
+    .filter(
+        row =>
+            String(row.year) === "2025"
     )
+    .forEach(
 
-    print(
-        "        AETHERA WATER INTELLIGENCE"
-    )
+        row => {
 
-    print(
-        "========================================"
-    )
+            comparisonLabels.push(
+                row.month || row.date
+            );
 
-    print(
-        "Server:"
-    )
+            rainfall2025.push(
+                number(
+                    row.rainfall_mm
+                )
+            );
 
-    print(
-        "http://127.0.0.1:5000"
-    )
+        }
 
-    print(
-        "========================================\n"
-    )
+    );
 
 
-    app.run(
+/*
+   Collect 2026
+*/
 
-        debug=True,
+const labels2026 =
+    AETHERA.rainfallCompare
+        .filter(
+            row =>
+                String(row.year) === "2026"
+        )
+        .map(
+            row =>
+                row.month || row.date
+        );
 
-        host="127.0.0.1",
 
-        port=5000
+const values2026 =
+    AETHERA.rainfallCompare
+        .filter(
+            row =>
+                String(row.year) === "2026"
+        )
+        .map(
+            row =>
+                number(
+                    row.rainfall_mm
+                )
+        );
 
-    )
+
+/*
+   If 2025 is unavailable,
+   still show 2026.
+*/
+
+if (comparisonLabels.length === 0) {
+
+    labels2026.forEach(
+        label =>
+            comparisonLabels.push(label)
+    );
+
+}
+
+
+new Chart(
+
+    document.getElementById(
+        "rainfallComparisonChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels:
+                labels2026,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "2026 Rainfall",
+
+                    data:
+                        values2026,
+
+                    tension: .3,
+
+                    borderWidth: 2
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    title: {
+
+                        display: true,
+
+                        text: "Rainfall (mm)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   AETHERA INTELLIGENCE
+   ========================================================= */
+
+const title =
+    document.getElementById(
+        "insightTitle"
+    );
+
+const text =
+    document.getElementById(
+        "insightText"
+    );
+
+
+if (
+    AETHERA.rainfallTotal > 0
+) {
+
+    title.textContent =
+        "2026 rainfall intelligence available";
+
+    text.textContent =
+        "AETHERA has processed the available 2026 rainfall records, including total rainfall, runoff and groundwater recharge. Reservoir information is displayed separately based on the available reservoir dataset.";
+
+}
+
+</script>
+
+{% endblock %}
