@@ -2634,3 +2634,384 @@ if (resetFilters) {
 </script>
 
 {% endblock %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("waterSearch");
+    const searchButton = document.getElementById("searchButton");
+    const searchResults = document.getElementById("searchResults");
+
+    const yearFilter = document.getElementById("yearFilter");
+    const monthFilter = document.getElementById("monthFilter");
+    const dataFilter = document.getElementById("dataFilter");
+
+    const A = window.AETHERA_DATA || {};
+
+    const rainfall = A.rainfall2026 || [];
+    const water = A.water2026 || [];
+    const reservoir = A.reservoirCompare || [];
+
+    function normal(value) {
+        return String(value ?? "").toLowerCase().trim();
+    }
+
+    function monthMatch(rowMonth, selectedMonth) {
+
+        if (!selectedMonth || selectedMonth === "all") {
+            return true;
+        }
+
+        const m = normal(rowMonth);
+        const s = normal(selectedMonth);
+
+        const monthMap = {
+            january: "jan",
+            february: "feb",
+            march: "mar",
+            april: "apr",
+            may: "may",
+            june: "jun",
+            july: "jul",
+            august: "aug",
+            september: "sep",
+            october: "oct",
+            november: "nov",
+            december: "dec"
+        };
+
+        return m === s || m === monthMap[s];
+    }
+
+    function yearMatch(rowYear, selectedYear) {
+
+        if (!selectedYear || selectedYear === "all") {
+            return true;
+        }
+
+        return normal(rowYear) === normal(selectedYear);
+    }
+
+    function showResults(results, title) {
+
+        searchResults.hidden = false;
+
+        if (!results.length) {
+
+            searchResults.innerHTML = `
+                <div class="search-result">
+                    <strong>No data found.</strong>
+                    <br>
+                    <small>
+                        Try: 2026 rainfall, August rainfall,
+                        water use, agriculture, reservoir or dam.
+                    </small>
+                </div>
+            `;
+
+            return;
+        }
+
+        let html = `
+            <div class="search-result"
+                 style="background:#f5f8f6;font-weight:800;">
+                ${title}
+            </div>
+        `;
+
+        results.forEach(item => {
+
+            html += `
+                <div class="search-result">
+                    ${item}
+                </div>
+            `;
+
+        });
+
+        searchResults.innerHTML = html;
+    }
+
+
+    function searchAethera() {
+
+        const query = normal(searchInput.value);
+
+        const selectedYear =
+            yearFilter ? yearFilter.value : "all";
+
+        const selectedMonth =
+            monthFilter ? monthFilter.value : "all";
+
+        const selectedType =
+            dataFilter ? dataFilter.value : "all";
+
+
+        if (!query) {
+
+            showResults(
+                [],
+                "Please enter something to search."
+            );
+
+            return;
+        }
+
+
+        const results = [];
+
+
+        /* =====================================================
+           RAINFALL SEARCH
+           ===================================================== */
+
+        if (
+            selectedType === "all" ||
+            selectedType === "rainfall"
+        ) {
+
+            rainfall.forEach(row => {
+
+                const text = Object.values(row)
+                    .join(" ")
+                    .toLowerCase();
+
+                const matchesQuery =
+                    text.includes(query) ||
+                    query.includes("rain") ||
+                    query.includes("rainfall") ||
+                    query.includes("precipitation");
+
+                const matchesYear =
+                    yearMatch(row.year, selectedYear);
+
+                const matchesMonth =
+                    monthMatch(row.month, selectedMonth);
+
+                if (
+                    matchesQuery &&
+                    matchesYear &&
+                    matchesMonth
+                ) {
+
+                    results.push(`
+                        <strong>🌧 Rainfall</strong><br>
+                        Date: ${row.date || "N/A"}<br>
+                        Year: ${row.year || "N/A"}<br>
+                        Month: ${row.month || "N/A"}<br>
+                        Rainfall: <strong>
+                            ${row.rainfall_mm || 0} mm
+                        </strong><br>
+                        Runoff: ${row.runoff_mcm || 0} MCM<br>
+                        Groundwater Recharge:
+                        ${row.groundwater_recharge_mcm || 0} MCM
+                    `);
+
+                }
+
+            });
+
+        }
+
+
+        /* =====================================================
+           WATER USE SEARCH
+           ===================================================== */
+
+        if (
+            selectedType === "all" ||
+            selectedType === "water"
+        ) {
+
+            water.forEach(row => {
+
+                const text = Object.values(row)
+                    .join(" ")
+                    .toLowerCase();
+
+                const matchesQuery =
+                    text.includes(query) ||
+                    query.includes("water") ||
+                    query.includes("agriculture") ||
+                    query.includes("industry") ||
+                    query.includes("domestic") ||
+                    query.includes("power") ||
+                    query.includes("animal");
+
+                const matchesYear =
+                    yearMatch(row.year, selectedYear);
+
+                const matchesMonth =
+                    monthMatch(row.month, selectedMonth);
+
+                if (
+                    matchesQuery &&
+                    matchesYear &&
+                    matchesMonth
+                ) {
+
+                    results.push(`
+                        <strong>💧 Water Use</strong><br>
+                        Year: ${row.year || "N/A"}<br>
+                        Month: ${row.month || "N/A"}<br>
+                        Agriculture:
+                        ${row.agriculture_mcm || 0} MCM<br>
+                        Industry:
+                        ${row.industry_mcm || 0} MCM<br>
+                        Domestic:
+                        ${row.domestic_mcm || 0} MCM<br>
+                        Animal Husbandry:
+                        ${row.animal_husbandry_mcm || 0} MCM<br>
+                        Power:
+                        ${row.power_mcm || 0} MCM<br>
+                        Environment:
+                        ${row.environment_mcm || 0} MCM<br>
+                        Other:
+                        ${row.other_mcm || 0} MCM<br>
+                        <strong>
+                            Total:
+                            ${row.total_use_mcm || 0} MCM
+                        </strong>
+                    `);
+
+                }
+
+            });
+
+        }
+
+
+        /* =====================================================
+           RESERVOIR / DAM SEARCH
+           ===================================================== */
+
+        if (
+            selectedType === "all" ||
+            selectedType === "reservoir"
+        ) {
+
+            reservoir.forEach(row => {
+
+                const text = Object.values(row)
+                    .join(" ")
+                    .toLowerCase();
+
+                const matchesQuery =
+                    text.includes(query) ||
+                    query.includes("reservoir") ||
+                    query.includes("dam") ||
+                    query.includes("storage");
+
+                const matchesYear =
+                    yearMatch(row.year, selectedYear);
+
+                const matchesMonth =
+                    monthMatch(row.month, selectedMonth);
+
+                if (
+                    matchesQuery &&
+                    matchesYear &&
+                    matchesMonth
+                ) {
+
+                    results.push(`
+                        <strong>🏞 Reservoir / Dam</strong><br>
+                        Date: ${row.date || "N/A"}<br>
+                        Reservoir:
+                        ${row.reservoir_name || row.reservoir_id || "N/A"}<br>
+                        Storage:
+                        ${row.storage_pct || 0}%<br>
+                        Capacity:
+                        ${row.capacity_mcm || 0} MCM<br>
+                        Inflow:
+                        ${row.inflow_mcm || 0} MCM<br>
+                        Outflow:
+                        ${row.outflow_mcm || 0} MCM
+                    `);
+
+                }
+
+            });
+
+        }
+
+
+        showResults(
+            results,
+            `AETHERA SEARCH RESULTS — ${results.length} record(s)`
+        );
+
+    }
+
+
+    /* =====================================================
+       SEARCH BUTTON
+       ===================================================== */
+
+    if (searchButton) {
+
+        searchButton.addEventListener(
+            "click",
+            searchAethera
+        );
+
+    }
+
+
+    /* =====================================================
+       ENTER KEY
+       ===================================================== */
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    searchAethera();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       FILTER CHANGE
+       ===================================================== */
+
+    [
+        yearFilter,
+        monthFilter,
+        dataFilter
+    ].forEach(filter => {
+
+        if (filter) {
+
+            filter.addEventListener(
+                "change",
+                function () {
+
+                    if (
+                        searchInput &&
+                        searchInput.value.trim()
+                    ) {
+
+                        searchAethera();
+
+                    }
+
+                }
+            );
+
+        }
+
+    });
+
+});
+</script>
