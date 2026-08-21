@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}
-AETHERA | 2026 Water Command Center
+AETHERA | Command Center
 {% endblock %}
-
 
 {% block head %}
 
@@ -11,544 +10,553 @@ AETHERA | 2026 Water Command Center
 
 <style>
 
-* {
-    box-sizing: border-box;
+/* ============================================================
+   AETHERA STARTING HOME
+============================================================ */
+
+html {
+    scroll-behavior: smooth;
 }
+
+.aethera-home {
+    width: min(1200px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 35px 0 55px;
+    text-align: center;
+}
+
+.aethera-logo {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: #24b8e5;
+    margin-bottom: 2px;
+}
+
+.aethera-subtitle {
+    color: #b8d0dc;
+    font-size: 15px;
+    letter-spacing: 3px;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.aethera-home > h1 {
+    font-size: 30px;
+    margin: 0 0 18px;
+    color: #ffffff;
+}
+
+.aethera-description {
+    max-width: 850px;
+    margin: 0 auto 35px;
+    color: #b9c7ce;
+    line-height: 1.7;
+    font-size: 15px;
+}
+
+
+/* ============================================================
+   FEATURE CARDS
+============================================================ */
+
+.aethera-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+}
+
+.aethera-feature-card {
+    min-height: 175px;
+    padding: 24px 18px;
+    border-radius: 18px;
+
+    background: rgba(55, 70, 82, 0.82);
+
+    border: 1px solid rgba(180, 210, 220, 0.18);
+
+    color: white;
+    text-decoration: none;
+
+    transition:
+        transform .25s ease,
+        background .25s ease,
+        border-color .25s ease;
+
+    display: block;
+}
+
+.aethera-feature-card:hover {
+    transform: translateY(-6px);
+    background: rgba(65, 85, 98, 0.95);
+    border-color: #24b8e5;
+}
+
+.feature-icon {
+    font-size: 38px;
+    height: 50px;
+    margin-bottom: 8px;
+}
+
+.aethera-feature-card h2 {
+    font-size: 16px;
+    margin: 4px 0 10px;
+}
+
+.aethera-feature-card p {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #b9c9d0;
+    margin: 0;
+}
+
+
+/* ============================================================
+   QUICK ACTION BUTTONS
+============================================================ */
+
+.aethera-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.aethera-actions a {
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+
+    padding: 14px 25px;
+
+    border-radius: 11px;
+
+    transition: .2s ease;
+}
+
+.aethera-primary-btn {
+    background: #24b8e5;
+    color: #07141d;
+    min-width: 150px;
+}
+
+.aethera-primary-btn:hover {
+    transform: translateY(-2px);
+    background: #38c8f0;
+}
+
+.aethera-action-btn {
+    color: white;
+
+    border: 1px solid #279dc2;
+
+    background: rgba(10, 30, 40, .35);
+}
+
+.aethera-action-btn:hover {
+    background: #173f4d;
+    transform: translateY(-2px);
+}
+
+
+/* ============================================================
+   COMMAND CENTER
+============================================================ */
 
 .command-center {
-
-    width: min(
-        1450px,
-        calc(100% - 40px)
-    );
-
-    margin: 45px auto 90px;
-
+    width: min(1450px, calc(100% - 40px));
+    margin: 35px auto 80px;
 }
 
 
-/* =========================================================
+/* ============================================================
    HERO
-   ========================================================= */
+============================================================ */
 
-.cc-hero {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: flex-end;
-
-    gap: 30px;
-
-    margin-bottom: 30px;
-
+.hero {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:25px;
+    margin-bottom:25px;
 }
 
-.cc-eyebrow {
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    letter-spacing: .16em;
-
-    opacity: .55;
-
+.hero h1 {
+    font-size:48px;
+    margin:8px 0;
 }
 
-.cc-hero h1 {
-
-    margin: 10px 0;
-
-    font-size: clamp(
-        38px,
-        6vw,
-        72px
-    );
-
-    line-height: .95;
-
+.hero p {
+    opacity:.7;
+    max-width:750px;
+    line-height:1.6;
 }
 
-.cc-hero p {
-
-    max-width: 720px;
-
-    opacity: .65;
-
-    line-height: 1.7;
-
-}
-
-.system-status {
-
-    padding: 12px 18px;
-
-    border: 1px solid
-        rgba(20,50,45,.15);
-
-    border-radius: 999px;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: .1em;
-
-    white-space: nowrap;
-
-}
-
-.status-dot {
-
-    display: inline-block;
-
-    width: 8px;
-
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: #39a86f;
-
-    margin-right: 8px;
-
+.status {
+    padding:12px 18px;
+    border-radius:30px;
+    background:#173f38;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
 }
 
 
-/* =========================================================
-   DATA NOTICE
-   ========================================================= */
+/* ============================================================
+   SEARCH
+============================================================ */
 
-.data-notice {
+.search-box {
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+}
 
-    margin-bottom: 22px;
+.search-box input {
+    flex:1;
+    padding:15px;
+    border-radius:12px;
+    border:1px solid #ccd5d2;
+    font-size:15px;
+}
 
-    padding: 17px 20px;
+.search-box button {
+    padding:0 25px;
+    border:0;
+    border-radius:12px;
+    background:#173f38;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
 
-    border-radius: 16px;
+#searchResults {
+    background:white;
+    border-radius:15px;
+    margin-bottom:20px;
+    overflow:hidden;
+}
 
-    background: #fff8e8;
-
-    border: 1px solid #f0dfb1;
-
-    color: #614d1e;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-
+.search-result {
+    padding:14px;
+    border-bottom:1px solid #e5e9e7;
 }
 
 
-/* =========================================================
-   KPI GRID
-   ========================================================= */
+/* ============================================================
+   FILTERS
+============================================================ */
+
+.filters {
+    display:grid;
+    grid-template-columns: repeat(3,1fr) auto;
+    gap:12px;
+    margin-bottom:25px;
+}
+
+.filters select,
+.filters button {
+    padding:13px;
+    border-radius:10px;
+    border:1px solid #ccd5d2;
+    background:white;
+}
+
+
+/* ============================================================
+   KPI
+============================================================ */
 
 .kpi-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 15px;
-
-    margin-bottom: 20px;
-
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
 }
 
-.kpi-card {
-
-    padding: 23px;
-
-    border-radius: 20px;
-
-    background: #f5f8f6;
-
-    border: 1px solid
-        rgba(20,50,45,.08);
-
+.kpi {
+    padding:22px;
+    border-radius:18px;
+    background:#f4f8f6;
+    border:1px solid rgba(20,50,45,.1);
 }
 
-.kpi-card span {
-
-    display: block;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: .08em;
-
-    opacity: .55;
-
-    margin-bottom: 15px;
-
+.kpi span {
+    display:block;
+    font-size:12px;
+    font-weight:bold;
+    opacity:.55;
+    margin-bottom:12px;
 }
 
-.kpi-card strong {
-
-    display: block;
-
-    font-size: 31px;
-
-    line-height: 1.05;
-
-    margin-bottom: 9px;
-
+.kpi strong {
+    font-size:30px;
 }
 
-.kpi-card small {
-
-    opacity: .55;
-
-    line-height: 1.5;
-
+.kpi small {
+    opacity:.6;
 }
 
 
-/* =========================================================
-   SECTION TITLE
-   ========================================================= */
-
-.section-title {
-
-    margin: 35px 0 15px;
-
-}
-
-.section-title span {
-
-    display: block;
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: .12em;
-
-    opacity: .5;
-
-    margin-bottom: 5px;
-
-}
-
-.section-title h2 {
-
-    margin: 0;
-
-    font-size: 25px;
-
-}
-
-
-/* =========================================================
-   CHART GRID
-   ========================================================= */
+/* ============================================================
+   CHARTS
+============================================================ */
 
 .chart-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 18px;
-
-    margin-bottom: 20px;
-
+    display:grid;
+    grid-template-columns: repeat(2,1fr);
+    gap:18px;
+    margin-bottom:20px;
 }
 
 .chart-card {
-
-    background: #fff;
-
-    border: 1px solid
-        rgba(20,50,45,.1);
-
-    border-radius: 22px;
-
-    padding: 23px;
-
-    min-height: 400px;
-
+    background:white;
+    border-radius:20px;
+    border:1px solid rgba(20,50,45,.1);
+    padding:22px;
 }
 
 .chart-card.wide {
-
-    grid-column: 1 / -1;
-
+    grid-column:1/-1;
 }
 
-.chart-heading {
-
-    margin-bottom: 20px;
-
+.chart-title {
+    margin-bottom:18px;
 }
 
-.chart-heading span {
-
-    display: block;
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: .12em;
-
-    opacity: .5;
-
-    margin-bottom: 5px;
-
+.chart-title span {
+    display:block;
+    font-size:10px;
+    font-weight:bold;
+    opacity:.5;
 }
 
-.chart-heading strong {
-
-    font-size: 19px;
-
+.chart-title h2 {
+    margin:6px 0;
 }
 
 .chart-box {
-
-    height: 300px;
-
-    position: relative;
-
+    height:320px;
 }
 
 
-/* =========================================================
-   INTELLIGENCE
-   ========================================================= */
+/* ============================================================
+   SECTIONS
+============================================================ */
 
-.intelligence {
-
-    display: flex;
-
-    gap: 18px;
-
-    padding: 27px;
-
-    border-radius: 22px;
-
-    background: #173f38;
-
-    color: white;
-
-    margin: 20px 0;
-
+.section {
+    background:white;
+    border-radius:20px;
+    border:1px solid rgba(20,50,45,.1);
+    padding:22px;
+    margin-bottom:20px;
 }
 
-.ai-symbol {
-
-    width: 46px;
-
-    height: 46px;
-
-    flex: 0 0 46px;
-
-    display: grid;
-
-    place-items: center;
-
-    border-radius: 14px;
-
-    background:
-        rgba(255,255,255,.12);
-
-    font-size: 22px;
-
-}
-
-.intelligence span {
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: .12em;
-
-    opacity: .6;
-
-}
-
-.intelligence h3 {
-
-    margin: 7px 0;
-
-}
-
-.intelligence p {
-
-    margin: 0;
-
-    opacity: .75;
-
-    line-height: 1.7;
-
+.section h2 {
+    margin-top:0;
 }
 
 
-/* =========================================================
-   DATA TABLE
-   ========================================================= */
+/* ============================================================
+   SECTOR
+============================================================ */
 
-.data-panel {
-
-    background: #fff;
-
-    border: 1px solid
-        rgba(20,50,45,.1);
-
-    border-radius: 22px;
-
-    padding: 25px;
-
-    overflow: hidden;
-
-    margin-top: 20px;
-
+.sector-grid {
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:14px;
 }
 
-.data-heading {
-
-    margin-bottom: 18px;
-
+.sector {
+    padding:20px;
+    border-radius:15px;
+    background:#f5f8f6;
 }
 
-.data-heading span {
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: .12em;
-
-    opacity: .5;
-
+.sector strong {
+    display:block;
+    font-size:25px;
+    margin-top:8px;
 }
 
-.data-heading h2 {
 
-    margin: 6px 0 0;
+/* ============================================================
+   ALERTS
+============================================================ */
 
+.alert-grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:15px;
 }
 
-.data-table-wrap {
-
-    overflow-x: auto;
-
+.alert {
+    padding:18px;
+    border-radius:15px;
+    background:#f5f8f6;
 }
+
+.alert.high {
+    border-left:5px solid #d64545;
+}
+
+.alert.medium {
+    border-left:5px solid #d99a22;
+}
+
+.alert.low {
+    border-left:5px solid #39a86f;
+}
+
+
+/* ============================================================
+   TABLE
+============================================================ */
 
 .data-table {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-    font-size: 13px;
-
+    width:100%;
+    border-collapse:collapse;
 }
 
 .data-table th,
 .data-table td {
-
-    padding: 13px;
-
-    border-bottom:
-        1px solid
-        rgba(20,50,45,.08);
-
-    text-align: left;
-
-    white-space: nowrap;
-
+    padding:12px;
+    border-bottom:1px solid #e4e8e6;
+    text-align:left;
 }
 
 .data-table th {
-
-    font-size: 9px;
-
-    letter-spacing: .08em;
-
-    opacity: .55;
-
+    font-size:11px;
+    opacity:.6;
 }
 
-.data-table tbody tr:hover {
-
-    background: #f7faf8;
-
+.table-wrap {
+    overflow-x:auto;
 }
 
 
-/* =========================================================
+/* ============================================================
+   MODULES
+============================================================ */
+
+.modules {
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:14px;
+}
+
+.module {
+    text-decoration:none;
+    color:inherit;
+    padding:20px;
+    border-radius:15px;
+    background:#f5f8f6;
+    transition:.2s;
+}
+
+.module:hover {
+    transform:translateY(-3px);
+}
+
+.module h3 {
+    margin:8px 0;
+}
+
+
+/* ============================================================
    RESPONSIVE
-   ========================================================= */
+============================================================ */
 
-@media(max-width:1000px) {
+@media(max-width:950px) {
+
+    .aethera-feature-grid {
+        grid-template-columns:repeat(2,1fr);
+    }
 
     .kpi-grid {
-
-        grid-template-columns:
-            repeat(2,1fr);
-
+        grid-template-columns:repeat(2,1fr);
     }
 
-}
-
-@media(max-width:900px) {
-
-    .command-center {
-
-        width:
-            calc(100% - 24px);
-
+    .sector-grid {
+        grid-template-columns:repeat(2,1fr);
     }
 
-    .cc-hero {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
+    .modules {
+        grid-template-columns:repeat(2,1fr);
     }
 
     .chart-grid {
-
-        grid-template-columns: 1fr;
-
+        grid-template-columns:1fr;
     }
 
     .chart-card.wide {
+        grid-column:auto;
+    }
 
-        grid-column: auto;
-
+    .filters {
+        grid-template-columns:1fr 1fr;
     }
 
 }
 
+
 @media(max-width:600px) {
 
+    .aethera-home {
+        width:calc(100% - 20px);
+        padding-top:25px;
+    }
+
+    .aethera-logo {
+        font-size:38px;
+        letter-spacing:5px;
+    }
+
+    .aethera-home > h1 {
+        font-size:24px;
+    }
+
+    .aethera-feature-grid {
+        grid-template-columns:1fr;
+    }
+
+    .aethera-actions {
+        flex-direction:column;
+    }
+
+    .aethera-actions a {
+        width:90%;
+    }
+
     .command-center {
-
-        width:
-            calc(100% - 14px);
-
+        width:calc(100% - 20px);
     }
 
-    .kpi-grid {
-
-        grid-template-columns: 1fr;
-
+    .hero {
+        flex-direction:column;
+        align-items:flex-start;
     }
 
-    .intelligence {
+    .hero h1 {
+        font-size:36px;
+    }
 
-        flex-direction: column;
+    .kpi-grid,
+    .sector-grid,
+    .modules,
+    .alert-grid,
+    .filters {
+        grid-template-columns:1fr;
+    }
 
+    .search-box {
+        flex-direction:column;
+    }
+
+    .search-box button {
+        padding:14px;
     }
 
 }
@@ -560,18 +568,196 @@ AETHERA | 2026 Water Command Center
 
 {% block content %}
 
-<div class="command-center">
+
+<!-- ============================================================
+     AETHERA STARTING PAGE
+============================================================ -->
+
+<section class="aethera-home">
+
+    <div class="aethera-logo">
+        AETHERA
+    </div>
+
+    <div class="aethera-subtitle">
+        WATER INTELLIGENCE PLATFORM
+    </div>
+
+    <h1>
+        Smart Water Monitoring & Intelligence
+    </h1>
+
+    <p class="aethera-description">
+        AETHERA provides an integrated view of rainfall,
+        water demand, reservoir levels, river systems,
+        major dams, water usage and sustainability indicators.
+    </p>
 
 
-<!-- =====================================================
-     HERO
-     ===================================================== -->
+    <!-- ========================================================
+         FEATURE CARDS
+    ======================================================== -->
 
-<section class="cc-hero">
+    <div class="aethera-feature-grid">
+
+
+        <!-- RAINFALL -->
+
+        <a
+            href="#rainfallSection"
+            class="aethera-feature-card"
+        >
+
+            <div class="feature-icon">
+                ☁️
+            </div>
+
+            <h2>
+                Rainfall
+            </h2>
+
+            <p>
+                Monitor 2025 and 2026 rainfall,
+                runoff and groundwater recharge.
+            </p>
+
+        </a>
+
+
+        <!-- WATER USAGE -->
+
+        <a
+            href="#waterUsageSection"
+            class="aethera-feature-card"
+        >
+
+            <div class="feature-icon">
+                💧
+            </div>
+
+            <h2>
+                Water Usage
+            </h2>
+
+            <p>
+                Track agriculture, domestic,
+                industry, power and other water use.
+            </p>
+
+        </a>
+
+
+        <!-- RIVERS -->
+
+        <a
+            href="#reservoirSection"
+            class="aethera-feature-card"
+        >
+
+            <div class="feature-icon">
+                🏞️
+            </div>
+
+            <h2>
+                Rivers
+            </h2>
+
+            <p>
+                Explore major river systems
+                and associated water resources.
+            </p>
+
+        </a>
+
+
+        <!-- DAMS -->
+
+        <a
+            href="#reservoirSection"
+            class="aethera-feature-card"
+        >
+
+            <div class="feature-icon">
+                🏗️
+            </div>
+
+            <h2>
+                Dams & Reservoirs
+            </h2>
+
+            <p>
+                Monitor storage, capacity, inflow,
+                outflow and risk levels.
+            </p>
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================================
+         QUICK BUTTONS
+    ======================================================== -->
+
+    <div class="aethera-actions">
+
+        <a
+            href="#commandCenter"
+            class="aethera-primary-btn"
+        >
+            🚀 Open Dashboard
+        </a>
+
+
+        <a
+            href="#reservoirSection"
+            class="aethera-action-btn"
+        >
+            🏞️ Rivers & Dams
+        </a>
+
+
+        <a
+            href="#rainfallSection"
+            class="aethera-action-btn"
+        >
+            ☁️ Rainfall Data
+        </a>
+
+
+        <a
+            href="#globalWaterSection"
+            class="aethera-action-btn"
+        >
+            🌍 Global Water
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- ============================================================
+     COMMAND CENTER
+     EXISTING DASHBOARD STARTS HERE
+============================================================ -->
+
+<div
+    id="commandCenter"
+    class="command-center"
+>
+
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+
+<section class="hero">
 
     <div>
 
-        <span class="cc-eyebrow">
+        <span>
             AETHERA WATER INTELLIGENCE
         </span>
 
@@ -580,166 +766,147 @@ AETHERA | 2026 Water Command Center
         </h1>
 
         <p>
-            2026 rainfall, runoff, groundwater recharge,
-            dam/reservoir storage and sector-wise water
-            utilization in one water intelligence dashboard.
+            Search, compare and monitor rainfall,
+            water demand, reservoirs, water usage,
+            risk and sustainability for 2025–2026.
         </p>
 
     </div>
 
-    <div class="system-status">
-
-        <span class="status-dot"></span>
-
-        SYSTEM ACTIVE
-
+    <div class="status">
+        ● SYSTEM ACTIVE
     </div>
 
 </section>
 
 
-<!-- =====================================================
-     RESERVOIR DATA NOTICE
-     ===================================================== -->
+<!-- ============================================================
+     SEARCH
+============================================================ -->
 
-{% if reservoir_is_demo %}
+<section>
 
-<div class="data-notice">
+    <div class="search-box">
 
-    <strong>🏞️ Reservoir data notice:</strong>
+        <input
+            id="waterSearch"
+            type="search"
+            placeholder="Search AETHERA data... e.g. 2025 rainfall, Aug, reservoir, agriculture"
+        >
 
-    The available reservoir dataset is
-    <strong>demo/synthetic data</strong>.
-    Its current readings are from the existing
-    <strong>reservoir_demo.csv</strong> dataset and should
-    not be interpreted as actual 2026 dam readings.
+        <button
+            id="searchButton"
+        >
+            Search
+        </button>
 
-</div>
+    </div>
 
-{% endif %}
+    <div id="searchResults"></div>
+
+</section>
 
 
-<!-- =====================================================
-     2026 RAINFALL KPIs
-     ===================================================== -->
+<!-- ============================================================
+     FILTERS
+============================================================ -->
 
-<div class="section-title">
+<section class="filters">
 
-    <span>
-        2026 RAINFALL
-    </span>
+    <select id="yearFilter">
 
-    <h2>
-        Rainfall & Water Availability
-    </h2>
+        <option value="all">
+            All Years
+        </option>
 
-</div>
+        <option value="2025">
+            2025
+        </option>
 
+        <option value="2026">
+            2026
+        </option>
+
+    </select>
+
+
+    <select id="monthFilter">
+
+        <option value="all">
+            All Months
+        </option>
+
+        <option value="Jan">Jan</option>
+        <option value="Feb">Feb</option>
+        <option value="Mar">Mar</option>
+        <option value="Apr">Apr</option>
+        <option value="May">May</option>
+        <option value="Jun">Jun</option>
+        <option value="Jul">Jul</option>
+        <option value="Aug">Aug</option>
+        <option value="Sep">Sep</option>
+        <option value="Oct">Oct</option>
+        <option value="Nov">Nov</option>
+        <option value="Dec">Dec</option>
+
+    </select>
+
+
+    <select id="dataFilter">
+
+        <option value="all">
+            All Data
+        </option>
+
+        <option value="rainfall">
+            Rainfall
+        </option>
+
+        <option value="water">
+            Water Use
+        </option>
+
+        <option value="reservoir">
+            Reservoir
+        </option>
+
+    </select>
+
+
+    <button id="resetFilters">
+        Reset
+    </button>
+
+</section>
+
+
+<!-- ============================================================
+     KPI 1
+============================================================ -->
 
 <section class="kpi-grid">
 
-
-    <!-- TOTAL RAIN -->
-
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            🌧️ TOTAL 2026 RAINFALL
+            💧 WATER AVAILABLE
         </span>
 
         <strong>
-            {{ rainfall_2026_total }}
+            {{ data.water_available }}
         </strong>
 
         <small>
-            mm received from available 2026 records
+            MCM
         </small>
 
     </div>
 
 
-    <!-- LATEST RAIN -->
-
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            🌧️ LATEST RAINFALL
-        </span>
-
-        <strong>
-            {{ latest_rainfall }}
-        </strong>
-
-        <small>
-            {{ latest_rainfall_month }} 2026
-        </small>
-
-    </div>
-
-
-    <!-- RUNOFF -->
-
-    <div class="kpi-card">
-
-        <span>
-            💧 2026 RUNOFF
-        </span>
-
-        <strong>
-            {{ runoff_2026_total }}
-        </strong>
-
-        <small>
-            MCM generated from available rainfall data
-        </small>
-
-    </div>
-
-
-    <!-- GROUNDWATER -->
-
-    <div class="kpi-card">
-
-        <span>
-            💧 GROUNDWATER RECHARGE
-        </span>
-
-        <strong>
-            {{ recharge_2026_total }}
-        </strong>
-
-        <small>
-            MCM estimated recharge
-        </small>
-
-    </div>
-
-
-    <!-- HIGHEST RAIN -->
-
-    <div class="kpi-card">
-
-        <span>
-            ⛈️ HIGHEST RAINFALL MONTH
-        </span>
-
-        <strong>
-            {{ highest_rainfall_value }} mm
-        </strong>
-
-        <small>
-            {{ highest_rainfall_month }}
-        </small>
-
-    </div>
-
-
-    <!-- DEMAND -->
-
-    <div class="kpi-card">
-
-        <span>
-            🚰 WATER DEMAND
+            📊 TODAY'S WATER DEMAND
         </span>
 
         <strong>
@@ -747,525 +914,642 @@ AETHERA | 2026 Water Command Center
         </strong>
 
         <small>
-            Latest available demand indicator
+            MLD
         </small>
 
     </div>
 
 
-    <!-- DAM STORAGE -->
-
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            🏞️ DAM STORAGE
+            🏞 RESERVOIR LEVEL
         </span>
 
         <strong>
-            {{ reservoir_value }}%
+            {{ data.reservoir }}
         </strong>
 
         <small>
-            Latest available reservoir storage
+            %
         </small>
 
     </div>
 
 
-    <!-- DAM CAPACITY -->
-
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            🏞️ DAM CAPACITY
+            🌧 2026 RAINFALL
         </span>
 
         <strong>
-            {{ reservoir_capacity }}
+            {{ data.rainfall_2026_total }}
         </strong>
 
         <small>
-            MCM | {{ reservoir_name }}
+            mm
         </small>
 
     </div>
-
 
 </section>
 
 
-<!-- =====================================================
-     DAM DETAILS
-     ===================================================== -->
-
-<div class="section-title">
-
-    <span>
-        DAM / RESERVOIR MONITORING
-    </span>
-
-    <h2>
-        Current Reservoir Intelligence
-    </h2>
-
-</div>
-
+<!-- ============================================================
+     KPI 2
+============================================================ -->
 
 <section class="kpi-grid">
 
-
-    <div class="kpi-card">
-
-        <span>
-            🏞️ RESERVOIR
-        </span>
-
-        <strong style="font-size:22px;">
-            {{ reservoir_name }}
-        </strong>
-
-        <small>
-            Reservoir / dam name
-        </small>
-
-    </div>
-
-
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            💦 STORAGE
+            🌧 LATEST RAINFALL
         </span>
 
         <strong>
-            {{ reservoir_value }}%
+            {{ data.latest_rainfall }}
         </strong>
 
         <small>
-            Latest storage percentage
+            mm · {{ data.latest_rainfall_month }}
         </small>
 
     </div>
 
 
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            ⬆️ INFLOW
+            🌊 2026 RUNOFF
         </span>
 
         <strong>
-            {{ reservoir_inflow }}
+            {{ data.runoff_2026_total }}
         </strong>
 
         <small>
-            MCM latest inflow
+            MCM
         </small>
 
     </div>
 
 
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            ⬇️ OUTFLOW
+            💦 GROUNDWATER RECHARGE
         </span>
 
         <strong>
-            {{ reservoir_outflow }}
+            {{ data.groundwater_2026_total }}
         </strong>
 
         <small>
-            MCM latest outflow
+            MCM
         </small>
 
     </div>
 
 
-    <div class="kpi-card">
+    <div class="kpi">
 
         <span>
-            📦 CAPACITY
+            ⚠️ RISK LEVEL
         </span>
 
         <strong>
-            {{ reservoir_capacity }}
+            {{ data.risk_level }}
         </strong>
 
         <small>
-            MCM total capacity
+            Current assessment
         </small>
 
     </div>
-
-
-    <div class="kpi-card">
-
-        <span>
-            📅 LAST READING
-        </span>
-
-        <strong style="font-size:20px;">
-            {{ reservoir_latest_date }}
-        </strong>
-
-        <small>
-            Latest available reservoir record
-        </small>
-
-    </div>
-
 
 </section>
 
 
-<!-- =====================================================
+<!-- ============================================================
      CHARTS
-     ===================================================== -->
-
-<div class="section-title">
-
-    <span>
-        AETHERA ANALYTICS
-    </span>
-
-    <h2>
-        Water Intelligence Charts
-    </h2>
-
-</div>
-
+============================================================ -->
 
 <section class="chart-grid">
 
 
-    <!-- =================================================
-         2026 RAINFALL
-         ================================================= -->
+    <!-- RAINFALL -->
 
-    <article class="chart-card">
+    <article
+        id="rainfallSection"
+        class="chart-card"
+    >
 
-        <div class="chart-heading">
+        <div class="chart-title">
 
             <span>
                 RAINFALL ANALYTICS
             </span>
 
-            <strong>
-                2026 Monthly Rainfall
-            </strong>
+            <h2>
+                2025 vs 2026 Rainfall
+            </h2>
 
         </div>
 
         <div class="chart-box">
 
             <canvas
-                id="rainfall2026Chart">
-            </canvas>
+                id="rainfallChart"
+            ></canvas>
 
         </div>
 
     </article>
 
 
-    <!-- =================================================
-         RUNOFF + RECHARGE
-         ================================================= -->
+    <!-- WATER USE -->
 
     <article class="chart-card">
 
-        <div class="chart-heading">
-
-            <span>
-                WATER GENERATION
-            </span>
-
-            <strong>
-                Runoff & Groundwater Recharge
-            </strong>
-
-        </div>
-
-        <div class="chart-box">
-
-            <canvas
-                id="waterGenerationChart">
-            </canvas>
-
-        </div>
-
-    </article>
-
-
-    <!-- =================================================
-         DAM STORAGE
-         ================================================= -->
-
-    <article class="chart-card wide">
-
-        <div class="chart-heading">
-
-            <span>
-                DAM MONITORING
-            </span>
-
-            <strong>
-                Reservoir Storage Trend
-            </strong>
-
-        </div>
-
-        <div class="chart-box">
-
-            <canvas
-                id="reservoirChart">
-            </canvas>
-
-        </div>
-
-    </article>
-
-
-    <!-- =================================================
-         WATER USE
-         ================================================= -->
-
-    <article class="chart-card wide">
-
-        <div class="chart-heading">
+        <div class="chart-title">
 
             <span>
                 WATER UTILIZATION
             </span>
 
-            <strong>
+            <h2>
                 2026 Sector-wise Water Use
-            </strong>
+            </h2>
 
         </div>
 
         <div class="chart-box">
 
             <canvas
-                id="waterUseChart">
-            </canvas>
+                id="waterChart"
+            ></canvas>
 
         </div>
 
     </article>
 
 
-    <!-- =================================================
-         2025 VS 2026 RAIN
-         ================================================= -->
+    <!-- RESERVOIR -->
+
+    <article
+        id="reservoirChartSection"
+        class="chart-card wide"
+    >
+
+        <div class="chart-title">
+
+            <span>
+                RESERVOIR MONITORING
+            </span>
+
+            <h2>
+                Reservoir Availability Trend
+            </h2>
+
+        </div>
+
+        <div class="chart-box">
+
+            <canvas
+                id="reservoirChart"
+            ></canvas>
+
+        </div>
+
+    </article>
+
+
+    <!-- SUPPLY DEMAND -->
 
     <article class="chart-card wide">
 
-        <div class="chart-heading">
+        <div class="chart-title">
 
             <span>
-                YEAR COMPARISON
+                WATER BALANCE
             </span>
 
-            <strong>
-                2025 vs 2026 Rainfall
-            </strong>
+            <h2>
+                Supply vs Demand
+            </h2>
 
         </div>
 
         <div class="chart-box">
 
             <canvas
-                id="rainfallComparisonChart">
-            </canvas>
+                id="supplyDemandChart"
+            ></canvas>
 
         </div>
 
     </article>
 
+</section>
+
+
+<!-- ============================================================
+     2026 WATER USE
+============================================================ -->
+
+<section
+    id="waterUsageSection"
+    class="section"
+>
+
+    <h2>
+        2026 Water Use by Sector
+    </h2>
+
+    <div class="sector-grid">
+
+
+        <div class="sector">
+
+            Agriculture
+
+            <strong>
+                {{ water_use_2026_summary.agriculture }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Industry
+
+            <strong>
+                {{ water_use_2026_summary.industry }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Domestic
+
+            <strong>
+                {{ water_use_2026_summary.domestic }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Animal Husbandry
+
+            <strong>
+                {{ water_use_2026_summary.animal }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Power
+
+            <strong>
+                {{ water_use_2026_summary.power }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Environment
+
+            <strong>
+                {{ water_use_2026_summary.environment }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Other
+
+            <strong>
+                {{ water_use_2026_summary.other }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            TOTAL
+
+            <strong>
+                {{ water_use_2026_summary.total }}
+            </strong>
+
+            MCM
+
+        </div>
+
+    </div>
 
 </section>
 
 
-<!-- =====================================================
-     AETHERA INTELLIGENCE
-     ===================================================== -->
+<!-- ============================================================
+     RESERVOIR DETAILS
+============================================================ -->
 
-<section class="intelligence">
+<section
+    id="reservoirSection"
+    class="section"
+>
 
-    <div class="ai-symbol">
-        ✦
-    </div>
+    <h2>
+        🏞 Reservoir & Dam Monitoring
+    </h2>
 
-    <div>
+    <div class="sector-grid">
 
-        <span>
-            AETHERA INTELLIGENCE
-        </span>
 
-        <h3 id="insightTitle">
-            2026 water intelligence ready
-        </h3>
+        <div class="sector">
 
-        <p id="insightText">
+            Reservoir
 
-            AETHERA is monitoring rainfall,
-            runoff, groundwater recharge,
-            reservoir storage and water utilization.
+            <strong>
+                {{ data.reservoir_name }}
+            </strong>
 
-        </p>
+        </div>
+
+
+        <div class="sector">
+
+            Storage
+
+            <strong>
+                {{ data.reservoir }}%
+            </strong>
+
+        </div>
+
+
+        <div class="sector">
+
+            Capacity
+
+            <strong>
+                {{ data.reservoir_capacity }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Latest Inflow
+
+            <strong>
+                {{ data.reservoir_inflow }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Latest Outflow
+
+            <strong>
+                {{ data.reservoir_outflow }}
+            </strong>
+
+            MCM
+
+        </div>
+
+
+        <div class="sector">
+
+            Latest Date
+
+            <strong>
+                {{ data.reservoir_latest_date }}
+            </strong>
+
+        </div>
 
     </div>
 
 </section>
 
 
-<!-- =====================================================
-     RAINFALL DATA TABLE
-     ===================================================== -->
+<!-- ============================================================
+     ANIMAL WATER
+============================================================ -->
 
-<section class="data-panel">
+<section class="section">
 
-    <div class="data-heading">
+    <h2>
+        🐄 Animal Water Intelligence
+    </h2>
 
-        <span>
-            2026 RAINFALL RECORDS
-        </span>
+    <div class="sector-grid">
 
-        <h2>
-            Monthly Rainfall Details
-        </h2>
+
+        <div class="sector">
+
+            Total Animals
+
+            <strong>
+                {{ animal_summary.total_animals }}
+            </strong>
+
+        </div>
+
+
+        <div class="sector">
+
+            Daily Water
+
+            <strong>
+                {{ animal_summary.daily_water }}
+            </strong>
+
+            L/day
+
+        </div>
+
+
+        <div class="sector">
+
+            Monthly Water
+
+            <strong>
+                {{ animal_summary.monthly_water }}
+            </strong>
+
+            L/month
+
+        </div>
+
+
+        <div class="sector">
+
+            Highest Consumer
+
+            <strong>
+                {{ animal_summary.highest_consumer }}
+            </strong>
+
+        </div>
 
     </div>
 
+</section>
 
-    <div class="data-table-wrap">
+
+<!-- ============================================================
+     RISK
+============================================================ -->
+
+<section class="section">
+
+    <h2>
+        ⚠️ Risk & AI Alerts
+    </h2>
+
+    <div class="alert-grid">
+
+        {% for alert in alerts %}
+
+        <div class="alert">
+
+            {{ alert }}
+
+        </div>
+
+        {% else %}
+
+        <div class="alert low">
+            No active alerts.
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     GLOBAL WATER
+============================================================ -->
+
+<section
+    id="globalWaterSection"
+    class="section"
+>
+
+    <h2>
+        🌍 Global Water Intelligence
+    </h2>
+
+    <div class="sector-grid">
+
+
+        <div class="sector">
+
+            Countries
+
+            <strong>
+                {{ water_summary.countries }}
+            </strong>
+
+        </div>
+
+
+        <div class="sector">
+
+            Agriculture
+
+            <strong>
+                {{ water_summary.agriculture }}%
+            </strong>
+
+        </div>
+
+
+        <div class="sector">
+
+            Industry
+
+            <strong>
+                {{ water_summary.industry }}%
+            </strong>
+
+        </div>
+
+
+        <div class="sector">
+
+            Domestic
+
+            <strong>
+                {{ water_summary.domestic }}%
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ============================================================
+     MONTHLY WATER USE
+============================================================ -->
+
+<section class="section">
+
+    <h2>
+        📊 2026 Monthly Water Use Data
+    </h2>
+
+    <div class="table-wrap">
 
         <table class="data-table">
 
             <thead>
 
                 <tr>
-
-                    <th>
-                        DATE
-                    </th>
-
-                    <th>
-                        MONTH
-                    </th>
-
-                    <th>
-                        RAINFALL
-                    </th>
-
-                    <th>
-                        RUNOFF
-                    </th>
-
-                    <th>
-                        GROUNDWATER RECHARGE
-                    </th>
-
-                    <th>
-                        QUALITY
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-            {% if rainfall_2026_data %}
-
-                {% for row in rainfall_2026_data %}
-
-                <tr>
-
-                    <td>
-                        {{ row.date }}
-                    </td>
-
-                    <td>
-                        {{ row.month }}
-                    </td>
-
-                    <td>
-                        {{ row.rainfall_mm }}
-                        mm
-                    </td>
-
-                    <td>
-                        {{ row.runoff_mcm }}
-                        MCM
-                    </td>
-
-                    <td>
-                        {{ row.groundwater_recharge_mcm }}
-                        MCM
-                    </td>
-
-                    <td>
-                        {{ row.quality_flag }}
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            {% else %}
-
-                <tr>
-
-                    <td colspan="6">
-                        No 2026 rainfall data available.
-                    </td>
-
-                </tr>
-
-            {% endif %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     WATER USE TABLE
-     ===================================================== -->
-
-<section class="data-panel">
-
-    <div class="data-heading">
-
-        <span>
-            2026 WATER USE
-        </span>
-
-        <h2>
-            Sector-wise Water Utilization
-        </h2>
-
-    </div>
-
-
-    <div class="data-table-wrap">
-
-        <table class="data-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        YEAR
-                    </th>
 
                     <th>
                         MONTH
@@ -1307,18 +1591,17 @@ AETHERA | 2026 Water Command Center
 
             </thead>
 
-
             <tbody>
 
-            {% if water_use_2026_data %}
 
-                {% for row in water_use_2026_data %}
+            {% for row in water_use_2026_data %}
 
-                <tr>
-
-                    <td>
-                        {{ row.year }}
-                    </td>
+                <tr
+                    class="data-row"
+                    data-year="2026"
+                    data-month="{{ row.month }}"
+                    data-type="water"
+                >
 
                     <td>
                         {{ row.month }}
@@ -1360,19 +1643,17 @@ AETHERA | 2026 Water Command Center
 
                 </tr>
 
-                {% endfor %}
-
             {% else %}
 
                 <tr>
 
-                    <td colspan="10">
+                    <td colspan="9">
                         No 2026 water-use data available.
                     </td>
 
                 </tr>
 
-            {% endif %}
+            {% endfor %}
 
             </tbody>
 
@@ -1383,123 +1664,197 @@ AETHERA | 2026 Water Command Center
 </section>
 
 
-<!-- =====================================================
-     RESERVOIR TABLE
-     ===================================================== -->
+<!-- ============================================================
+     MODULES
+============================================================ -->
 
-<section class="data-panel">
+<section class="section">
 
-    <div class="data-heading">
+    <h2>
+        AETHERA Intelligence Modules
+    </h2>
 
-        <span>
-            RESERVOIR DATA
-        </span>
-
-        <h2>
-            Dam / Reservoir Records
-        </h2>
-
-    </div>
+    <div class="modules">
 
 
-    <div class="data-table-wrap">
+        <a
+            class="module"
+            href="{{ url_for('rainfall') }}"
+        >
 
-        <table class="data-table">
+            🌧️
 
-            <thead>
+            <h3>
+                Rainfall Prediction
+            </h3>
 
-                <tr>
+            <p>
+                Rainfall trends and recharge.
+            </p>
 
-                    <th>
-                        DATE
-                    </th>
-
-                    <th>
-                        RESERVOIR
-                    </th>
-
-                    <th>
-                        STORAGE %
-                    </th>
-
-                    <th>
-                        CAPACITY MCM
-                    </th>
-
-                    <th>
-                        INFLOW MCM
-                    </th>
-
-                    <th>
-                        OUTFLOW MCM
-                    </th>
-
-                    <th>
-                        QUALITY
-                    </th>
-
-                </tr>
-
-            </thead>
+        </a>
 
 
-            <tbody>
+        <a
+            class="module"
+            href="{{ url_for('demand') }}"
+        >
 
-            {% if reservoir_data %}
+            💧
 
-                {% for row in reservoir_data %}
+            <h3>
+                Water Demand
+            </h3>
 
-                <tr>
+            <p>
+                Demand monitoring.
+            </p>
 
-                    <td>
-                        {{ row.date }}
-                    </td>
+        </a>
 
-                    <td>
-                        {{ row.reservoir_name }}
-                    </td>
 
-                    <td>
-                        {{ row.storage_pct }}%
-                    </td>
+        <a
+            class="module"
+            href="{{ url_for('reservoir') }}"
+        >
 
-                    <td>
-                        {{ row.capacity_mcm }}
-                    </td>
+            🏞️
 
-                    <td>
-                        {{ row.inflow_mcm }}
-                    </td>
+            <h3>
+                Reservoir
+            </h3>
 
-                    <td>
-                        {{ row.outflow_mcm }}
-                    </td>
+            <p>
+                Dam and storage monitoring.
+            </p>
 
-                    <td>
-                        {{ row.quality_flag }}
-                    </td>
+        </a>
 
-                </tr>
 
-                {% endfor %}
+        <a
+            class="module"
+            href="{{ url_for('water_quality') }}"
+        >
 
-            {% else %}
+            🧪
 
-                <tr>
+            <h3>
+                Water Quality
+            </h3>
 
-                    <td colspan="7">
+            <p>
+                Quality intelligence.
+            </p>
 
-                        No reservoir data available.
+        </a>
 
-                    </td>
 
-                </tr>
+        <a
+            class="module"
+            href="{{ url_for('water_allocation') }}"
+        >
 
-            {% endif %}
+            🚰
 
-            </tbody>
+            <h3>
+                Water Allocation
+            </h3>
 
-        </table>
+            <p>
+                Sector allocation.
+            </p>
+
+        </a>
+
+
+        <a
+            class="module"
+            href="{{ url_for('risk_alerts') }}"
+        >
+
+            ⚠️
+
+            <h3>
+                Risk & Alerts
+            </h3>
+
+            <p>
+                Water risk monitoring.
+            </p>
+
+        </a>
+
+
+        <a
+            class="module"
+            href="{{ url_for('digital_twin') }}"
+        >
+
+            🧬
+
+            <h3>
+                Digital Twin
+            </h3>
+
+            <p>
+                What-if simulation.
+            </p>
+
+        </a>
+
+
+        <a
+            class="module"
+            href="{{ url_for('sustainability') }}"
+        >
+
+            🌱
+
+            <h3>
+                Sustainability
+            </h3>
+
+            <p>
+                Sustainability indicators.
+            </p>
+
+        </a>
+
+
+        <a
+            class="module"
+            href="{{ url_for('analytics') }}"
+        >
+
+            📈
+
+            <h3>
+                Analytics
+            </h3>
+
+            <p>
+                Advanced analytics.
+            </p>
+
+        </a>
+
+
+        <a
+            class="module"
+            href="{{ url_for('global_water') }}"
+        >
+
+            🌍
+
+            <h3>
+                Global Water
+            </h3>
+
+            <p>
+                Global water usage.
+            </p>
+
+        </a>
 
     </div>
 
@@ -1507,123 +1862,173 @@ AETHERA | 2026 Water Command Center
 
 
 </div>
+<!-- END COMMAND CENTER -->
 
 
-<!-- =====================================================
+<!-- ============================================================
      JAVASCRIPT DATA
-     ===================================================== -->
+============================================================ -->
 
 <script>
 
-const AETHERA = {
 
-    rainfall2026:
-        {{ rainfall_2026_data | default([], true) | tojson }},
+/* ============================================================
+   DATA FROM FLASK
+============================================================ */
 
-    rainfallCompare:
-        {{ rainfall_compare_data | default([], true) | tojson }},
-
-    water2026:
-        {{ water_use_2026_data | default([], true) | tojson }},
-
-    reservoir:
-        {{ reservoir_data | default([], true) | tojson }},
-
-    rainfallTotal:
-        {{ rainfall_2026_total | default(0, true) | tojson }},
-
-    runoffTotal:
-        {{ runoff_2026_total | default(0, true) | tojson }},
-
-    rechargeTotal:
-        {{ recharge_2026_total | default(0, true) | tojson }},
-
-    reservoirValue:
-        {{ reservoir_value | default(0, true) | tojson }}
-
-};
+const rainfall2025 =
+    {{ rainfall_2025_data | default([], true) | tojson }};
 
 
-/* =========================================================
-   HELPER
-   ========================================================= */
-
-function number(value) {
-
-    const n = Number(value);
-
-    return Number.isFinite(n)
-        ? n
-        : 0;
-
-}
+const rainfall2026 =
+    {{ rainfall_2026_data | default([], true) | tojson }};
 
 
-/* =========================================================
-   1. 2026 RAINFALL CHART
-   ========================================================= */
-
-const rainfallLabels =
-    AETHERA.rainfall2026.map(
-        row => row.month || row.date
-    );
-
-const rainfallValues =
-    AETHERA.rainfall2026.map(
-        row => number(row.rainfall_mm)
-    );
+const water2026 =
+    {{ water_use_2026_data | default([], true) | tojson }};
 
 
-new Chart(
+const reservoirData =
+    {{ reservoir_data | default([], true) | tojson }};
 
+
+const supplyDemandData =
+    {{ supply_demand_data | default([], true) | tojson }};
+
+
+
+/* ============================================================
+   RAINFALL CHART
+============================================================ */
+
+const rainfallCanvas =
     document.getElementById(
-        "rainfall2026Chart"
-    ),
+        "rainfallChart"
+    );
 
-    {
 
-        type: "bar",
+if (rainfallCanvas) {
 
-        data: {
+    const months = [
 
-            labels: rainfallLabels,
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
 
-            datasets: [
+    ];
 
-                {
 
-                    label:
-                        "Rainfall (mm)",
+    const r2025 =
+        months.map(
+            month => {
 
-                    data:
-                        rainfallValues,
+                const row =
+                    rainfall2025.find(
+                        item =>
+                            String(
+                                item.month
+                            )
+                            .toLowerCase()
+                            ===
+                            month.toLowerCase()
+                    );
 
-                    borderWidth: 1
 
-                }
+                return row
+                    ? Number(
+                        row.rainfall_mm || 0
+                    )
+                    : 0;
 
-            ]
+            }
+        );
 
-        },
 
-        options: {
+    const r2026 =
+        months.map(
+            month => {
 
-            responsive: true,
+                const row =
+                    rainfall2026.find(
+                        item =>
+                            String(
+                                item.month
+                            )
+                            .toLowerCase()
+                            ===
+                            month.toLowerCase()
+                    );
 
-            maintainAspectRatio: false,
 
-            scales: {
+                return row
+                    ? Number(
+                        row.rainfall_mm || 0
+                    )
+                    : 0;
 
-                y: {
+            }
+        );
 
-                    beginAtZero: true,
 
-                    title: {
+    new Chart(
+        rainfallCanvas,
+        {
 
-                        display: true,
+            type:"line",
 
-                        text: "Rainfall (mm)"
+            data:{
 
+                labels:months,
+
+                datasets:[
+
+                    {
+                        label:
+                            "2025 Rainfall (mm)",
+
+                        data:r2025,
+
+                        borderWidth:3,
+
+                        tension:.3
+
+                    },
+
+                    {
+                        label:
+                            "2026 Rainfall (mm)",
+
+                        data:r2026,
+
+                        borderWidth:3,
+
+                        tension:.3
+
+                    }
+
+                ]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                scales:{
+
+                    y:{
+                        beginAtZero:true
                     }
 
                 }
@@ -1631,557 +2036,598 @@ new Chart(
             }
 
         }
-
-    }
-
-);
-
-
-/* =========================================================
-   2. RUNOFF + RECHARGE
-   ========================================================= */
-
-const generationLabels =
-    AETHERA.rainfall2026.map(
-        row => row.month || row.date
     );
 
-const runoffValues =
-    AETHERA.rainfall2026.map(
-        row => number(row.runoff_mcm)
-    );
-
-const rechargeValues =
-    AETHERA.rainfall2026.map(
-        row =>
-            number(
-                row.groundwater_recharge_mcm
-            )
-    );
+}
 
 
-new Chart(
 
+/* ============================================================
+   WATER USE CHART
+============================================================ */
+
+const waterCanvas =
     document.getElementById(
-        "waterGenerationChart"
-    ),
+        "waterChart"
+    );
 
-    {
 
-        type: "line",
+if (waterCanvas) {
 
-        data: {
+    new Chart(
+        waterCanvas,
+        {
 
-            labels: generationLabels,
+            type:"doughnut",
 
-            datasets: [
+            data:{
 
-                {
+                labels:[
 
-                    label:
-                        "Runoff (MCM)",
+                    "Agriculture",
 
-                    data:
-                        runoffValues,
+                    "Industry",
 
-                    tension: .3,
+                    "Domestic",
 
-                    borderWidth: 2
+                    "Animal Husbandry",
 
-                },
+                    "Power",
 
-                {
+                    "Environment",
 
-                    label:
-                        "Groundwater Recharge (MCM)",
+                    "Other"
 
-                    data:
-                        rechargeValues,
+                ],
 
-                    tension: .3,
+                datasets:[{
 
-                    borderWidth: 2
+                    data:[
 
-                }
+                        Number(
+                            {{ water_use_2026_summary.agriculture | default(0) }}
+                        ),
 
-            ]
+                        Number(
+                            {{ water_use_2026_summary.industry | default(0) }}
+                        ),
 
-        },
+                        Number(
+                            {{ water_use_2026_summary.domestic | default(0) }}
+                        ),
 
-        options: {
+                        Number(
+                            {{ water_use_2026_summary.animal | default(0) }}
+                        ),
 
-            responsive: true,
+                        Number(
+                            {{ water_use_2026_summary.power | default(0) }}
+                        ),
 
-            maintainAspectRatio: false,
+                        Number(
+                            {{ water_use_2026_summary.environment | default(0) }}
+                        ),
 
-            scales: {
+                        Number(
+                            {{ water_use_2026_summary.other | default(0) }}
+                        )
 
-                y: {
+                    ],
 
-                    beginAtZero: true
+                    borderWidth:1
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        position:"bottom"
+                    }
 
                 }
 
             }
 
         }
-
-    }
-
-);
-
-
-/* =========================================================
-   3. RESERVOIR STORAGE
-   ========================================================= */
-
-const reservoirLabels =
-    AETHERA.reservoir.map(
-        row => row.date
     );
 
-const reservoirStorage =
-    AETHERA.reservoir.map(
-        row => number(
-            row.storage_pct
-        )
-    );
+}
 
 
-new Chart(
 
+/* ============================================================
+   RESERVOIR CHART
+============================================================ */
+
+const reservoirCanvas =
     document.getElementById(
         "reservoirChart"
-    ),
-
-    {
-
-        type: "line",
-
-        data: {
-
-            labels:
-                reservoirLabels,
-
-            datasets: [
-
-                {
-
-                    label:
-                        "Storage (%)",
-
-                    data:
-                        reservoirStorage,
-
-                    tension: .25,
-
-                    borderWidth: 2,
-
-                    fill: false
-
-                }
-
-            ]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            scales: {
-
-                y: {
-
-                    beginAtZero: true,
-
-                    max: 100,
-
-                    title: {
-
-                        display: true,
-
-                        text: "Storage (%)"
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   4. WATER USE
-   ========================================================= */
-
-const waterLabels =
-    AETHERA.water2026.map(
-        row => row.month
-    );
-
-
-const agriculture =
-    AETHERA.water2026.map(
-        row => number(
-            row.agriculture_mcm
-        )
-    );
-
-
-const industry =
-    AETHERA.water2026.map(
-        row => number(
-            row.industry_mcm
-        )
-    );
-
-
-const domestic =
-    AETHERA.water2026.map(
-        row => number(
-            row.domestic_mcm
-        )
-    );
-
-
-const animal =
-    AETHERA.water2026.map(
-        row => number(
-            row.animal_husbandry_mcm
-        )
-    );
-
-
-const power =
-    AETHERA.water2026.map(
-        row => number(
-            row.power_mcm
-        )
-    );
-
-
-const environment =
-    AETHERA.water2026.map(
-        row => number(
-            row.environment_mcm
-        )
-    );
-
-
-new Chart(
-
-    document.getElementById(
-        "waterUseChart"
-    ),
-
-    {
-
-        type: "bar",
-
-        data: {
-
-            labels:
-                waterLabels,
-
-            datasets: [
-
-                {
-
-                    label:
-                        "Agriculture",
-
-                    data:
-                        agriculture,
-
-                    borderWidth: 1
-
-                },
-
-                {
-
-                    label:
-                        "Industry",
-
-                    data:
-                        industry,
-
-                    borderWidth: 1
-
-                },
-
-                {
-
-                    label:
-                        "Domestic",
-
-                    data:
-                        domestic,
-
-                    borderWidth: 1
-
-                },
-
-                {
-
-                    label:
-                        "Animal",
-
-                    data:
-                        animal,
-
-                    borderWidth: 1
-
-                },
-
-                {
-
-                    label:
-                        "Power",
-
-                    data:
-                        power,
-
-                    borderWidth: 1
-
-                },
-
-                {
-
-                    label:
-                        "Environment",
-
-                    data:
-                        environment,
-
-                    borderWidth: 1
-
-                }
-
-            ]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            scales: {
-
-                x: {
-
-                    stacked: true
-
-                },
-
-                y: {
-
-                    stacked: true,
-
-                    beginAtZero: true,
-
-                    title: {
-
-                        display: true,
-
-                        text: "Water Use (MCM)"
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   5. 2025 vs 2026 RAINFALL
-   ========================================================= */
-
-const comparisonLabels = [];
-
-const rainfall2025 = [];
-
-const rainfall2026 = [];
-
-
-/*
-   Collect 2025
-*/
-
-AETHERA.rainfallCompare
-    .filter(
-        row =>
-            String(row.year) === "2025"
-    )
-    .forEach(
-
-        row => {
-
-            comparisonLabels.push(
-                row.month || row.date
-            );
-
-            rainfall2025.push(
-                number(
-                    row.rainfall_mm
-                )
-            );
-
-        }
-
-    );
-
-
-/*
-   Collect 2026
-*/
-
-const labels2026 =
-    AETHERA.rainfallCompare
-        .filter(
-            row =>
-                String(row.year) === "2026"
-        )
-        .map(
-            row =>
-                row.month || row.date
-        );
-
-
-const values2026 =
-    AETHERA.rainfallCompare
-        .filter(
-            row =>
-                String(row.year) === "2026"
-        )
-        .map(
-            row =>
-                number(
-                    row.rainfall_mm
-                )
-        );
-
-
-/*
-   If 2025 is unavailable,
-   still show 2026.
-*/
-
-if (comparisonLabels.length === 0) {
-
-    labels2026.forEach(
-        label =>
-            comparisonLabels.push(label)
-    );
-
-}
-
-
-new Chart(
-
-    document.getElementById(
-        "rainfallComparisonChart"
-    ),
-
-    {
-
-        type: "line",
-
-        data: {
-
-            labels:
-                labels2026,
-
-            datasets: [
-
-                {
-
-                    label:
-                        "2026 Rainfall",
-
-                    data:
-                        values2026,
-
-                    tension: .3,
-
-                    borderWidth: 2
-
-                }
-
-            ]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            scales: {
-
-                y: {
-
-                    beginAtZero: true,
-
-                    title: {
-
-                        display: true,
-
-                        text: "Rainfall (mm)"
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   AETHERA INTELLIGENCE
-   ========================================================= */
-
-const title =
-    document.getElementById(
-        "insightTitle"
-    );
-
-const text =
-    document.getElementById(
-        "insightText"
     );
 
 
 if (
-    AETHERA.rainfallTotal > 0
+    reservoirCanvas
+    &&
+    reservoirData.length > 0
 ) {
 
-    title.textContent =
-        "2026 rainfall intelligence available";
+    const labels =
+        reservoirData.map(
+            row =>
+                row.month ||
+                row.date ||
+                ""
+        );
 
-    text.textContent =
-        "AETHERA has processed the available 2026 rainfall records, including total rainfall, runoff and groundwater recharge. Reservoir information is displayed separately based on the available reservoir dataset.";
+
+    const storage =
+        reservoirData.map(
+            row =>
+                Number(
+                    row.storage_pct ||
+                    row.availability_pct ||
+                    0
+                )
+        );
+
+
+    new Chart(
+        reservoirCanvas,
+        {
+
+            type:"line",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[{
+
+                    label:
+                        "Reservoir Storage (%)",
+
+                    data:storage,
+
+                    borderWidth:3,
+
+                    tension:.3,
+
+                    fill:false
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                scales:{
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        max:100
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* ============================================================
+   SUPPLY VS DEMAND
+============================================================ */
+
+const supplyCanvas =
+    document.getElementById(
+        "supplyDemandChart"
+    );
+
+
+if (
+    supplyCanvas
+    &&
+    supplyDemandData.length > 0
+) {
+
+    new Chart(
+        supplyCanvas,
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:
+                    supplyDemandData.map(
+                        row => row.month
+                    ),
+
+                datasets:[
+
+                    {
+
+                        label:
+                            "Supply / Availability",
+
+                        data:
+                            supplyDemandData.map(
+                                row =>
+                                    Number(
+                                        row.supply || 0
+                                    )
+                            ),
+
+                        borderWidth:1
+
+                    },
+
+                    {
+
+                        label:
+                            "Demand",
+
+                        data:
+                            supplyDemandData.map(
+                                row =>
+                                    Number(
+                                        row.demand || 0
+                                    )
+                            ),
+
+                        borderWidth:1
+
+                    }
+
+                ]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* ============================================================
+   SEARCH
+============================================================ */
+
+const searchInput =
+    document.getElementById(
+        "waterSearch"
+    );
+
+
+const searchButton =
+    document.getElementById(
+        "searchButton"
+    );
+
+
+const searchResults =
+    document.getElementById(
+        "searchResults"
+    );
+
+
+async function performSearch() {
+
+    const query =
+        searchInput.value.trim();
+
+
+    if (!query) {
+
+        searchResults.innerHTML = "";
+
+        return;
+
+    }
+
+
+    searchResults.innerHTML =
+        "<div class='search-result'>Searching...</div>";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/search?q="
+                +
+                encodeURIComponent(query)
+            );
+
+
+        const results =
+            await response.json();
+
+
+        if (!results.length) {
+
+            searchResults.innerHTML =
+                "<div class='search-result'>No matching data found.</div>";
+
+            return;
+
+        }
+
+
+        searchResults.innerHTML =
+            results.map(
+                result => {
+
+                    const values =
+                        Object.entries(
+                            result.data
+                        )
+                        .map(
+                            ([key,value]) =>
+                                `<b>${key}</b>: ${value}`
+                        )
+                        .join(
+                            " &nbsp; | &nbsp; "
+                        );
+
+
+                    return `
+
+                        <div class="search-result">
+
+                            <b>
+                                ${result.dataset}
+                            </b>
+
+                            <br>
+
+                            ${values}
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        searchResults.innerHTML =
+            "<div class='search-result'>Search error.</div>";
+
+    }
+
+}
+
+
+if (searchButton) {
+
+    searchButton.addEventListener(
+        "click",
+        performSearch
+    );
+
+}
+
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Enter") {
+
+                performSearch();
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* ============================================================
+   FILTERS
+============================================================ */
+
+const yearFilter =
+    document.getElementById(
+        "yearFilter"
+    );
+
+
+const monthFilter =
+    document.getElementById(
+        "monthFilter"
+    );
+
+
+const dataFilter =
+    document.getElementById(
+        "dataFilter"
+    );
+
+
+const resetFilters =
+    document.getElementById(
+        "resetFilters"
+    );
+
+
+
+function applyFilters() {
+
+    const year =
+        yearFilter.value;
+
+
+    const month =
+        monthFilter.value;
+
+
+    const type =
+        dataFilter.value;
+
+
+    const rows =
+        document.querySelectorAll(
+            ".data-row"
+        );
+
+
+    rows.forEach(
+        row => {
+
+            let show = true;
+
+
+            const rowYear =
+                row.dataset.year || "";
+
+
+            const rowMonth =
+                row.dataset.month || "";
+
+
+            const rowType =
+                row.dataset.type || "";
+
+
+            if (
+                year !== "all"
+                &&
+                rowYear !== year
+            ) {
+
+                show = false;
+
+            }
+
+
+            if (
+                month !== "all"
+                &&
+                rowMonth.toLowerCase()
+                !==
+                month.toLowerCase()
+            ) {
+
+                show = false;
+
+            }
+
+
+            if (
+                type !== "all"
+                &&
+                rowType !== type
+            ) {
+
+                show = false;
+
+            }
+
+
+            row.style.display =
+                show
+                ? ""
+                : "none";
+
+        }
+    );
+
+}
+
+
+
+if (yearFilter) {
+
+    yearFilter.addEventListener(
+        "change",
+        applyFilters
+    );
+
+}
+
+
+if (monthFilter) {
+
+    monthFilter.addEventListener(
+        "change",
+        applyFilters
+    );
+
+}
+
+
+if (dataFilter) {
+
+    dataFilter.addEventListener(
+        "change",
+        applyFilters
+    );
+
+}
+
+
+if (resetFilters) {
+
+    resetFilters.addEventListener(
+        "click",
+        () => {
+
+            yearFilter.value =
+                "all";
+
+
+            monthFilter.value =
+                "all";
+
+
+            dataFilter.value =
+                "all";
+
+
+            applyFilters();
+
+        }
+    );
 
 }
 

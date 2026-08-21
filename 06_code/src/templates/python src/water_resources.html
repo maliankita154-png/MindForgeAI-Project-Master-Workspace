@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERA - Rivers & Dams</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #06131f;
+            color: white;
+        }
+
+        h1 {
+            color: #55d9ff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .buttons {
+            margin-bottom: 25px;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 20px;
+            margin-right: 10px;
+            background: #12617b;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th {
+            background: #0b536d;
+            color: #7ee8ff;
+            padding: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #234454;
+        }
+
+        tr:hover {
+            background: #102a38;
+        }
+
+        .empty {
+            margin-top: 30px;
+            padding: 30px;
+            background: #102532;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🏞️ AETHERA Water Resources</h1>
+
+    <p>
+        Rivers, Dams & Reservoir Monitoring
+    </p>
+
+    <div class="buttons">
+
+        <a href="/">🏠 Home</a>
+
+        <a href="/dashboard">📊 Dashboard</a>
+
+        <a href="/rainfall">🌧️ Rainfall</a>
+
+        <a href="/demand">💧 Water Demand</a>
+
+    </div>
+
+
+    {% if reservoir_data %}
+
+        <h2>🏗️ Rivers & Dams Data</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    {% for column in reservoir_data[0].keys() %}
+
+                        <th>
+                            {{ column|replace("_", " ")|title }}
+                        </th>
+
+                    {% endfor %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for row in reservoir_data %}
+
+                    <tr>
+
+                        {% for column in reservoir_data[0].keys() %}
+
+                            <td>
+                                {{ row[column] }}
+                            </td>
+
+                        {% endfor %}
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="empty">
+
+            <h2>⚠️ No River / Dam Data Found</h2>
+
+            <p>
+                Reservoir data is currently not available.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

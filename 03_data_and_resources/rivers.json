@@ -1,0 +1,35 @@
+[
+  {
+    "id": "R001",
+    "name": "Godavari River",
+    "origin": "Trimbakeshwar, Nashik",
+    "length_km": 1465,
+    "current_level_m": 458.2,
+    "warning_level_m": 462.0,
+    "danger_level_m": 464.5,
+    "discharge_rate_cusecs": 18500,
+    "associated_dams": ["Jayakwadi Dam", "Gangapur Dam"]
+  },
+  {
+    "id": "R002",
+    "name": "Krishna River",
+    "origin": "Mahabaleshwar, Satara",
+    "length_km": 1400,
+    "current_level_m": 532.1,
+    "warning_level_m": 536.0,
+    "danger_level_m": 538.5,
+    "discharge_rate_cusecs": 24100,
+    "associated_dams": ["Koyna Dam", "Ujjani Dam"]
+  },
+  {
+    "id": "R003",
+    "name": "Tapi River",
+    "origin": "Satpura Range, Betul",
+    "length_km": 724,
+    "current_level_m": 128.4,
+    "warning_level_m": 133.0,
+    "danger_level_m": 135.2,
+    "discharge_rate_cusecs": 9200,
+    "associated_dams": ["Hatnur Dam", "Ukai Dam"]
+  }
+]

@@ -1,0 +1,36 @@
+district,river,dam,reservoir_capacity_mcm,storage_pct,water_available_mcm,annual_rainfall_mm,water_use_mcm,status
+Ahmednagar,Godavari,Waghad Dam,121.0,68,82.28,542,185,Normal
+Akola,Morna,Morna Dam,15.5,72,11.16,758,96,Normal
+Amravati,Purna,Upper Wardha Dam,564.0,61,344.04,847,210,Normal
+Aurangabad,Gomukh,Jayakwadi Dam,2909.0,54,156? ,734,620,Watch
+Beed,Manjra,Majalgaon Dam,455.7,48,218.74,671,265,Watch
+Bhandara,Wainganga,Gosikhurd Dam,1146.0,73,836.58,1250,240,Normal
+Buldhana,Kharrpan,Palkhed Dam,209.0,57,119.13,720,155,Normal
+Chandrapur,Wainganga,Irai Dam,1019.0,66,672.54,1220,310,Normal
+Dhule,Panzara,Urmodi Dam,216.0,52,112.32,560,175,Watch
+Gadchiroli,Pranhita,Medigatta Dam,1400.0,79,1106.00,1450,190,Normal
+Gondia,Wainganga,Itadoh Dam,985.0,76,748.60,1350,165,Normal
+Hingoli,Purna,Siddheshwar Dam,240.0,51,122.40,890,130,Watch
+Jalgaon,Tapi,Hatnur Dam,286.0,63,180.18,690,285,Normal
+Jalna,Ghansawangi,Upper Dudhana Dam,227.0,47,106.69,700,210,Watch
+Kolhapur,Panchganga,Radhanagari Dam,831.0,81,673.11,1900,225,Normal
+Latur,Manjra,Manjara Dam,224.0,45,100.80,760,240,High
+Mumbai,Ulhas,Upper Vaitarna Dam,331.0,74,244.94,2300,520,Normal
+Nagpur,Kanhan,Totladoh Dam,1043.0,69,719.67,1100,330,Normal
+Nanded,Godavari,Vishnupuri Dam,80.0,56,44.80,900,260,Watch
+Nandurbar,Narmada,Dhadgaon Dam,500.0,62,310.00,720,180,Normal
+Nashik,Girna,Gangapur Dam,215.9,59,127.38,850,295,Normal
+Osmanabad,Terna,Sina Kolegaon Dam,171.0,43,73.53,690,220,High
+Palghar,Vaitarna,Modak Sagar Dam,178.0,78,138.84,2200,230,Normal
+Parbhani,Dudhna,Lower Dudhna Dam,246.0,49,120.54,850,185,Watch
+Pune,Bhima,Khadakwasla Dam,65.0,71,46.15,720,610,Normal
+Raigad,Kundalika,Bhira Dam,300.0,82,246.00,3000,270,Normal
+Ratnagiri,Jagbudi,Kolhapur Barrage,100.0,85,85.00,3200,145,Normal
+Sangli,Krishna,Chandoli Dam,1465.0,77,1128.05,650,320,Normal
+Satara,Krishna,Dhom Dam,270.0,73,197.10,1100,240,Normal
+Sindhudurg,Tilari,Tilari Dam,419.0,86,360.34,3000,130,Normal
+Solapur,Bhima,Ujani Dam,117.0,39,45.63,550,420,High
+Thane,Bhatsa,Bhatsa Dam,976.0,76,741.76,2500,500,Normal
+Wardha,Wardha,Dham Dam,228.0,64,145.92,1100,180,Normal
+Washim,Aran,Arunavati Dam,285.0,55,156.75,750,140,Watch
+Yavatmal,Pus,Upper Penganga Dam,1150.0,67,770.50,1050,230,Normal

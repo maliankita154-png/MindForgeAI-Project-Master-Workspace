@@ -1,0 +1,38 @@
+[
+  {
+    "id": "D001",
+    "name": "Koyna Dam",
+    "river": "Koyna River",
+    "district": "Satara",
+    "gross_capacity_mcm": 2797.4,
+    "current_storage_mcm": 2348.8,
+    "capacity_percentage": 83.9,
+    "inflow_cusecs": 12400,
+    "outflow_cusecs": 8500,
+    "status": "Normal"
+  },
+  {
+    "id": "D002",
+    "name": "Ujjani Dam",
+    "river": "Bhima River",
+    "district": "Solapur",
+    "gross_capacity_mcm": 3140.0,
+    "current_storage_mcm": 2669.0,
+    "capacity_percentage": 85.0,
+    "inflow_cusecs": 15200,
+    "outflow_cusecs": 11000,
+    "status": "High Inflow Alert"
+  },
+  {
+    "id": "D003",
+    "name": "Jayakwadi Dam",
+    "river": "Godavari River",
+    "district": "Chhatrapati Sambhajinagar",
+    "gross_capacity_mcm": 2171.0,
+    "current_storage_mcm": 1563.1,
+    "capacity_percentage": 72.0,
+    "inflow_cusecs": 8900,
+    "outflow_cusecs": 4200,
+    "status": "Normal"
+  }
+]

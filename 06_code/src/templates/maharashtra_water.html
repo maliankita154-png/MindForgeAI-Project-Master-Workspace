@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AETHERA | Maharashtra Water Resources</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #081824;
+            color: white;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        .back {
+            display: inline-block;
+            padding: 12px 20px;
+            border: 1px solid #25b8e8;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #25b8e8;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #172937;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #25b8e8;
+        }
+
+        .table-card {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #0d3448;
+            color: #25b8e8;
+            padding: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #28404d;
+        }
+
+        tr:hover {
+            background: #203b4a;
+        }
+
+        .normal {
+            color: #43d17a;
+            font-weight: bold;
+        }
+
+        .watch {
+            color: #f0c75e;
+            font-weight: bold;
+        }
+
+        .high {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #25b8e8;
+            background: #102532;
+            color: white;
+            font-size: 16px;
+        }
+
+        .chart-card {
+            margin-bottom: 25px;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/dashboard" class="back">
+        ← Back to Dashboard
+    </a>
+
+    <h1>🇮🇳 Maharashtra Water Resources</h1>
+
+    <p>
+        Maharashtra district-wise rivers, dams,
+        reservoir storage, rainfall and water-use intelligence.
+    </p>
+
+
+    <!-- SUMMARY -->
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Districts</h3>
+            <div class="value">
+                {{ summary.districts }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Rivers</h3>
+            <div class="value">
+                {{ summary.rivers }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Dams</h3>
+            <div class="value">
+                {{ summary.dams }}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Total Capacity</h3>
+            <div class="value">
+                {{ summary.capacity }} MCM
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Water Available</h3>
+            <div class="value">
+                {{ summary.available }} MCM
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Average Storage</h3>
+            <div class="value">
+                {{ summary.storage }}%
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Total Water Use</h3>
+            <div class="value">
+                {{ summary.water_use }} MCM
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- CHART -->
+
+    <div class="card chart-card">
+
+        <h2>Reservoir Storage by District</h2>
+
+        <canvas id="storageChart"></canvas>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="card">
+
+        <h2>Search Maharashtra Data</h2>
+
+        <input
+            type="text"
+            id="searchBox"
+            placeholder="Search district, river or dam..."
+            onkeyup="filterTable()"
+        >
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="card table-card">
+
+        <h2>Complete Maharashtra Dataset</h2>
+
+        <table id="waterTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>District</th>
+
+                    <th>River</th>
+
+                    <th>Dam</th>
+
+                    <th>Capacity (MCM)</th>
+
+                    <th>Storage %</th>
+
+                    <th>Available (MCM)</th>
+
+                    <th>Rainfall (mm)</th>
+
+                    <th>Water Use (MCM)</th>
+
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for row in data %}
+
+                <tr>
+
+                    <td>
+                        {{ row.district }}
+                    </td>
+
+                    <td>
+                        {{ row.river }}
+                    </td>
+
+                    <td>
+                        {{ row.dam }}
+                    </td>
+
+                    <td>
+                        {{ row.reservoir_capacity_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.storage_pct }}%
+                    </td>
+
+                    <td>
+                        {{ row.water_available_mcm }}
+                    </td>
+
+                    <td>
+                        {{ row.annual_rainfall_mm }}
+                    </td>
+
+                    <td>
+                        {{ row.water_use_mcm }}
+                    </td>
+
+                    <td class="{{ row.status|lower }}">
+                        {{ row.status }}
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const districts = [
+    {% for row in data %}
+        "{{ row.district }}",
+    {% endfor %}
+];
+
+const storage = [
+    {% for row in data %}
+        {{ row.storage_pct }},
+    {% endfor %}
+];
+
+new Chart(
+    document.getElementById("storageChart"),
+    {
+        type: "bar",
+
+        data: {
+            labels: districts,
+
+            datasets: [
+                {
+                    label: "Reservoir Storage %",
+                    data: storage
+                }
+            ]
+        },
+
+        options: {
+            responsive: true,
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    }
+);
+
+
+function filterTable() {
+
+    const input =
+        document
+        .getElementById("searchBox")
+        .value
+        .toLowerCase();
+
+    const rows =
+        document
+        .querySelectorAll("#waterTable tbody tr");
+
+    rows.forEach(
+        function(row) {
+
+            const text =
+                row.innerText.toLowerCase();
+
+            row.style.display =
+                text.includes(input)
+                ? ""
+                : "none";
+
+        }
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

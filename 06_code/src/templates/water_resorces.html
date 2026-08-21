@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AETHERA | Rivers & Dams</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+
+            background: #06131f;
+
+            color: white;
+
+            min-height: 100vh;
+
+        }
+
+        header {
+
+            background: linear-gradient(
+                135deg,
+                #083b59,
+                #087f9b
+            );
+
+            padding: 25px 40px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.35);
+
+        }
+
+        header h1 {
+
+            font-size: 32px;
+
+            color: #61ddff;
+
+        }
+
+        header p {
+
+            margin-top: 6px;
+
+            color: #d0eef5;
+
+        }
+
+        .container {
+
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 30px;
+
+        }
+
+        .top-buttons {
+
+            display: flex;
+
+            gap: 12px;
+
+            margin-bottom: 30px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .btn {
+
+            text-decoration: none;
+
+            padding: 12px 20px;
+
+            border-radius: 10px;
+
+            background: #12384d;
+
+            color: white;
+
+            border: 1px solid #28627a;
+
+        }
+
+        .btn:hover {
+
+            background: #1a536d;
+
+        }
+
+        .summary {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 30px;
+
+        }
+
+        .card {
+
+            background: rgba(
+                255,
+                255,
+                255,
+                0.07
+            );
+
+            border:
+                1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    0.12
+                );
+
+            border-radius: 18px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0,0,0,.25);
+
+        }
+
+        .card h3 {
+
+            color: #9eddec;
+
+            font-size: 15px;
+
+            margin-bottom: 10px;
+
+        }
+
+        .card .value {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            color: #5bdcff;
+
+        }
+
+        .section-title {
+
+            margin:
+                30px 0 18px;
+
+            font-size: 25px;
+
+        }
+
+        .table-container {
+
+            overflow-x: auto;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .05
+                );
+
+            border-radius: 18px;
+
+            padding: 15px;
+
+        }
+
+        table {
+
+            width: 100%;
+
+            border-collapse:
+                collapse;
+
+        }
+
+        th {
+
+            background: #0c4058;
+
+            color: #7ee6ff;
+
+            padding: 14px;
+
+            text-align: left;
+
+        }
+
+        td {
+
+            padding: 13px;
+
+            border-bottom:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .08
+                );
+
+            color: #d7e8ed;
+
+        }
+
+        tr:hover {
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .06
+                );
+
+        }
+
+        .storage {
+
+            font-weight: bold;
+
+            color: #54dcaa;
+
+        }
+
+        .empty {
+
+            text-align: center;
+
+            padding: 50px;
+
+            color: #9eb5bf;
+
+        }
+
+        @media(max-width:900px) {
+
+            .summary {
+
+                grid-template-columns:
+                    repeat(2,1fr);
+
+            }
+
+        }
+
+        @media(max-width:550px) {
+
+            .summary {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            header {
+
+                padding: 20px;
+
+            }
+
+            .container {
+
+                padding: 18px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>🏞️ AETHERA</h1>
+
+    <p>
+        Rivers, Dams & Reservoir Water Intelligence
+    </p>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- NAVIGATION -->
+
+    <div class="top-buttons">
+
+        <a
+            href="/"
+            class="btn"
+        >
+            🏠 Home
+        </a>
+
+        <a
+            href="/dashboard"
+            class="btn"
+        >
+            📊 Dashboard
+        </a>
+
+        <a
+            href="/rainfall"
+            class="btn"
+        >
+            🌧️ Rainfall
+        </a>
+
+        <a
+            href="/demand"
+            class="btn"
+        >
+            💧 Water Demand
+        </a>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+
+        <div class="card">
+
+            <h3>Total Water Resources</h3>
+
+            <div class="value">
+
+                {{ reservoir_data|length }}
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Average Storage</h3>
+
+            <div class="value">
+
+                {% if reservoir_data %}
+
+                    {% set ns = namespace(
+                        total=0,
+                        count=0
+                    ) %}
+
+                    {% for r in reservoir_data %}
+
+                        {% if r.get('storage_pct') is not none %}
+
+                            {% set ns.total =
+                                ns.total +
+                                (r.get('storage_pct')|float)
+                            %}
+
+                            {% set ns.count =
+                                ns.count + 1
+                            %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {% if ns.count > 0 %}
+
+                        {{ "%.2f"|format(
+                            ns.total / ns.count
+                        ) }}%
+
+                    {% else %}
+
+                        N/A
+
+                    {% endif %}
+
+                {% else %}
+
+                    N/A
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Total Capacity</h3>
+
+            <div class="value">
+
+                {% if reservoir_data %}
+
+                    {% set ns = namespace(
+                        total=0
+                    ) %}
+
+                    {% for r in reservoir_data %}
+
+                        {% if r.get('capacity_mcm') is not none %}
+
+                            {% set ns.total =
+                                ns.total +
+                                (r.get('capacity_mcm')|float)
+                            %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {{ "%.2f"|format(ns.total) }}
+                    MCM
+
+                {% else %}
+
+                    N/A
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Data Records</h3>
+
+            <div class="value">
+
+                {{ reservoir_data|length }}
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- MAIN TITLE -->
+
+    <h2 class="section-title">
+
+        🏗️ All Rivers, Dams & Reservoirs
+
+    </h2>
+
+
+    <!-- DATA TABLE -->
+
+    <div class="table-container">
+
+
+        {% if reservoir_data %}
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    {% set columns =
+                        reservoir_data[0].keys()
+                    %}
+
+                    {% for column in columns %}
+
+                        <th>
+
+                            {{ column
+                               |replace("_"," ")
+                               |title }}
+
+                        </th>
+
+                    {% endfor %}
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for row in reservoir_data %}
+
+
+                <tr>
+
+
+                    {% for column in columns %}
+
+                        <td>
+
+                            {% if
+                                column ==
+                                'storage_pct'
+                            %}
+
+                                <span
+                                    class="storage"
+                                >
+
+                                    {{ row[column] }}%
+
+                                </span>
+
+                            {% else %}
+
+                                {{ row[column] }}
+
+                            {% endif %}
+
+                        </td>
+
+                    {% endfor %}
+
+
+                </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="empty">
+
+            <h3>
+                No River / Dam Data Available
+            </h3>
+
+            <p style="margin-top:10px">
+
+                Add your river and dam CSV data
+                inside the curated data folder.
+
+            </p>
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERA - Rivers & Dams</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #06131f;
+            color: white;
+        }
+
+        h1 {
+            color: #55d9ff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .buttons {
+            margin-bottom: 25px;
+        }
+
+        a {
+            display: inline-block;
+            padding: 12px 20px;
+            margin-right: 10px;
+            background: #12617b;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th {
+            background: #0b536d;
+            color: #7ee8ff;
+            padding: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #234454;
+        }
+
+        tr:hover {
+            background: #102a38;
+        }
+
+        .empty {
+            margin-top: 30px;
+            padding: 30px;
+            background: #102532;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🏞️ AETHERA Water Resources</h1>
+
+    <p>
+        Rivers, Dams & Reservoir Monitoring
+    </p>
+
+    <div class="buttons">
+
+        <a href="/">🏠 Home</a>
+
+        <a href="/dashboard">📊 Dashboard</a>
+
+        <a href="/rainfall">🌧️ Rainfall</a>
+
+        <a href="/demand">💧 Water Demand</a>
+
+    </div>
+
+
+    {% if reservoir_data %}
+
+        <h2>🏗️ Rivers & Dams Data</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    {% for column in reservoir_data[0].keys() %}
+
+                        <th>
+                            {{ column|replace("_", " ")|title }}
+                        </th>
+
+                    {% endfor %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for row in reservoir_data %}
+
+                    <tr>
+
+                        {% for column in reservoir_data[0].keys() %}
+
+                            <td>
+                                {{ row[column] }}
+                            </td>
+
+                        {% endfor %}
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <div class="empty">
+
+            <h2>⚠️ No River / Dam Data Found</h2>
+
+            <p>
+                Reservoir data is currently not available.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
