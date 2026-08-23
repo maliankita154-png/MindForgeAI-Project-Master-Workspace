@@ -1,61 +1,262 @@
-/* =====================================================
-   AETHERA STARTING HOME DASHBOARD
-===================================================== */
+<style>
 
-html {
-    scroll-behavior: smooth;
+/* ============================================================
+   AETHERA INTELLIGENCE MODULES
+============================================================ */
+
+.modules-section {
+    margin-top: 45px;
 }
 
-.aethera-home {
-    width: min(1200px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 35px 0 55px;
+.modules-heading {
     text-align: center;
-}
-
-.aethera-logo {
-    font-size: 52px;
-    font-weight: 800;
-    letter-spacing: 8px;
-    color: #24b8e5;
-    margin-bottom: 2px;
-}
-
-.aethera-subtitle {
-    color: #b8d0dc;
-    font-size: 15px;
-    letter-spacing: 3px;
-    font-weight: 600;
     margin-bottom: 25px;
 }
 
-.aethera-home > h1 {
-    font-size: 30px;
-    margin: 0 0 18px;
-    color: #ffffff;
+.modules-heading span {
+    color: #59d8ff;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
 }
 
-.aethera-description {
-    max-width: 850px;
-    margin: 0 auto 35px;
-    color: #b9c7ce;
-    line-height: 1.7;
+.modules-heading h3 {
+    margin-top: 8px;
+    font-size: 28px;
+    color: white;
+}
+
+.modules-heading p {
+    margin-top: 8px;
+    color: #9fb8c4;
+    font-size: 14px;
+}
+
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+}
+
+.module {
+    position: relative;
+    padding: 22px 18px;
+    min-height: 155px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.module:hover {
+    transform: translateY(-6px);
+    border-color: #59d8ff;
+    background: rgba(32, 184, 232, 0.10);
+    box-shadow: 0 12px 30px rgba(32, 184, 232, 0.12);
+}
+
+.module-icon {
+    font-size: 32px;
+    margin-bottom: 14px;
+}
+
+.module h4 {
     font-size: 15px;
+    margin: 0 0 8px;
+    color: white;
+}
+
+.module-description-small {
+    color: #91adba;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.module-arrow {
+    position: absolute;
+    right: 15px;
+    bottom: 12px;
+    color: #59d8ff;
+    font-size: 20px;
 }
 
 
-/* FEATURE CARDS */
+/* ============================================================
+   DATA MODAL
+============================================================ */
+
+.data-modal {
+    position: fixed;
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px;
+
+    background: rgba(0, 0, 0, 0.72);
+
+    backdrop-filter: blur(8px);
+
+    z-index: 9999;
+}
+
+.data-modal.show {
+    display: flex;
+}
+
+.modal-content {
+    position: relative;
+
+    width: 100%;
+    max-width: 1050px;
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 32px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10, 35, 50, 0.98),
+            rgba(5, 20, 32, 0.98)
+        );
+
+    border: 1px solid rgba(89, 216, 255, 0.20);
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.65);
+}
+
+.close-modal {
+    position: absolute;
+
+    top: 18px;
+    right: 20px;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: white;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.15);
+
+    border-color: #59d8ff;
+
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding-right: 50px;
+}
+
+.modal-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+
+    background: rgba(32, 184, 232, 0.10);
+
+    border: 1px solid rgba(89, 216, 255, 0.18);
+
+    font-size: 30px;
+
+    flex-shrink: 0;
+}
+
+.modal-label {
+    color: #59d8ff;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+.modal-header h2 {
+    margin: 5px 0 0;
+
+    font-size: 27px;
+
+    color: white;
+}
+
+.modal-body {
+    margin-top: 25px;
+}
+
+.modal-description {
+    padding: 16px 18px;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    border-left: 3px solid #59d8ff;
+
+    color: #c7d9df;
+
+    line-height: 1.6;
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   FEATURE CARDS
+============================================================ */
 
 .aethera-feature-grid {
     display: grid;
+
     grid-template-columns: repeat(4, 1fr);
+
     gap: 16px;
+
     margin-bottom: 36px;
 }
 
 .aethera-feature-card {
     min-height: 175px;
+
     padding: 24px 18px;
+
     border-radius: 18px;
 
     background: rgba(55, 70, 82, 0.82);
@@ -63,12 +264,14 @@ html {
     border: 1px solid rgba(180, 210, 220, 0.18);
 
     color: white;
+
     text-decoration: none;
 
     transition:
-        transform .25s ease,
-        background .25s ease,
-        border-color .25s ease;
+        transform 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 
     display: block;
 }
@@ -79,51 +282,130 @@ html {
     background: rgba(65, 85, 98, 0.95);
 
     border-color: #24b8e5;
+
+    box-shadow:
+        0 10px 30px rgba(36, 184, 229, 0.12);
 }
 
 .feature-icon {
     font-size: 38px;
+
     height: 50px;
+
     margin-bottom: 8px;
 }
 
 .aethera-feature-card h2 {
     font-size: 16px;
+
     margin: 4px 0 10px;
+
+    color: white;
 }
 
 .aethera-feature-card p {
     font-size: 12px;
+
     line-height: 1.55;
+
     color: #b9c9d0;
+
     margin: 0;
 }
 
 
-/* BUTTONS */
+/* ============================================================
+   AETHERA HOME
+============================================================ */
+
+.aethera-home {
+    width: min(1200px, calc(100% - 40px));
+
+    margin: 0 auto;
+
+    padding: 35px 0 55px;
+
+    text-align: center;
+}
+
+.aethera-logo {
+    font-size: 52px;
+
+    font-weight: 800;
+
+    letter-spacing: 8px;
+
+    color: #24b8e5;
+
+    margin-bottom: 2px;
+}
+
+.aethera-subtitle {
+    color: #b8d0dc;
+
+    font-size: 15px;
+
+    letter-spacing: 3px;
+
+    font-weight: 600;
+
+    margin-bottom: 25px;
+}
+
+.aethera-home > h1 {
+    font-size: 30px;
+
+    margin: 0 0 18px;
+
+    color: #ffffff;
+}
+
+.aethera-description {
+    max-width: 850px;
+
+    margin: 0 auto 35px;
+
+    color: #b9c7ce;
+
+    line-height: 1.7;
+
+    font-size: 15px;
+}
+
+
+/* ============================================================
+   BUTTONS
+============================================================ */
 
 .aethera-actions {
     display: flex;
+
     justify-content: center;
+
     align-items: center;
+
     flex-wrap: wrap;
+
     gap: 16px;
 }
 
 .aethera-actions a {
     text-decoration: none;
+
     font-weight: 700;
+
     font-size: 14px;
 
     padding: 14px 25px;
 
     border-radius: 11px;
 
-    transition: .2s ease;
+    transition: 0.2s ease;
 }
 
 .aethera-primary-btn {
     background: #24b8e5;
+
     color: #07141d;
 
     min-width: 150px;
@@ -131,7 +413,11 @@ html {
 
 .aethera-primary-btn:hover {
     transform: translateY(-2px);
+
     background: #38c8f0;
+
+    box-shadow:
+        0 8px 25px rgba(36, 184, 229, 0.20);
 }
 
 .aethera-action-btn {
@@ -139,34 +425,137 @@ html {
 
     border: 1px solid #279dc2;
 
-    background: rgba(10, 30, 40, .35);
+    background: rgba(10, 30, 40, 0.35);
 }
 
 .aethera-action-btn:hover {
     background: #173f4d;
+
     transform: translateY(-2px);
 }
 
 
-/* MOBILE */
+/* ============================================================
+   DASHBOARD SHOW / HIDE
+============================================================ */
 
-@media(max-width: 950px) {
+.dashboard-hidden {
+    display: none !important;
+}
+
+.dashboard-visible {
+    display: block;
+
+    animation: dashboardOpen 0.5s ease;
+}
+
+@keyframes dashboardOpen {
+
+    from {
+        opacity: 0;
+
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform: translateY(0);
+    }
+
+}
+
+
+/* ============================================================
+   DATA CARDS
+============================================================ */
+
+.data-card {
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.data-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.data-card:active {
+    transform: scale(0.98);
+}
+
+
+/* ============================================================
+   MODULE CARD
+============================================================ */
+
+.module-card {
+    text-decoration: none;
+
+    color: inherit;
+
+    cursor: pointer;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: 0.2s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-4px);
+}
+
+
+/* ============================================================
+   MOBILE / TABLET
+============================================================ */
+
+@media (max-width: 1100px) {
+
+    .modules-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+@media (max-width: 950px) {
 
     .aethera-feature-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-content {
+        max-width: 95%;
+    }
+
 }
 
-@media(max-width: 600px) {
+@media (max-width: 600px) {
 
     .aethera-home {
         width: calc(100% - 20px);
+
         padding-top: 25px;
     }
 
     .aethera-logo {
         font-size: 38px;
+
         letter-spacing: 5px;
     }
 
@@ -186,4 +575,184 @@ html {
         width: 90%;
     }
 
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modules-heading h3 {
+        font-size: 23px;
+    }
+
+    .modal-content {
+        padding: 22px;
+
+        max-height: 92vh;
+    }
+
+    .modal-header {
+        gap: 12px;
+    }
+
+    .modal-icon {
+        width: 48px;
+        height: 48px;
+
+        font-size: 24px;
+    }
+
+    .modal-header h2 {
+        font-size: 21px;
+    }
+
 }
+
+
+/* ============================================================
+   MODAL TABLE
+============================================================ */
+
+.modal-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+
+    margin-top: 20px;
+}
+
+.modal-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    color: #d9e8ed;
+}
+
+.modal-table th,
+.modal-table td {
+    padding: 12px;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.modal-table th {
+    color: #59d8ff;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+}
+
+.modal-table td {
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   MODAL DATA GRID
+============================================================ */
+
+.modal-data-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.modal-data-card {
+    padding: 18px;
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,0.045);
+
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.modal-data-card span {
+    display: block;
+
+    color: #91adba;
+
+    font-size: 11px;
+
+    margin-bottom: 7px;
+}
+
+.modal-data-card strong {
+    color: white;
+
+    font-size: 22px;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+
+.modal-content::-webkit-scrollbar {
+    width: 7px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.03);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(89,216,255,0.35);
+
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #59d8ff;
+}
+
+
+/* ============================================================
+   MOBILE MODAL GRID
+============================================================ */
+
+@media (max-width: 700px) {
+
+    .modal-data-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-description {
+        font-size: 13px;
+    }
+
+}
+
+
+/* ============================================================
+   MODULE ACTIVE EFFECT
+============================================================ */
+
+.module.active {
+    border-color: #59d8ff;
+
+    background: rgba(32,184,232,0.12);
+
+    box-shadow:
+        0 0 25px rgba(89,216,255,0.10);
+}
+
+
+/* ============================================================
+   SMOOTH PAGE EFFECT
+============================================================ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+</style>

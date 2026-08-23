@@ -1,0 +1,238 @@
+<!-- ================= HYDROLOGY MAP ================= -->
+
+<div class="map-section">
+
+    <h2>🗺️ Maharashtra Hydrology Map</h2>
+
+    <p>
+        Interactive river and reservoir monitoring
+    </p>
+
+    <div id="map"></div>
+
+</div>
+
+
+<!-- Leaflet CSS -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<!-- Leaflet JS -->
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<style>
+
+.map-section {
+    margin-top: 30px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+#map {
+    width: 100%;
+    height: 550px;
+    margin-top: 20px;
+    border-radius: 15px;
+}
+
+</style>
+
+
+<script>
+
+/* ==========================================
+   MAHARASHTRA MAP
+========================================== */
+
+const map = L.map("map").setView(
+    [19.7515, 75.7139],
+    6
+);
+
+
+/* OpenStreetMap */
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(map);
+
+
+/* ==========================================
+   RIVER DATA
+========================================== */
+
+const rivers = [
+
+    {
+        name: "Bhima River",
+        flow: 245,
+        normal: 310,
+        status: "Below Normal",
+        lat: 18.52,
+        lng: 73.86
+    },
+
+    {
+        name: "Krishna River",
+        flow: 420,
+        normal: 400,
+        status: "Normal",
+        lat: 16.70,
+        lng: 74.22
+    },
+
+    {
+        name: "Godavari River",
+        flow: 610,
+        normal: 500,
+        status: "Above Normal",
+        lat: 19.99,
+        lng: 73.78
+    },
+
+    {
+        name: "Tapi River",
+        flow: 180,
+        normal: 300,
+        status: "Critical",
+        lat: 21.17,
+        lng: 75.77
+    }
+
+];
+
+
+/* ==========================================
+   RIVER MARKERS
+========================================== */
+
+rivers.forEach(river => {
+
+    let marker = L.marker([
+        river.lat,
+        river.lng
+    ]).addTo(map);
+
+
+    marker.bindPopup(`
+
+        <div style="min-width:220px">
+
+            <h3>🌊 ${river.name}</h3>
+
+            <hr>
+
+            <p>
+                <b>Current Flow:</b>
+                ${river.flow} m³/s
+            </p>
+
+            <p>
+                <b>Normal Flow:</b>
+                ${river.normal} m³/s
+            </p>
+
+            <p>
+                <b>Status:</b>
+                ${river.status}
+            </p>
+
+            <button
+                onclick="showRiver('${river.name}')"
+                style="
+                    padding:8px 14px;
+                    border:none;
+                    border-radius:8px;
+                    cursor:pointer;
+                "
+            >
+                View Details
+            </button>
+
+        </div>
+
+    `);
+
+});
+
+
+/* ==========================================
+   RESERVOIRS
+========================================== */
+
+const reservoirs = [
+
+    {
+        name: "Ujani Reservoir",
+        lat: 18.07,
+        lng: 74.75,
+        level: "62%",
+        risk: "Moderate"
+    },
+
+    {
+        name: "Koyna Reservoir",
+        lat: 17.40,
+        lng: 73.75,
+        level: "78%",
+        risk: "Low"
+    },
+
+    {
+        name: "Jayakwadi Reservoir",
+        lat: 19.48,
+        lng: 75.38,
+        level: "55%",
+        risk: "Moderate"
+    }
+
+];
+
+
+reservoirs.forEach(reservoir => {
+
+    const marker = L.circleMarker(
+        [reservoir.lat, reservoir.lng],
+        {
+            radius: 9,
+            fillOpacity: 0.9
+        }
+    ).addTo(map);
+
+
+    marker.bindPopup(`
+
+        <div style="min-width:200px">
+
+            <h3>🏗️ ${reservoir.name}</h3>
+
+            <hr>
+
+            <p>
+                <b>Reservoir Level:</b>
+                ${reservoir.level}
+            </p>
+
+            <p>
+                <b>Risk:</b>
+                ${reservoir.risk}
+            </p>
+
+        </div>
+
+    `);
+
+});
+
+</script>

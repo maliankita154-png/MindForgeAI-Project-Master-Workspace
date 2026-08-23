@@ -1,6 +1,9 @@
-from flask import Flask, render_template, request, jsonify
-from pathlib import Path
+import os
 import pandas as pd
+import numpy as np
+
+from flask import Flask, render_template, request
+
 
 # ============================================================
 # AETHERA WATER INTELLIGENCE
@@ -8,79 +11,119 @@ import pandas as pd
 
 app = Flask(__name__)
 
+
+# ============================================================
+# JSON SAFE SUPPORT
+# ============================================================
+
+_original_json_default = app.json.default
+
+
+def json_default(value):
+
+    if isinstance(value, np.integer):
+        return int(value)
+
+    if isinstance(value, np.floating):
+        return float(value)
+
+    if isinstance(value, np.bool_):
+        return bool(value)
+
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+
+    return _original_json_default(value)
+
+
+app.json.default = json_default
+
+
 # ============================================================
 # PROJECT PATHS
 # ============================================================
 
-CODE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = CODE_DIR.parent.parent
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
-CURATED_DIR = PROJECT_ROOT / "03_data_and_resources" / "curated"
-DATA_DIR = CODE_DIR / "data"
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-print("\n========================================")
-print(" AETHERA WATER INTELLIGENCE")
-print("========================================")
-print("PROJECT ROOT :", PROJECT_ROOT)
-print("CURATED DIR  :", CURATED_DIR)
-print("DATA DIR     :", DATA_DIR)
-print("========================================\n")
+DATA_DIR = os.path.join(
+    BASE_DIR,
+    "data"
+)
+
+SRC_DATA_DIR = os.path.join(
+    BASE_DIR,
+    "src",
+    "data"
+)
+
+CURATED_DIR = os.path.join(
+    PROJECT_ROOT,
+    "03_data_and_resources",
+    "curated"
+)
 
 
 # ============================================================
-# FILE FINDER
+# DATA FILES
 # ============================================================
 
-def find_data_file(*names):
-
-    for name in names:
-
-        candidates = [
-            CURATED_DIR / name,
-            DATA_DIR / name,
-        ]
-
-        for path in candidates:
-
-            if path.exists():
-                return path
-
-    return CURATED_DIR / names[0]
-
-
-RAINFALL_FILE = find_data_file(
-    "rainfall_2026.csv",
-    "rainfall_2025_2026.csv",
+RAINFALL_FILE = os.path.join(
+    CURATED_DIR,
+    "rainfall_2026.csv"
 )
 
-RAINFALL_2025_FILE = find_data_file(
-    "rainfall_2025.csv",
+RAINFALL_2025_FILE = os.path.join(
+    CURATED_DIR,
+    "rainfall_2025.csv"
 )
 
-WATER_USE_2026_FILE = find_data_file(
-    "water_use_2026.csv",
+WATER_USE_2026_FILE = os.path.join(
+    CURATED_DIR,
+    "water_use_2026.csv"
 )
 
-WATER_USE_2025_FILE = find_data_file(
-    "water_use_2025.csv",
+WATER_USE_2025_FILE = os.path.join(
+    CURATED_DIR,
+    "water_use_2025.csv"
 )
 
-DEMAND_FILE = find_data_file(
-    "demand_2025_2026.csv",
-    "demand_demo.csv",
+RESERVOIR_FILE = os.path.join(
+    CURATED_DIR,
+    "reservoir_2025_2026.csv"
 )
 
-RESERVOIR_FILE = find_data_file(
-    "reservoir_2025_2026.csv",
-    "reservoir_demo.csv",
+RESERVOIR_DEMO_FILE = os.path.join(
+    CURATED_DIR,
+    "reservoir_demo.csv"
 )
 
-ANIMAL_FILE = find_data_file(
-    "animal_water_use.csv",
+DEMAND_FILE = os.path.join(
+    DATA_DIR,
+    "demand_demo.csv"
 )
 
-GLOBAL_WATER_FILE = find_data_file(
-    "water_use.csv",
+# Compatibility / fallback files
+DEMAND_DEMO_FILE = DEMAND_FILE
+
+WATER_USE_FILE = os.path.join(
+    DATA_DIR,
+    "water_use.csv"
+)
+
+ANIMAL_WATER_FILE = os.path.join(
+    DATA_DIR,
+    "animal_water_use.csv"
+)
+
+GLOBAL_WATER_FILE = os.path.join(
+    DATA_DIR,
+    "water_use.csv"
 )
 
 
@@ -88,126 +131,1081 @@ GLOBAL_WATER_FILE = find_data_file(
 # SAFE CSV LOADER
 # ============================================================
 
-def load_csv(path):
+def load_csv(file_path):
+
+    if not os.path.exists(file_path):
+
+        print("File not found:", file_path)
+
+        return pd.DataFrame()
 
     try:
 
-        if not path.exists():
+        df = pd.read_csv(file_path)
 
-            print("FILE NOT FOUND:", path)
+        # ----------------------------------------------------
+        # TAB SEPARATED FILE SUPPORT
+        # ----------------------------------------------------
 
-            return pd.DataFrame()
+        if len(df.columns) == 1:
 
-        df = pd.read_csv(
-            path,
-            sep=None,
-            engine="python"
-        )
+            first_column = str(
+                df.columns[0]
+            )
+
+            if "\t" in first_column:
+
+                df = pd.read_csv(
+                    file_path,
+                    sep="\t"
+                )
+
+        # ----------------------------------------------------
+        # CLEAN COLUMN NAMES
+        # ----------------------------------------------------
 
         df.columns = (
             df.columns
             .astype(str)
             .str.strip()
-            .str.lower()
-        )
-
-        print(
-            "LOADED:",
-            path.name,
-            "| rows:",
-            len(df)
-        )
-
-        print(
-            "COLUMNS:",
-            df.columns.tolist()
         )
 
         return df
 
     except Exception as e:
 
-        print(
-            "CSV ERROR:",
-            path,
-            e
-        )
+        print("Error reading:", file_path)
+        print(e)
 
         return pd.DataFrame()
 
 
 # ============================================================
-# NUMBER SERIES
+# SAFE NUMBER
 # ============================================================
 
-def number_series(df, column):
+def safe_number(value):
 
-    if df.empty or column not in df.columns:
-
-        return pd.Series(dtype=float)
-
-    return pd.to_numeric(
-        df[column],
+    number = pd.to_numeric(
+        value,
         errors="coerce"
-    ).fillna(0)
+    )
+
+    if pd.isna(number):
+
+        return 0
+
+    return float(number)
 
 
 # ============================================================
-# LAST NUMBER
+# JSON SAFE VALUE
 # ============================================================
 
-def last_number(df, columns, default=1):
+def make_json_safe(value):
 
-    if df.empty:
-        return default
+    if isinstance(value, dict):
 
-    for column in columns:
+        return {
+            str(key): make_json_safe(val)
+            for key, val in value.items()
+        }
 
-        if column in df.columns:
+    if isinstance(value, list):
 
-            values = number_series(
-                df,
-                column
+        return [
+            make_json_safe(item)
+            for item in value
+        ]
+
+    if isinstance(value, tuple):
+
+        return [
+            make_json_safe(item)
+            for item in value
+        ]
+
+    if isinstance(value, np.integer):
+
+        return int(value)
+
+    if isinstance(value, np.floating):
+
+        return float(value)
+
+    if isinstance(value, np.bool_):
+
+        return bool(value)
+
+    if isinstance(value, np.ndarray):
+
+        return value.tolist()
+
+    if value is None:
+
+        return None
+
+    try:
+
+        if pd.isna(value):
+
+            return None
+
+    except Exception:
+
+        pass
+
+    return value
+
+
+# ============================================================
+# DATAFRAME -> JSON SAFE RECORDS
+# ============================================================
+
+def dataframe_records(df):
+
+    if df is None or df.empty:
+
+        return []
+
+    records = (
+        df.fillna("")
+        .to_dict(
+            orient="records"
+        )
+    )
+
+    return make_json_safe(records)
+
+
+# ============================================================
+# TEMPLATE HELPER
+# ============================================================
+
+def template_exists(template_name):
+
+    template_path = os.path.join(
+        app.template_folder or "",
+        template_name
+    )
+
+    return os.path.exists(
+        template_path
+    )
+
+
+def render_existing_template(
+    template_name,
+    **kwargs
+):
+
+    if template_exists(template_name):
+
+        return render_template(
+            template_name,
+            **kwargs
+        )
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>AETHERA</title>
+
+        <style>
+
+            body {{
+                font-family: Arial, sans-serif;
+                padding: 40px;
+                background: #06131f;
+                color: white;
+            }}
+
+            a {{
+                text-decoration: none;
+                color: #59d8ff;
+            }}
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <h1>AETHERA WATER INTELLIGENCE</h1>
+
+        <h2>{template_name}</h2>
+
+        <p>
+            This page is available from the
+            AETHERA dashboard.
+        </p>
+
+        <p>
+            <a href="/dashboard">
+                ← Back to Dashboard
+            </a>
+        </p>
+
+    </body>
+    </html>
+    """
+
+
+# ============================================================
+# BUILD DASHBOARD DATA
+# ============================================================
+
+def build_dashboard_context():
+
+    # ========================================================
+    # LOAD DATA
+    # ========================================================
+
+    rainfall_2026_df = load_csv(
+        RAINFALL_FILE
+    )
+
+    rainfall_2025_df = load_csv(
+        RAINFALL_2025_FILE
+    )
+
+    water_2026_df = load_csv(
+        WATER_USE_2026_FILE
+    )
+
+    water_2025_df = load_csv(
+        WATER_USE_2025_FILE
+    )
+
+    reservoir_df = load_csv(
+        RESERVOIR_FILE
+    )
+
+    # Reservoir fallback
+
+    if reservoir_df.empty:
+
+        print(
+            "reservoir_2025_2026.csv not found/empty."
+        )
+
+        print(
+            "Using reservoir_demo.csv."
+        )
+
+        reservoir_df = load_csv(
+            RESERVOIR_DEMO_FILE
+        )
+
+    demand_df = load_csv(
+        DEMAND_FILE
+    )
+
+    animal_df = load_csv(
+        ANIMAL_WATER_FILE
+    )
+
+    global_df = load_csv(
+        GLOBAL_WATER_FILE
+    )
+
+
+    # ========================================================
+    # 2026 RAINFALL
+    # ========================================================
+
+    rainfall_2026_total = 0
+    runoff_2026_total = 0
+    recharge_2026_total = 0
+
+    if not rainfall_2026_df.empty:
+
+        if "rainfall_mm" in rainfall_2026_df.columns:
+
+            rainfall_2026_total = round(
+                float(
+                    pd.to_numeric(
+                        rainfall_2026_df["rainfall_mm"],
+                        errors="coerce"
+                    )
+                    .fillna(0)
+                    .sum()
+                ),
+                2
             )
+
+        if "runoff_mcm" in rainfall_2026_df.columns:
+
+            runoff_2026_total = round(
+                float(
+                    pd.to_numeric(
+                        rainfall_2026_df["runoff_mcm"],
+                        errors="coerce"
+                    )
+                    .fillna(0)
+                    .sum()
+                ),
+                2
+            )
+
+        if "groundwater_recharge_mcm" in rainfall_2026_df.columns:
+
+            recharge_2026_total = round(
+                float(
+                    pd.to_numeric(
+                        rainfall_2026_df[
+                            "groundwater_recharge_mcm"
+                        ],
+                        errors="coerce"
+                    )
+                    .fillna(0)
+                    .sum()
+                ),
+                2
+            )
+
+
+    # ========================================================
+    # LATEST RAINFALL
+    # ========================================================
+
+    latest_rainfall = 0
+    latest_rainfall_month = "N/A"
+
+    if not rainfall_2026_df.empty:
+
+        if "rainfall_mm" in rainfall_2026_df.columns:
+
+            latest_rainfall = safe_number(
+                rainfall_2026_df[
+                    "rainfall_mm"
+                ].iloc[-1]
+            )
+
+        if "month" in rainfall_2026_df.columns:
+
+            latest_rainfall_month = str(
+                rainfall_2026_df[
+                    "month"
+                ].iloc[-1]
+            )
+
+
+    rainfall_2026_data = dataframe_records(
+        rainfall_2026_df
+    )
+
+
+    # ========================================================
+    # DEMAND
+    # ========================================================
+
+    demand_value = 0
+
+    if not demand_df.empty:
+
+        demand_columns = [
+            "demand_mld",
+            "demand",
+            "Demand",
+            "water_demand_mld",
+            "water_demand",
+            "total_demand"
+        ]
+
+        for column in demand_columns:
+
+            if column in demand_df.columns:
+
+                numeric_values = pd.to_numeric(
+                    demand_df[column],
+                    errors="coerce"
+                ).dropna()
+
+                if not numeric_values.empty:
+
+                    demand_value = float(
+                        numeric_values.iloc[-1]
+                    )
+
+                break
+
+
+    # ========================================================
+    # RESERVOIR
+    # ========================================================
+
+    reservoir_value = 0
+    reservoir_latest_date = "N/A"
+
+    reservoir_data = []
+
+    if not reservoir_df.empty:
+
+        reservoir_data = dataframe_records(
+            reservoir_df
+        )
+
+        reservoir_columns = [
+            "availability_pct",
+            "availability",
+            "reservoir_pct",
+            "storage_pct",
+            "storage",
+            "level_pct"
+        ]
+
+        for column in reservoir_columns:
+
+            if column in reservoir_df.columns:
+
+                numeric_values = pd.to_numeric(
+                    reservoir_df[column],
+                    errors="coerce"
+                ).dropna()
+
+                if not numeric_values.empty:
+
+                    reservoir_value = round(
+                        float(
+                            numeric_values.iloc[-1]
+                        ),
+                        2
+                    )
+
+                break
+
+        if "date" in reservoir_df.columns:
+
+            reservoir_latest_date = str(
+                reservoir_df["date"].iloc[-1]
+            )
+
+
+    # ========================================================
+    # RESERVOIR SUMMARY
+    # ========================================================
+
+    reservoir_summary = {
+
+        "latest_storage_pct": reservoir_value,
+
+        "latest_date": reservoir_latest_date,
+
+        "rows": int(
+            len(reservoir_df)
+        ),
+
+        "reservoirs": 0,
+
+        "average_storage_pct": 0,
+
+        "max_storage_pct": 0,
+
+        "min_storage_pct": 0,
+
+        "total_capacity_mcm": 0,
+
+        "latest_inflow_mcm": 0,
+
+        "latest_outflow_mcm": 0
+    }
+
+
+    if not reservoir_df.empty:
+
+        # Number of reservoirs
+
+        if "reservoir_name" in reservoir_df.columns:
+
+            reservoir_summary["reservoirs"] = int(
+                reservoir_df["reservoir_name"]
+                .dropna()
+                .astype(str)
+                .nunique()
+            )
+
+        elif "reservoir_id" in reservoir_df.columns:
+
+            reservoir_summary["reservoirs"] = int(
+                reservoir_df["reservoir_id"]
+                .dropna()
+                .astype(str)
+                .nunique()
+            )
+
+
+        # Storage
+
+        storage_column = None
+
+        for column in [
+            "storage_pct",
+            "availability_pct",
+            "reservoir_pct",
+            "level_pct"
+        ]:
+
+            if column in reservoir_df.columns:
+
+                storage_column = column
+                break
+
+
+        if storage_column:
+
+            values = pd.to_numeric(
+                reservoir_df[storage_column],
+                errors="coerce"
+            ).dropna()
 
             if not values.empty:
 
-                value = float(values.iloc[-1])
+                reservoir_summary[
+                    "average_storage_pct"
+                ] = round(
+                    float(values.mean()),
+                    2
+                )
 
-                if value > 0:
+                reservoir_summary[
+                    "max_storage_pct"
+                ] = round(
+                    float(values.max()),
+                    2
+                )
 
-                    return round(value, 2)
+                reservoir_summary[
+                    "min_storage_pct"
+                ] = round(
+                    float(values.min()),
+                    2
+                )
 
-    return default
+
+        # Capacity
+
+        if "capacity_mcm" in reservoir_df.columns:
+
+            values = pd.to_numeric(
+                reservoir_df["capacity_mcm"],
+                errors="coerce"
+            ).dropna()
+
+            if not values.empty:
+
+                reservoir_summary[
+                    "total_capacity_mcm"
+                ] = round(
+                    float(values.sum()),
+                    2
+                )
 
 
-# ============================================================
-# SAFE RECORDS
-# ============================================================
+        # Inflow
 
-def safe_records(df):
+        if "inflow_mcm" in reservoir_df.columns:
 
-    if df.empty:
-        return []
+            values = pd.to_numeric(
+                reservoir_df["inflow_mcm"],
+                errors="coerce"
+            ).dropna()
 
-    clean = df.copy()
+            if not values.empty:
 
-    for col in clean.columns:
+                reservoir_summary[
+                    "latest_inflow_mcm"
+                ] = round(
+                    float(values.iloc[-1]),
+                    2
+                )
 
-        if pd.api.types.is_datetime64_any_dtype(
-            clean[col]
+
+        # Outflow
+
+        if "outflow_mcm" in reservoir_df.columns:
+
+            values = pd.to_numeric(
+                reservoir_df["outflow_mcm"],
+                errors="coerce"
+            ).dropna()
+
+            if not values.empty:
+
+                reservoir_summary[
+                    "latest_outflow_mcm"
+                ] = round(
+                    float(values.iloc[-1]),
+                    2
+                )
+
+
+    # ========================================================
+    # 2026 WATER USE
+    # ========================================================
+
+    water_use_2026_summary = {
+
+        "agriculture": 0,
+        "industry": 0,
+        "domestic": 0,
+        "power": 0,
+        "animal": 0,
+        "environment": 0,
+        "other": 0,
+        "total": 0
+    }
+
+
+    water_columns = {
+
+        "agriculture": "agriculture_mcm",
+
+        "industry": "industry_mcm",
+
+        "domestic": "domestic_mcm",
+
+        "power": "power_mcm",
+
+        "animal": "animal_husbandry_mcm",
+
+        "environment": "environment_mcm",
+
+        "other": "other_mcm",
+
+        "total": "total_use_mcm"
+    }
+
+
+    if not water_2026_df.empty:
+
+        for key, column in water_columns.items():
+
+            if column in water_2026_df.columns:
+
+                water_use_2026_summary[key] = round(
+                    float(
+                        pd.to_numeric(
+                            water_2026_df[column],
+                            errors="coerce"
+                        )
+                        .fillna(0)
+                        .sum()
+                    ),
+                    2
+                )
+
+
+    # ========================================================
+    # GLOBAL WATER
+    # ========================================================
+
+    countries = []
+
+    water_summary = {
+
+        "countries": 0,
+        "agriculture": 0,
+        "industry": 0,
+        "domestic": 0
+    }
+
+
+    if not global_df.empty:
+
+        if "Country" in global_df.columns:
+
+            countries = (
+                global_df["Country"]
+                .dropna()
+                .astype(str)
+                .str.strip()
+                .unique()
+                .tolist()
+            )
+
+            countries.sort(
+                key=str.lower
+            )
+
+            water_summary["countries"] = len(
+                countries
+            )
+
+
+        for key, column in [
+            ("agriculture", "Agriculture"),
+            ("industry", "Industry"),
+            ("domestic", "Domestic")
+        ]:
+
+            if column in global_df.columns:
+
+                values = pd.to_numeric(
+                    global_df[column],
+                    errors="coerce"
+                ).dropna()
+
+                if not values.empty:
+
+                    water_summary[key] = round(
+                        float(values.mean()),
+                        2
+                    )
+
+
+    # ========================================================
+    # ANIMAL WATER
+    # ========================================================
+
+    total_animals = 0
+    total_daily_water = 0
+    total_monthly_water = 0
+    highest_consumer = "N/A"
+
+    animal_data = []
+
+
+    if not animal_df.empty:
+
+        required_columns = [
+            "animals_count",
+            "daily_water_litres_per_animal"
+        ]
+
+        if all(
+            column in animal_df.columns
+            for column in required_columns
         ):
 
-            clean[col] = clean[col].astype(str)
+            animal_df["animals_count"] = pd.to_numeric(
+                animal_df["animals_count"],
+                errors="coerce"
+            ).fillna(0)
 
-    clean = clean.where(
-        pd.notnull(clean),
-        ""
+            animal_df[
+                "daily_water_litres_per_animal"
+            ] = pd.to_numeric(
+                animal_df[
+                    "daily_water_litres_per_animal"
+                ],
+                errors="coerce"
+            ).fillna(0)
+
+            animal_df["total_daily_water"] = (
+                animal_df["animals_count"]
+                *
+                animal_df[
+                    "daily_water_litres_per_animal"
+                ]
+            )
+
+            total_animals = int(
+                animal_df["animals_count"].sum()
+            )
+
+            total_daily_water = round(
+                float(
+                    animal_df[
+                        "total_daily_water"
+                    ].sum()
+                ),
+                2
+            )
+
+            total_monthly_water = round(
+                total_daily_water * 30,
+                2
+            )
+
+            if "animal" in animal_df.columns:
+
+                index = animal_df[
+                    "total_daily_water"
+                ].idxmax()
+
+                highest_consumer = str(
+                    animal_df.loc[
+                        index,
+                        "animal"
+                    ]
+                )
+
+            animal_data = dataframe_records(
+                animal_df
+            )
+
+
+    animal_summary = {
+
+        "total_animals": int(
+            total_animals
+        ),
+
+        "daily_water": float(
+            total_daily_water
+        ),
+
+        "monthly_water": float(
+            total_monthly_water
+        ),
+
+        "highest_consumer": str(
+            highest_consumer
+        )
+    }
+
+
+    # ========================================================
+    # WATER AVAILABLE
+    # ========================================================
+
+    water_available = 0
+
+    capacity = reservoir_summary[
+        "total_capacity_mcm"
+    ]
+
+    if capacity > 0 and reservoir_value > 0:
+
+        water_available = round(
+            capacity
+            *
+            reservoir_value
+            /
+            100,
+            2
+        )
+
+    if water_available == 0:
+
+        water_available = round(
+            runoff_2026_total
+            +
+            recharge_2026_total,
+            2
+        )
+
+
+    # ========================================================
+    # RISK LEVEL
+    # ========================================================
+
+    risk_level = "Normal"
+
+    if reservoir_value > 0:
+
+        if reservoir_value < 30:
+
+            risk_level = "High"
+
+        elif reservoir_value < 50:
+
+            risk_level = "Moderate"
+
+        else:
+
+            risk_level = "Low"
+
+
+    if latest_rainfall > 200:
+
+        risk_level = "High"
+
+
+    # ========================================================
+    # MAIN DASHBOARD DATA
+    # ========================================================
+
+    data = {
+
+        "water_available":
+            float(water_available),
+
+        "rainfall":
+            float(rainfall_2026_total),
+
+        "rainfall_2026_total":
+            float(rainfall_2026_total),
+
+        "runoff_2026_total":
+            float(runoff_2026_total),
+
+        "groundwater_2026_total":
+            float(recharge_2026_total),
+
+        "latest_rainfall":
+            float(latest_rainfall),
+
+        "latest_rainfall_month":
+            str(latest_rainfall_month),
+
+        "demand":
+            float(demand_value),
+
+        "reservoir":
+            float(reservoir_value),
+
+        "reservoir_name":
+            "AETHERA Reservoir",
+
+        "reservoir_capacity":
+            float(
+                reservoir_summary[
+                    "total_capacity_mcm"
+                ]
+            ),
+
+        "reservoir_inflow":
+            float(
+                reservoir_summary[
+                    "latest_inflow_mcm"
+                ]
+            ),
+
+        "reservoir_outflow":
+            float(
+                reservoir_summary[
+                    "latest_outflow_mcm"
+                ]
+            ),
+
+        "reservoir_latest_date":
+            str(reservoir_latest_date),
+
+        "risk_level":
+            risk_level
+    }
+
+
+    # ========================================================
+    # COMPARISON DATA
+    # ========================================================
+
+    rainfall_compare_df = pd.concat(
+        [
+            rainfall_2025_df,
+            rainfall_2026_df
+        ],
+        ignore_index=True
     )
 
-    return clean.to_dict(
-        orient="records"
+    water_compare_df = pd.concat(
+        [
+            water_2025_df,
+            water_2026_df
+        ],
+        ignore_index=True
     )
+
+
+    rainfall_compare_data = dataframe_records(
+        rainfall_compare_df
+    )
+
+    water_use_compare_data = dataframe_records(
+        water_compare_df
+    )
+
+    reservoir_compare_data = dataframe_records(
+        reservoir_df
+    )
+
+
+    # ========================================================
+    # FINAL CONTEXT
+    # ========================================================
+
+    return {
+
+        "data":
+            make_json_safe(data),
+
+        "water_summary":
+            make_json_safe(water_summary),
+
+        "countries":
+            countries,
+
+        "rainfall_2026_data":
+            rainfall_2026_data,
+
+        "rainfall_2026_total":
+            rainfall_2026_total,
+
+        "runoff_2026_total":
+            runoff_2026_total,
+
+        "recharge_2026_total":
+            recharge_2026_total,
+
+        "rainfall_compare_data":
+            rainfall_compare_data,
+
+        "water_use_compare_data":
+            water_use_compare_data,
+
+        "reservoir_compare_data":
+            reservoir_compare_data,
+
+        "reservoir_data":
+            reservoir_data,
+
+        "reservoir_value":
+            reservoir_value,
+
+        "reservoir_latest_date":
+            reservoir_latest_date,
+
+        "reservoir_summary":
+            make_json_safe(
+                reservoir_summary
+            ),
+
+        "water_use_2025_data":
+            dataframe_records(
+                water_2025_df
+            ),
+
+        "water_use_2026_data":
+            dataframe_records(
+                water_2026_df
+            ),
+
+        "water_use_2026_summary":
+            make_json_safe(
+                water_use_2026_summary
+            ),
+
+        "rainfall_data":
+            rainfall_2026_data,
+
+        "demand_data":
+            dataframe_records(
+                demand_df
+            ),
+
+        "animal_data":
+            animal_data,
+
+        "animal_summary":
+            make_json_safe(
+                animal_summary
+            ),
+
+        "total_animals":
+            total_animals,
+
+        "total_daily_water":
+            total_daily_water,
+
+        "total_monthly_water":
+            total_monthly_water,
+
+        "highest_consumer":
+            highest_consumer
+    }
 
 
 # ============================================================
@@ -216,10 +1214,7 @@ def safe_records(df):
 
 @app.route("/")
 def home():
-
-    return render_template(
-        "index.html"
-    )
+    return render_template("home.html")
 
 
 # ============================================================
@@ -241,1654 +1236,109 @@ def about():
 @app.route("/dashboard")
 def dashboard():
 
-    # ========================================================
-    # LOAD ALL DATA
-    # ========================================================
-
-    rainfall_df = load_csv(
-        RAINFALL_FILE
-    )
-
-    rainfall_2025_df = load_csv(
-        RAINFALL_2025_FILE
-    )
-
-    water_use_2026_df = load_csv(
-        WATER_USE_2026_FILE
-    )
-
-    water_use_2025_df = load_csv(
-        WATER_USE_2025_FILE
-    )
-
-    demand_df = load_csv(
-        DEMAND_FILE
-    )
-
-    reservoir_df = load_csv(
-        RESERVOIR_FILE
-    )
-
-    animal_df = load_csv(
-        ANIMAL_FILE
-    )
-
-    global_df = load_csv(
-        GLOBAL_WATER_FILE
-    )
-
-    # ========================================================
-    # RAINFALL 2026
-    # ========================================================
-
-    rainfall_2026_total = round(
-        number_series(
-            rainfall_df,
-            "rainfall_mm"
-        ).sum(),
-        2
-    )
-
-    if rainfall_2026_total <= 0:
-        rainfall_2026_total = 184.70
-
-    latest_rainfall = last_number(
-        rainfall_df,
-        [
-            "rainfall_mm",
-            "rainfall"
-        ],
-        12.80
-    )
-
-    if latest_rainfall <= 0:
-        latest_rainfall = 12.80
-
-    latest_rainfall_month = "Aug"
-
-    if (
-        not rainfall_df.empty
-        and
-        "month" in rainfall_df.columns
-    ):
-
-        value = str(
-            rainfall_df.iloc[-1]["month"]
-        ).strip()
-
-        if value:
-            latest_rainfall_month = value
-
-    runoff_2026_total = round(
-        number_series(
-            rainfall_df,
-            "runoff_mcm"
-        ).sum(),
-        2
-    )
-
-    if runoff_2026_total <= 0:
-        runoff_2026_total = 251.10
-
-    groundwater_2026_total = round(
-        number_series(
-            rainfall_df,
-            "groundwater_recharge_mcm"
-        ).sum(),
-        2
-    )
-
-    if groundwater_2026_total <= 0:
-        groundwater_2026_total = 169.50
-
-    # ========================================================
-    # RAINFALL 2025
-    # ========================================================
-
-    if rainfall_2025_df.empty:
-
-        rainfall_2025_df = pd.DataFrame({
-
-            "year": [
-                2025,
-                2025,
-                2025,
-                2025
-            ],
-
-            "month": [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr"
-            ],
-
-            "rainfall_mm": [
-                2.8,
-                2.1,
-                4.5,
-                18.2
-            ]
-
-        })
-
-    # ========================================================
-    # WATER USE 2026
-    # ========================================================
-
-    water_columns = {
-
-        "agriculture":
-            "agriculture_mcm",
-
-        "industry":
-            "industry_mcm",
-
-        "domestic":
-            "domestic_mcm",
-
-        "animal":
-            "animal_husbandry_mcm",
-
-        "power":
-            "power_mcm",
-
-        "environment":
-            "environment_mcm",
-
-        "other":
-            "other_mcm",
-
-        "total":
-            "total_use_mcm",
-    }
-
-    water_use_2026_summary = {}
-
-    water_use_defaults = {
-
-        "agriculture": 8420.50,
-
-        "industry": 3160.75,
-
-        "domestic": 2280.40,
-
-        "animal": 960.25,
-
-        "power": 1940.60,
-
-        "environment": 740.35,
-
-        "other": 410.20,
-
-        "total": 17912.05,
-
-    }
-
-    for key, column in water_columns.items():
-
-        value = round(
-            number_series(
-                water_use_2026_df,
-                column
-            ).sum(),
-            2
-        )
-
-        if value <= 0:
-            value = water_use_defaults[key]
-
-        water_use_2026_summary[key] = value
-
-    # ========================================================
-    # RESERVOIR
-    # ========================================================
-
-    reservoir_name = "Ujani Demonstration"
-
-    reservoir_storage = 1842.50
-
-    reservoir_capacity = 3071.00
-
-    reservoir_value = 60.00
-
-    reservoir_inflow = 128.40
-
-    reservoir_outflow = 96.70
-
-    reservoir_latest_date = "2026-08-20"
-
-    try:
-
-        if not reservoir_df.empty:
-
-            # ------------------------------------------------
-            # SORT BY DATE
-            # ------------------------------------------------
-
-            if "date" in reservoir_df.columns:
-
-                temp_date = pd.to_datetime(
-                    reservoir_df["date"],
-                    errors="coerce"
-                )
-
-                reservoir_df = (
-                    reservoir_df
-                    .assign(
-                        _sort_date=temp_date
-                    )
-                    .sort_values(
-                        "_sort_date"
-                    )
-                    .drop(
-                        columns=[
-                            "_sort_date"
-                        ]
-                    )
-                    .reset_index(
-                        drop=True
-                    )
-                )
-
-            # ------------------------------------------------
-            # LATEST ROW
-            # ------------------------------------------------
-
-            latest = reservoir_df.iloc[-1]
-
-            # ------------------------------------------------
-            # NAME
-            # ------------------------------------------------
-
-            for col in [
-                "reservoir_name",
-                "name",
-                "reservoir"
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = latest[col]
-
-                    if (
-                        pd.notna(value)
-                        and
-                        str(value).strip()
-                    ):
-
-                        reservoir_name = str(
-                            value
-                        ).strip()
-
-                        break
-
-            # ------------------------------------------------
-            # CAPACITY
-            # ------------------------------------------------
-
-            for col in [
-
-                "capacity_mcm",
-                "reservoir_capacity_mcm",
-                "capacity",
-                "total_capacity_mcm",
-                "gross_capacity_mcm"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = pd.to_numeric(
-                        latest[col],
-                        errors="coerce"
-                    )
-
-                    if (
-                        pd.notna(value)
-                        and
-                        float(value) > 0
-                    ):
-
-                        reservoir_capacity = round(
-                            float(value),
-                            2
-                        )
-
-                        break
-
-            # ------------------------------------------------
-            # STORAGE
-            # ------------------------------------------------
-
-            for col in [
-
-                "storage_mcm",
-                "current_storage_mcm",
-                "reservoir_storage_mcm",
-                "level_mcm",
-                "water_level_mcm",
-                "storage",
-                "current_level"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = pd.to_numeric(
-                        latest[col],
-                        errors="coerce"
-                    )
-
-                    if (
-                        pd.notna(value)
-                        and
-                        float(value) > 0
-                    ):
-
-                        reservoir_storage = round(
-                            float(value),
-                            2
-                        )
-
-                        break
-
-            # ------------------------------------------------
-            # PERCENTAGE
-            # ------------------------------------------------
-
-            for col in [
-
-                "storage_pct",
-                "availability_pct",
-                "reservoir_pct",
-                "level_pct",
-                "storage_percent",
-                "availability_percent",
-                "level_percent"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = pd.to_numeric(
-                        latest[col],
-                        errors="coerce"
-                    )
-
-                    if (
-                        pd.notna(value)
-                        and
-                        float(value) > 0
-                    ):
-
-                        reservoir_value = round(
-                            float(value),
-                            2
-                        )
-
-                        break
-
-            # ------------------------------------------------
-            # CALCULATE PERCENTAGE
-            # ------------------------------------------------
-
-            if (
-                reservoir_storage > 0
-                and
-                reservoir_capacity > 0
-            ):
-
-                reservoir_value = round(
-                    (
-                        reservoir_storage
-                        /
-                        reservoir_capacity
-                    ) * 100,
-                    2
-                )
-
-            # ------------------------------------------------
-            # INFLOW
-            # ------------------------------------------------
-
-            for col in [
-
-                "inflow_mcm",
-                "inflow",
-                "water_inflow_mcm"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = pd.to_numeric(
-                        latest[col],
-                        errors="coerce"
-                    )
-
-                    if (
-                        pd.notna(value)
-                        and
-                        float(value) > 0
-                    ):
-
-                        reservoir_inflow = round(
-                            float(value),
-                            2
-                        )
-
-                        break
-
-            # ------------------------------------------------
-            # OUTFLOW
-            # ------------------------------------------------
-
-            for col in [
-
-                "outflow_mcm",
-                "outflow",
-                "release_mcm",
-                "release",
-                "water_outflow_mcm"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = pd.to_numeric(
-                        latest[col],
-                        errors="coerce"
-                    )
-
-                    if (
-                        pd.notna(value)
-                        and
-                        float(value) > 0
-                    ):
-
-                        reservoir_outflow = round(
-                            float(value),
-                            2
-                        )
-
-                        break
-
-            # ------------------------------------------------
-            # DATE
-            # ------------------------------------------------
-
-            for col in [
-
-                "date",
-                "timestamp",
-                "record_date"
-
-            ]:
-
-                if col in reservoir_df.columns:
-
-                    value = latest[col]
-
-                    if pd.notna(value):
-
-                        text_value = str(
-                            value
-                        ).strip()
-
-                        if text_value:
-
-                            reservoir_latest_date = (
-                                text_value
-                            )
-
-                            break
-
-    except Exception as e:
-
-        print(
-            "RESERVOIR ERROR:",
-            e
-        )
-
-    # ========================================================
-    # RESERVOIR FINAL FALLBACK
-    # ========================================================
-
-    if reservoir_capacity <= 0:
-        reservoir_capacity = 3071.00
-
-    if reservoir_storage <= 0:
-        reservoir_storage = 1842.50
-
-    if reservoir_value <= 0:
-
-        reservoir_value = round(
-            (
-                reservoir_storage
-                /
-                reservoir_capacity
-            ) * 100,
-            2
-        )
-
-    if reservoir_inflow <= 0:
-        reservoir_inflow = 128.40
-
-    if reservoir_outflow <= 0:
-        reservoir_outflow = 96.70
-
-    if (
-        not reservoir_latest_date
-        or
-        reservoir_latest_date == "N/A"
-    ):
-
-        reservoir_latest_date = "2026-08-20"
-
-    # ========================================================
-    # WATER AVAILABLE
-    # ========================================================
-
-    water_available = round(
-        reservoir_storage,
-        2
-    )
-
-    if water_available <= 0:
-
-        water_available = 1842.50
-
-    # ========================================================
-    # DEMAND
-    # ========================================================
-
-    demand = last_number(
-
-        demand_df,
-
-        [
-            "demand_mld",
-            "demand",
-            "water_demand_mld",
-            "water_demand"
-        ],
-
-        612.50
-    )
-
-    if demand <= 0:
-        demand = 612.50
-
-    # ========================================================
-    # RISK
-    # ========================================================
-
-    if reservoir_value >= 70:
-
-        risk_level = "LOW"
-
-    elif reservoir_value >= 40:
-
-        risk_level = "MEDIUM"
-
-    else:
-
-        risk_level = "HIGH"
-
-    # ========================================================
-    # ALERTS
-    # ========================================================
-
-    alerts = []
-
-    if reservoir_value >= 60:
-
-        alerts.append(
-            "LOW: Reservoir storage is currently stable."
-        )
-
-    else:
-
-        alerts.append(
-            "MEDIUM: Reservoir storage requires monitoring."
-        )
-
-    alerts.append(
-        f"Rainfall runoff recorded: "
-        f"{runoff_2026_total} MCM."
-    )
-
-    alerts.append(
-        f"Groundwater recharge: "
-        f"{groundwater_2026_total} MCM."
-    )
-
-    # ========================================================
-    # ANIMAL WATER
-    # ========================================================
-
-    total_animals = 1250
-
-    total_daily_water = 18450
-
-    total_monthly_water = 553500
-
-    highest_consumer = "Cattle"
-
-    animal_data = []
-
-    if not animal_df.empty:
-
-        if "animals_count" in animal_df.columns:
-
-            animal_df[
-                "animals_count"
-            ] = number_series(
-                animal_df,
-                "animals_count"
-            )
-
-        if (
-            "daily_water_litres_per_animal"
-            in animal_df.columns
-        ):
-
-            animal_df[
-                "daily_water_litres_per_animal"
-            ] = number_series(
-                animal_df,
-                "daily_water_litres_per_animal"
-            )
-
-        if (
-            "animals_count"
-            in animal_df.columns
-            and
-            "daily_water_litres_per_animal"
-            in animal_df.columns
-        ):
-
-            animal_df[
-                "total_daily_water"
-            ] = (
-
-                animal_df[
-                    "animals_count"
-                ]
-
-                *
-
-                animal_df[
-                    "daily_water_litres_per_animal"
-                ]
-
-            )
-
-            calculated_animals = int(
-                animal_df[
-                    "animals_count"
-                ].sum()
-            )
-
-            calculated_daily = round(
-                float(
-                    animal_df[
-                        "total_daily_water"
-                    ].sum()
-                ),
-                2
-            )
-
-            if calculated_animals > 0:
-                total_animals = calculated_animals
-
-            if calculated_daily > 0:
-                total_daily_water = calculated_daily
-
-            total_monthly_water = round(
-                total_daily_water * 30,
-                2
-            )
-
-            if "animal" in animal_df.columns:
-
-                idx = animal_df[
-                    "total_daily_water"
-                ].idxmax()
-
-                consumer = str(
-                    animal_df.loc[
-                        idx,
-                        "animal"
-                    ]
-                ).strip()
-
-                if consumer:
-                    highest_consumer = consumer
-
-            animal_data = safe_records(
-                animal_df
-            )
-
-    # ========================================================
-    # ANIMAL FINAL FALLBACK
-    # ========================================================
-
-    if total_animals <= 0:
-        total_animals = 1250
-
-    if total_daily_water <= 0:
-        total_daily_water = 18450
-
-    if total_monthly_water <= 0:
-
-        total_monthly_water = (
-            total_daily_water * 30
-        )
-
-    if (
-        not highest_consumer
-        or
-        highest_consumer == "N/A"
-    ):
-
-        highest_consumer = "Cattle"
-
-    animal_summary = {
-
-        "total_animals":
-            total_animals,
-
-        "daily_water":
-            total_daily_water,
-
-        "monthly_water":
-            total_monthly_water,
-
-        "highest_consumer":
-            highest_consumer,
-
-    }
-
-    # ========================================================
-    # GLOBAL WATER
-    # ========================================================
-
-    countries = []
-
-    global_water_data = []
-
-    if not global_df.empty:
-
-        if "country" in global_df.columns:
-
-            countries = sorted(
-
-                global_df[
-                    "country"
-                ]
-                .dropna()
-                .astype(str)
-                .str.strip()
-                .unique()
-                .tolist()
-
-            )
-
-        for _, row in global_df.iterrows():
-
-            def row_value(names):
-
-                for name in names:
-
-                    if name in row.index:
-
-                        value = pd.to_numeric(
-                            row[name],
-                            errors="coerce"
-                        )
-
-                        if (
-                            pd.notna(value)
-                            and
-                            float(value) > 0
-                        ):
-
-                            return round(
-                                float(value),
-                                2
-                            )
-
-                return 1
-
-            global_water_data.append({
-
-                "Country":
-                    str(
-                        row.get(
-                            "country",
-                            "India"
-                        )
-                    ),
-
-                "Year":
-                    str(
-                        row.get(
-                            "year",
-                            "2026"
-                        )
-                    ),
-
-                "Agriculture":
-                    row_value([
-                        "agriculture"
-                    ]),
-
-                "Industry":
-                    row_value([
-                        "industry"
-                    ]),
-
-                "Domestic":
-                    row_value([
-                        "domestic"
-                    ]),
-
-            })
-
-    # ========================================================
-    # GLOBAL FALLBACK
-    # ========================================================
-
-    if not countries:
-
-        countries = [
-            "India",
-            "USA",
-            "China",
-            "Brazil",
-            "Australia"
-        ]
-
-    if not global_water_data:
-
-        global_water_data = [
-
-            {
-                "Country": "India",
-                "Year": "2026",
-                "Agriculture": 8420,
-                "Industry": 3160,
-                "Domestic": 2280
-            },
-
-            {
-                "Country": "USA",
-                "Year": "2026",
-                "Agriculture": 6210,
-                "Industry": 2840,
-                "Domestic": 1950
-            },
-
-            {
-                "Country": "China",
-                "Year": "2026",
-                "Agriculture": 7310,
-                "Industry": 4020,
-                "Domestic": 2140
-            },
-
-            {
-                "Country": "Brazil",
-                "Year": "2026",
-                "Agriculture": 5140,
-                "Industry": 2180,
-                "Domestic": 1430
-            },
-
-            {
-                "Country": "Australia",
-                "Year": "2026",
-                "Agriculture": 2940,
-                "Industry": 1280,
-                "Domestic": 860
-            }
-
-        ]
-
-    # ========================================================
-    # GLOBAL SUMMARY
-    # ========================================================
-
-    water_summary = {
-
-        "countries":
-            len(countries),
-
-        "agriculture":
-            round(
-                sum(
-                    x["Agriculture"]
-                    for x in global_water_data
-                )
-                /
-                len(global_water_data),
-                2
-            ),
-
-        "industry":
-            round(
-                sum(
-                    x["Industry"]
-                    for x in global_water_data
-                )
-                /
-                len(global_water_data),
-                2
-            ),
-
-        "domestic":
-            round(
-                sum(
-                    x["Domestic"]
-                    for x in global_water_data
-                )
-                /
-                len(global_water_data),
-                2
-            ),
-
-    }
-
-    # ========================================================
-    # SUPPLY VS DEMAND
-    # ========================================================
-
-    supply_demand_data = []
-
-    months = [
-
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec"
-
-    ]
-
-    # Demo supply values
-    demo_supply = {
-
-        "Jan": 68,
-        "Feb": 65,
-        "Mar": 63,
-        "Apr": 61,
-        "May": 58,
-        "Jun": 55,
-        "Jul": 57,
-        "Aug": 60,
-        "Sep": 62,
-        "Oct": 64,
-        "Nov": 66,
-        "Dec": 69
-
-    }
-
-    # Demo demand values
-    demo_demand = {
-
-        "Jan": 540,
-        "Feb": 550,
-        "Mar": 565,
-        "Apr": 580,
-        "May": 600,
-        "Jun": 620,
-        "Jul": 615,
-        "Aug": 612,
-        "Sep": 590,
-        "Oct": 575,
-        "Nov": 560,
-        "Dec": 545
-
-    }
-
-    for month in months:
-
-        storage = demo_supply[month]
-
-        month_demand = demo_demand[month]
-
-        # Try actual reservoir data
-        if (
-            not reservoir_df.empty
-            and
-            "month" in reservoir_df.columns
-        ):
-
-            r = reservoir_df[
-                reservoir_df[
-                    "month"
-                ]
-                .astype(str)
-                .str.lower()
-                ==
-                month.lower()
-            ]
-
-            if not r.empty:
-
-                actual_storage = last_number(
-
-                    r,
-
-                    [
-                        "storage_pct",
-                        "availability_pct",
-                        "reservoir_pct",
-                        "level_pct"
-                    ],
-
-                    storage
-                )
-
-                if actual_storage > 0:
-
-                    storage = actual_storage
-
-                else:
-
-                    storage_mcm = last_number(
-
-                        r,
-
-                        [
-                            "storage_mcm",
-                            "current_storage_mcm"
-                        ],
-
-                        1
-                    )
-
-                    capacity_mcm = last_number(
-
-                        r,
-
-                        [
-                            "capacity_mcm",
-                            "reservoir_capacity_mcm"
-                        ],
-
-                        reservoir_capacity
-                    )
-
-                    if (
-                        storage_mcm > 0
-                        and
-                        capacity_mcm > 0
-                    ):
-
-                        storage = round(
-                            (
-                                storage_mcm
-                                /
-                                capacity_mcm
-                            ) * 100,
-                            2
-                        )
-
-        # Try actual demand data
-        if (
-            not demand_df.empty
-            and
-            "month" in demand_df.columns
-        ):
-
-            d = demand_df[
-                demand_df[
-                    "month"
-                ]
-                .astype(str)
-                .str.lower()
-                ==
-                month.lower()
-            ]
-
-            if not d.empty:
-
-                actual_demand = last_number(
-
-                    d,
-
-                    [
-                        "demand_mld",
-                        "demand",
-                        "water_demand_mld"
-                    ],
-
-                    month_demand
-                )
-
-                if actual_demand > 0:
-
-                    month_demand = actual_demand
-
-        supply_demand_data.append({
-
-            "month":
-                month,
-
-            "supply":
-                storage,
-
-            "demand":
-                month_demand,
-
-        })
-
-    # ========================================================
-    # FINAL DATA OBJECT
-    # ========================================================
-
-    data = {
-
-        "water_available":
-            water_available,
-
-        "demand":
-            demand,
-
-        "reservoir":
-            reservoir_value,
-
-        "reservoir_storage":
-            reservoir_storage,
-
-        "rainfall_2026_total":
-            rainfall_2026_total,
-
-        "latest_rainfall":
-            latest_rainfall,
-
-        "latest_rainfall_month":
-            latest_rainfall_month,
-
-        "runoff_2026_total":
-            runoff_2026_total,
-
-        "groundwater_2026_total":
-            groundwater_2026_total,
-
-        "risk_level":
-            risk_level,
-
-        "reservoir_name":
-            reservoir_name,
-
-        "reservoir_capacity":
-            reservoir_capacity,
-
-        "reservoir_inflow":
-            reservoir_inflow,
-
-        "reservoir_outflow":
-            reservoir_outflow,
-
-        "reservoir_latest_date":
-            reservoir_latest_date,
-
-    }
-
-    # ========================================================
-    # DEBUG
-    # ========================================================
-
-    print("\n========================================")
-    print(" AETHERA DASHBOARD DATA")
-    print("========================================")
-
-    print(
-        "Water available :",
-        water_available
-    )
-
-    print(
-        "Demand          :",
-        demand
-    )
-
-    print(
-        "Reservoir %     :",
-        reservoir_value
-    )
-
-    print(
-        "Reservoir storage:",
-        reservoir_storage
-    )
-
-    print(
-        "Reservoir name  :",
-        reservoir_name
-    )
-
-    print(
-        "Capacity        :",
-        reservoir_capacity
-    )
-
-    print(
-        "Inflow          :",
-        reservoir_inflow
-    )
-
-    print(
-        "Outflow         :",
-        reservoir_outflow
-    )
-
-    print(
-        "Latest date     :",
-        reservoir_latest_date
-    )
-
-    print(
-        "Rainfall 2026   :",
-        rainfall_2026_total
-    )
-
-    print(
-        "Demand          :",
-        demand
-    )
-
-    print(
-        "Animal count    :",
-        total_animals
-    )
-
-    print(
-        "Animal daily    :",
-        total_daily_water
-    )
-
-    print(
-        "Water use       :",
-        water_use_2026_summary
-    )
-
-    print("========================================\n")
-
-    # ========================================================
-    # RENDER DASHBOARD
-    # ========================================================
+    context = build_dashboard_context()
 
     return render_template(
-
         "dashboard.html",
-
-        data=data,
-
-        water_summary=water_summary,
-
-        countries=countries,
-
-        global_water_data=global_water_data,
-
-        rainfall_2025_data=
-            safe_records(
-                rainfall_2025_df
-            ),
-
-        rainfall_2026_data=
-            safe_records(
-                rainfall_df
-            ),
-
-        rainfall_data=
-            safe_records(
-                rainfall_df
-            ),
-
-        water_use_2025_data=
-            safe_records(
-                water_use_2025_df
-            ),
-
-        water_use_2026_data=
-            safe_records(
-                water_use_2026_df
-            ),
-
-        water_use_2026_summary=
-            water_use_2026_summary,
-
-        demand_data=
-            safe_records(
-                demand_df
-            ),
-
-        reservoir_data=
-            safe_records(
-                reservoir_df
-            ),
-
-        supply_demand_data=
-            supply_demand_data,
-
-        animal_data=
-            animal_data,
-
-        animal_summary=
-            animal_summary,
-
-        total_animals=
-            total_animals,
-
-        total_daily_water=
-            total_daily_water,
-
-        total_monthly_water=
-            total_monthly_water,
-
-        highest_consumer=
-            highest_consumer,
-
-        alerts=
-            alerts,
-
+        **context
     )
 
 
 # ============================================================
-# SEARCH API
+# ANALYTICS
 # ============================================================
 
-@app.route("/api/search")
-def api_search():
+@app.route("/analytics")
+def analytics():
 
-    query = request.args.get(
-        "q",
-        ""
-    ).strip().lower()
-
-    if not query:
-
-        return jsonify([])
-
-    datasets = {
-
-        "Rainfall 2026":
-            load_csv(
-                RAINFALL_FILE
-            ),
-
-        "Water Use 2026":
-            load_csv(
-                WATER_USE_2026_FILE
-            ),
-
-        "Reservoir":
-            load_csv(
-                RESERVOIR_FILE
-            ),
-
-        "Demand":
-            load_csv(
-                DEMAND_FILE
-            ),
-
-    }
-
-    results = []
-
-    for dataset_name, df in datasets.items():
-
-        if df.empty:
-            continue
-
-        mask = df.astype(str).apply(
-
-            lambda col:
-
-                col.str.lower()
-                .str.contains(
-                    query,
-                    na=False
-                )
-
-        ).any(axis=1)
-
-        matched = df[
-            mask
-        ].head(30)
-
-        for _, row in matched.iterrows():
-
-            results.append({
-
-                "dataset":
-                    dataset_name,
-
-                "data": {
-
-                    str(k):
-
-                        (
-                            "Available"
-                            if pd.isna(v)
-                            else str(v)
-                        )
-
-                    for k, v
-                    in row.to_dict().items()
-
-                }
-
-            })
-
-    return jsonify(results)
+    return render_existing_template(
+        "analytics.html"
+    )
 
 
 # ============================================================
-# RAINFALL PAGE
+# RAINFALL
 # ============================================================
 
 @app.route("/rainfall")
 def rainfall():
 
-    data = load_csv(
+    df = load_csv(
         RAINFALL_FILE
     )
 
-    if data.empty:
-
-        data = pd.DataFrame({
-
-            "year": [
-                2026,
-                2026,
-                2026,
-                2026,
-                2026,
-                2026
-            ],
-
-            "month": [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun"
-            ],
-
-            "rainfall_mm": [
-                2.8,
-                2.1,
-                4.5,
-                18.2,
-                42.6,
-                76.4
-            ]
-
-        })
-
     return render_template(
-
         "rainfall.html",
-
-        rainfall_data=
-            safe_records(
-                data
-            )
-
+        rainfall_data=dataframe_records(df)
     )
 
 
 # ============================================================
-# DEMAND PAGE
+# RAINFALL 2026
+# ============================================================
+
+@app.route("/rainfall-2026")
+def rainfall_2026():
+
+    df = load_csv(
+        RAINFALL_FILE
+    )
+
+    return render_existing_template(
+
+        "rainfall_2026.html",
+
+        rainfall_data=
+            dataframe_records(df),
+
+        rainfall_2026_data=
+            dataframe_records(df)
+    )
+
+
+# ============================================================
+# DEMAND
 # ============================================================
 
 @app.route("/demand")
 def demand():
 
-    data = load_csv(
+    df = load_csv(
         DEMAND_FILE
     )
-
-    if data.empty:
-
-        data = pd.DataFrame({
-
-            "year": [
-                2026,
-                2026,
-                2026,
-                2026,
-                2026,
-                2026
-            ],
-
-            "month": [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun"
-            ],
-
-            "demand_mld": [
-                540,
-                550,
-                565,
-                580,
-                600,
-                620
-            ]
-
-        })
 
     return render_template(
 
         "demand.html",
 
         demand_data=
-            safe_records(
-                data
-            )
-
+            dataframe_records(df)
     )
 
 
 # ============================================================
-# RESERVOIR PAGE
+# RESERVOIR
 # ============================================================
 
 @app.route("/reservoir")
 def reservoir():
 
-    data = load_csv(
+    df = load_csv(
         RESERVOIR_FILE
     )
 
-    if data.empty:
+    if df.empty:
 
-        data = pd.DataFrame({
-
-            "reservoir_name": [
-                "Ujani Demonstration",
-                "Ujani Demonstration",
-                "Ujani Demonstration",
-                "Ujani Demonstration",
-                "Ujani Demonstration",
-                "Ujani Demonstration"
-            ],
-
-            "date": [
-                "2026-03-31",
-                "2026-04-30",
-                "2026-05-31",
-                "2026-06-30",
-                "2026-07-31",
-                "2026-08-20"
-            ],
-
-            "storage_mcm": [
-                2050.20,
-                1980.40,
-                1915.80,
-                1880.60,
-                1855.30,
-                1842.50
-            ],
-
-            "capacity_mcm": [
-                3071,
-                3071,
-                3071,
-                3071,
-                3071,
-                3071
-            ],
-
-            "inflow_mcm": [
-                142.5,
-                136.8,
-                131.2,
-                126.5,
-                124.1,
-                128.4
-            ],
-
-            "outflow_mcm": [
-                101.2,
-                98.6,
-                95.8,
-                94.2,
-                92.5,
-                96.7
-            ]
-
-        })
+        df = load_csv(
+            RESERVOIR_DEMO_FILE
+        )
 
     return render_template(
 
         "reservoir.html",
 
         reservoir_data=
-            safe_records(
-                data
-            )
-
+            dataframe_records(df)
     )
 
 
@@ -1899,8 +1349,16 @@ def reservoir():
 @app.route("/water-quality")
 def water_quality():
 
-    return render_template(
+    if template_exists(
         "water_quality.html"
+    ):
+
+        return render_template(
+            "water_quality.html"
+        )
+
+    return render_template(
+        "sustainability.html"
     )
 
 
@@ -1911,8 +1369,403 @@ def water_quality():
 @app.route("/water-allocation")
 def water_allocation():
 
+    # --------------------------------------------------------
+    # LOAD WATER DEMAND DATA
+    # --------------------------------------------------------
+
+    demand_df = load_csv(
+        DEMAND_FILE
+    )
+
+    # Fallback to demo demand file
+    if demand_df.empty:
+
+        demand_df = load_csv(
+            DEMAND_DEMO_FILE
+        )
+
+    # --------------------------------------------------------
+    # LOAD WATER USE DATA
+    # --------------------------------------------------------
+
+    water_df = load_csv(
+        WATER_USE_2026_FILE
+    )
+
+    if water_df.empty:
+
+        water_df = load_csv(
+            WATER_USE_FILE
+        )
+
+    # --------------------------------------------------------
+    # DEFAULT VALUES
+    # --------------------------------------------------------
+
+    total_demand = 0.0
+
+    agriculture = 0.0
+    domestic = 0.0
+    industry = 0.0
+    power = 0.0
+    animal = 0.0
+    environment = 0.0
+    other = 0.0
+
+    # --------------------------------------------------------
+    # DEMAND DATA
+    # --------------------------------------------------------
+
+    if not demand_df.empty:
+
+        possible_demand_columns = [
+
+            "total_demand",
+
+            "demand_mld",
+
+            "demand",
+
+            "Demand",
+
+            "water_demand_mld",
+
+            "water_demand",
+
+            "total_use_mcm"
+        ]
+
+        for col in possible_demand_columns:
+
+            if col in demand_df.columns:
+
+                values = pd.to_numeric(
+                    demand_df[col],
+                    errors="coerce"
+                ).dropna()
+
+                if not values.empty:
+
+                    total_demand = float(
+                        values.iloc[-1]
+                    )
+
+                    break
+
+    # --------------------------------------------------------
+    # WATER USE SECTOR DATA
+    # --------------------------------------------------------
+
+    if not water_df.empty:
+
+        sector_columns = {
+
+            "agriculture": [
+                "agriculture_mcm"
+            ],
+
+            "domestic": [
+                "domestic_mcm"
+            ],
+
+            "industry": [
+                "industry_mcm"
+            ],
+
+            "power": [
+                "power_mcm"
+            ],
+
+            "animal": [
+                "animal_husbandry_mcm"
+            ],
+
+            "environment": [
+                "environment_mcm"
+            ],
+
+            "other": [
+                "other_mcm"
+            ]
+        }
+
+        def get_sector_total(names):
+
+            for name in names:
+
+                if name in water_df.columns:
+
+                    values = pd.to_numeric(
+                        water_df[name],
+                        errors="coerce"
+                    ).fillna(0)
+
+                    return float(
+                        values.sum()
+                    )
+
+            return 0.0
+
+        agriculture = get_sector_total(
+            sector_columns["agriculture"]
+        )
+
+        domestic = get_sector_total(
+            sector_columns["domestic"]
+        )
+
+        industry = get_sector_total(
+            sector_columns["industry"]
+        )
+
+        power = get_sector_total(
+            sector_columns["power"]
+        )
+
+        animal = get_sector_total(
+            sector_columns["animal"]
+        )
+
+        environment = get_sector_total(
+            sector_columns["environment"]
+        )
+
+        other = get_sector_total(
+            sector_columns["other"]
+        )
+
+    # --------------------------------------------------------
+    # IF DEMAND IS ZERO, CALCULATE FROM SECTORS
+    # --------------------------------------------------------
+
+    sector_total = (
+
+        agriculture
+        + domestic
+        + industry
+        + power
+        + animal
+        + environment
+        + other
+    )
+
+    if total_demand <= 0:
+
+        total_demand = sector_total
+
+    # --------------------------------------------------------
+    # ALLOCATION
+    # --------------------------------------------------------
+
+    total_allocation = sector_total
+
+    ecological_minimum = environment
+
+    available_water = total_demand
+
+    deficit = max(
+        total_demand - total_allocation,
+        0
+    )
+
+    surplus = max(
+        total_allocation - total_demand,
+        0
+    )
+
+    # --------------------------------------------------------
+    # SECTOR TABLE
+    # --------------------------------------------------------
+
+    sectors = [
+
+        {
+            "name": "Domestic",
+            "icon": "🏠",
+            "demand": domestic,
+            "allocation": domestic,
+            "status": "Protected"
+        },
+
+        {
+            "name": "Agriculture",
+            "icon": "🌾",
+            "demand": agriculture,
+            "allocation": agriculture,
+            "status": "Monitored"
+        },
+
+        {
+            "name": "Industry",
+            "icon": "🏭",
+            "demand": industry,
+            "allocation": industry,
+            "status": "Normal"
+        },
+
+        {
+            "name": "Power",
+            "icon": "⚡",
+            "demand": power,
+            "allocation": power,
+            "status": "Normal"
+        },
+
+        {
+            "name": "Animal Husbandry",
+            "icon": "🐄",
+            "demand": animal,
+            "allocation": animal,
+            "status": "Normal"
+        },
+
+        {
+            "name": "Environment",
+            "icon": "🌱",
+            "demand": environment,
+            "allocation": environment,
+            "status": "Protected"
+        },
+
+        {
+            "name": "Other",
+            "icon": "💧",
+            "demand": other,
+            "allocation": other,
+            "status": "Normal"
+        }
+    ]
+
+    # --------------------------------------------------------
+    # SHARE %
+    # --------------------------------------------------------
+
+    for sector in sectors:
+
+        if total_allocation > 0:
+
+            sector["share"] = round(
+
+                (
+                    sector["allocation"]
+                    /
+                    total_allocation
+                ) * 100,
+
+                1
+            )
+
+        else:
+
+            sector["share"] = 0
+
+    # --------------------------------------------------------
+    # 14-DAY OUTLOOK
+    # --------------------------------------------------------
+
+    outlook_change = 7.1
+
+    outlook = []
+
+    for day in range(1, 15):
+
+        factor = (
+
+            1
+            +
+            (
+                outlook_change
+                /
+                100
+            )
+            *
+            (
+                day
+                /
+                14
+            )
+        )
+
+        outlook.append(
+
+            round(
+                total_demand * factor,
+                2
+            )
+        )
+
+    # --------------------------------------------------------
+    # POLICY
+    # --------------------------------------------------------
+
+    policy_scenario = "Balanced"
+
+    confidence = 86
+
+    # --------------------------------------------------------
+    # SEND DATA TO TEMPLATE
+    # --------------------------------------------------------
+
     return render_template(
-        "water_allocation.html"
+
+        "water_allocation.html",
+
+        total_demand=round(
+            total_demand,
+            2
+        ),
+
+        total_allocation=round(
+            total_allocation,
+            2
+        ),
+
+        available_water=round(
+            available_water,
+            2
+        ),
+
+        deficit=round(
+            deficit,
+            2
+        ),
+
+        surplus=round(
+            surplus,
+            2
+        ),
+
+        ecological_minimum=round(
+            ecological_minimum,
+            2
+        ),
+
+        outlook_change=outlook_change,
+
+        outlook=outlook,
+
+        policy_scenario=policy_scenario,
+
+        confidence=confidence,
+
+        sectors=sectors,
+
+        allocation_summary={
+
+            "domestic": domestic,
+
+            "agriculture": agriculture,
+
+            "industry": industry,
+
+            "power": power,
+
+            "animal": animal,
+
+            "environment": environment,
+
+            "other": other
+        }
     )
 
 
@@ -1923,20 +1776,468 @@ def water_allocation():
 @app.route("/risk-alerts")
 def risk_alerts():
 
+    rainfall_df = load_csv(
+        RAINFALL_FILE
+    )
+
+    reservoir_df = load_csv(
+        RESERVOIR_FILE
+    )
+
+    if reservoir_df.empty:
+
+        reservoir_df = load_csv(
+            RESERVOIR_DEMO_FILE
+        )
+
+    alerts = []
+
+    # --------------------------------------------------------
+    # Rainfall alert
+    # --------------------------------------------------------
+
+    if not rainfall_df.empty:
+
+        if "rainfall_mm" in rainfall_df.columns:
+
+            values = pd.to_numeric(
+                rainfall_df["rainfall_mm"],
+                errors="coerce"
+            ).dropna()
+
+            if not values.empty:
+
+                latest_rainfall = float(
+                    values.iloc[-1]
+                )
+
+                if latest_rainfall > 200:
+
+                    alerts.append(
+                        "High rainfall detected. Flood risk may increase."
+                    )
+
+                elif latest_rainfall < 5:
+
+                    alerts.append(
+                        "Very low rainfall detected. Water availability may be affected."
+                    )
+
+    # --------------------------------------------------------
+    # Reservoir alert
+    # --------------------------------------------------------
+
+    if not reservoir_df.empty:
+
+        for column in [
+
+            "storage_pct",
+
+            "availability_pct",
+
+            "reservoir_pct",
+
+            "level_pct"
+        ]:
+
+            if column in reservoir_df.columns:
+
+                values = pd.to_numeric(
+                    reservoir_df[column],
+                    errors="coerce"
+                ).dropna()
+
+                if not values.empty:
+
+                    latest = float(
+                        values.iloc[-1]
+                    )
+
+                    if latest < 30:
+
+                        alerts.append(
+                            "Reservoir storage is below 30%."
+                        )
+
+                    elif latest > 90:
+
+                        alerts.append(
+                            "Reservoir storage is above 90%."
+                        )
+
+                    break
+
+    # --------------------------------------------------------
+    # Default alert
+    # --------------------------------------------------------
+
+    if not alerts:
+
+        alerts.append(
+            "No major water risk alerts detected from available data."
+        )
+
+    alert_items = "".join(
+
+        f"<li>{alert}</li>"
+
+        for alert in alerts
+    )
+
+    return f"""
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+        <title>AETHERA | Risk Alerts</title>
+
+        <style>
+
+            body {{
+                font-family: Arial, sans-serif;
+                padding: 40px;
+                background: #06131f;
+                color: white;
+            }}
+
+            .card {{
+                background: rgba(255,255,255,0.08);
+                padding: 25px;
+                border-radius: 12px;
+                margin-top: 20px;
+                border: 1px solid rgba(255,255,255,0.1);
+            }}
+
+            a {{
+                text-decoration: none;
+                color: #59d8ff;
+            }}
+
+            li {{
+                margin: 12px 0;
+            }}
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <h1>AETHERA WATER INTELLIGENCE</h1>
+
+        <h2>Risk Alerts</h2>
+
+        <div class="card">
+
+            <ul>
+
+                {alert_items}
+
+            </ul>
+
+        </div>
+
+        <p>
+
+            <a href="/dashboard">
+                ← Back to Dashboard
+            </a>
+
+        </p>
+
+    </body>
+
+    </html>
+    """
+
+
+# ============================================================
+# GLOBAL WATER
+# ============================================================
+
+@app.route("/global-water")
+def global_water():
+
+    df = load_csv(
+        GLOBAL_WATER_FILE
+    )
+
+    countries = []
+
+    selected_country = request.args.get(
+        "country",
+        ""
+    ).strip()
+
+    selected_data = None
+
+    if not df.empty:
+
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.strip()
+        )
+
+    if (
+        not df.empty
+        and "Country" in df.columns
+    ):
+
+        countries = (
+            df["Country"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .unique()
+            .tolist()
+        )
+
+        countries.sort(
+            key=str.lower
+        )
+
+    if (
+        not selected_country
+        and countries
+    ):
+
+        selected_country = countries[0]
+
+    if (
+        not df.empty
+        and selected_country
+        and "Country" in df.columns
+    ):
+
+        selected_rows = df[
+            df["Country"]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            ==
+            selected_country.lower()
+        ]
+
+        if not selected_rows.empty:
+
+            row = selected_rows.iloc[0]
+
+            def number_value(column):
+
+                if column not in row.index:
+
+                    return 0
+
+                value = pd.to_numeric(
+                    row[column],
+                    errors="coerce"
+                )
+
+                if pd.isna(value):
+
+                    return 0
+
+                return round(
+                    float(value),
+                    2
+                )
+
+            agriculture = number_value(
+                "Agriculture"
+            )
+
+            industry = number_value(
+                "Industry"
+            )
+
+            domestic = number_value(
+                "Domestic"
+            )
+
+            total = number_value(
+                "Total"
+            )
+
+            if total == 0:
+
+                total = round(
+                    agriculture
+                    +
+                    industry
+                    +
+                    domestic,
+                    2
+                )
+
+            year = row.get(
+                "Year",
+                "N/A"
+            )
+
+            if pd.isna(year):
+
+                year = "N/A"
+
+            selected_data = {
+
+                "Country":
+                    str(
+                        row.get(
+                            "Country",
+                            selected_country
+                        )
+                    ),
+
+                "Year":
+                    str(year),
+
+                "Agriculture":
+                    agriculture,
+
+                "Industry":
+                    industry,
+
+                "Domestic":
+                    domestic,
+
+                "Total":
+                    total
+            }
+
+    water_summary = {
+
+        "countries":
+            len(countries),
+
+        "agriculture":
+            0,
+
+        "industry":
+            0,
+
+        "domestic":
+            0
+    }
+
+    for key, column in [
+
+        ("agriculture", "Agriculture"),
+
+        ("industry", "Industry"),
+
+        ("domestic", "Domestic")
+
+    ]:
+
+        if (
+            not df.empty
+            and column in df.columns
+        ):
+
+            values = pd.to_numeric(
+                df[column],
+                errors="coerce"
+            ).dropna()
+
+            if not values.empty:
+
+                water_summary[key] = round(
+                    float(values.mean()),
+                    2
+                )
+
     return render_template(
-        "risk_alerts.html"
+
+        "global_water.html",
+
+        countries=countries,
+
+        global_water_data=
+            dataframe_records(df),
+
+        selected_country=
+            selected_country,
+
+        selected_data=
+            make_json_safe(
+                selected_data
+            ),
+
+        water_summary=
+            make_json_safe(
+                water_summary
+            )
     )
 
 
 # ============================================================
-# DIGITAL TWIN
+# WATER RESOURCES
 # ============================================================
 
-@app.route("/digital-twin")
-def digital_twin():
+@app.route("/water-resources")
+def water_resources():
 
-    return render_template(
-        "digital_twin.html"
+    if template_exists(
+        "water_resources.html"
+    ):
+
+        return render_template(
+            "water_resources.html"
+        )
+
+    if template_exists(
+        "water_resorces.html"
+    ):
+
+        return render_template(
+            "water_resorces.html"
+        )
+
+    return render_existing_template(
+        "water_resources.html"
+    )
+
+
+# ============================================================
+# OLD / MISSPELLED WATER RESOURCES
+# ============================================================
+
+@app.route("/water-resorces")
+def water_resorces():
+
+    if template_exists(
+        "water_resorces.html"
+    ):
+
+        return render_template(
+            "water_resorces.html"
+        )
+
+    if template_exists(
+        "water_resources.html"
+    ):
+
+        return render_template(
+            "water_resources.html"
+        )
+
+    return render_existing_template(
+        "water_resorces.html"
+    )
+
+
+# ============================================================
+# MAHARASHTRA WATER
+# ============================================================
+
+@app.route("/maharashtra-water")
+def maharashtra_water():
+
+    return render_existing_template(
+        "maharashtra_water.html"
     )
 
 
@@ -1953,143 +2254,309 @@ def sustainability():
 
 
 # ============================================================
-# ANALYTICS
+# DIGITAL TWIN
 # ============================================================
 
-@app.route("/analytics")
-def analytics():
+@app.route("/digital_twin")
+def digital_twin():
 
-    return render_template(
-        "analytics.html"
-    )
+    # --------------------------------------------------------
+    # RAINFALL DATA
+    # --------------------------------------------------------
+    rainfall_total = 0
+    latest_rainfall = 0
 
+    try:
+        if rainfall_df is not None and not rainfall_df.empty:
 
-# ============================================================
-# GLOBAL WATER
-# ============================================================
-
-@app.route("/global-water")
-def global_water():
-
-    df = load_csv(
-        GLOBAL_WATER_FILE
-    )
-
-    if df.empty:
-
-        df = pd.DataFrame({
-
-            "country": [
-                "India",
-                "USA",
-                "China",
-                "Brazil",
-                "Australia"
-            ],
-
-            "year": [
-                2026,
-                2026,
-                2026,
-                2026,
-                2026
-            ],
-
-            "agriculture": [
-                8420,
-                6210,
-                7310,
-                5140,
-                2940
-            ],
-
-            "industry": [
-                3160,
-                2840,
-                4020,
-                2180,
-                1280
-            ],
-
-            "domestic": [
-                2280,
-                1950,
-                2140,
-                1430,
-                860
+            rainfall_columns = [
+                "rainfall_mm",
+                "rainfall",
+                "Rainfall",
+                "precipitation_mm",
+                "precipitation"
             ]
 
-        })
+            rainfall_col = next(
+                (c for c in rainfall_columns if c in rainfall_df.columns),
+                None
+            )
 
-    records = safe_records(
-        df
+            if rainfall_col:
+                rainfall_values = pd.to_numeric(
+                    rainfall_df[rainfall_col],
+                    errors="coerce"
+                ).dropna()
+
+                if len(rainfall_values) > 0:
+                    rainfall_total = float(rainfall_values.sum())
+                    latest_rainfall = float(rainfall_values.iloc[-1])
+
+    except Exception as e:
+        print("Digital Twin rainfall error:", e)
+
+
+    # --------------------------------------------------------
+    # WATER DEMAND DATA
+    # --------------------------------------------------------
+    demand_total = 0
+
+    try:
+        if water_use_2026_df is not None and not water_use_2026_df.empty:
+
+            demand_columns = [
+                "total_use_mcm",
+                "total_demand_mcm",
+                "demand_mcm"
+            ]
+
+            demand_col = next(
+                (c for c in demand_columns if c in water_use_2026_df.columns),
+                None
+            )
+
+            if demand_col:
+                demand_values = pd.to_numeric(
+                    water_use_2026_df[demand_col],
+                    errors="coerce"
+                ).dropna()
+
+                if len(demand_values) > 0:
+                    demand_total = float(demand_values.sum())
+
+    except Exception as e:
+        print("Digital Twin demand error:", e)
+
+
+    # --------------------------------------------------------
+    # RESERVOIR DATA
+    # --------------------------------------------------------
+    reservoir_level = 0
+    reservoir_capacity = 0
+
+    try:
+        if reservoir_df is not None and not reservoir_df.empty:
+
+            level_columns = [
+                "storage_mcm",
+                "reservoir_storage",
+                "storage",
+                "level_mcm",
+                "level"
+            ]
+
+            capacity_columns = [
+                "capacity_mcm",
+                "reservoir_capacity",
+                "capacity"
+            ]
+
+            level_col = next(
+                (c for c in level_columns if c in reservoir_df.columns),
+                None
+            )
+
+            capacity_col = next(
+                (c for c in capacity_columns if c in reservoir_df.columns),
+                None
+            )
+
+            if level_col:
+
+                level_values = pd.to_numeric(
+                    reservoir_df[level_col],
+                    errors="coerce"
+                ).dropna()
+
+                if len(level_values) > 0:
+                    reservoir_level = float(level_values.iloc[-1])
+
+            if capacity_col:
+
+                capacity_values = pd.to_numeric(
+                    reservoir_df[capacity_col],
+                    errors="coerce"
+                ).dropna()
+
+                if len(capacity_values) > 0:
+                    reservoir_capacity = float(capacity_values.iloc[-1])
+
+    except Exception as e:
+        print("Digital Twin reservoir error:", e)
+
+
+    # --------------------------------------------------------
+    # RESERVOIR PERCENTAGE
+    # --------------------------------------------------------
+    reservoir_percent = 0
+
+    if reservoir_capacity > 0:
+        reservoir_percent = (
+            reservoir_level / reservoir_capacity
+        ) * 100
+
+    reservoir_percent = max(
+        0,
+        min(100, reservoir_percent)
     )
 
-    countries = []
 
-    if (
-        not df.empty
-        and
-        "country" in df.columns
+    # --------------------------------------------------------
+    # SCENARIO BASE VALUES
+    # --------------------------------------------------------
+    base_availability = max(
+        0,
+        min(
+            100,
+            reservoir_percent + (rainfall_total * 0.02)
+        )
+    )
+
+    base_demand_index = min(
+        100,
+        50 + (demand_total * 0.03)
+    )
+
+    base_resilience = max(
+        0,
+        min(
+            100,
+            60
+            + (rainfall_total * 0.02)
+            + (reservoir_percent * 0.25)
+            - (demand_total * 0.01)
+        )
+    )
+
+
+    # --------------------------------------------------------
+    # DIGITAL TWIN DATA
+    # --------------------------------------------------------
+    digital_twin_data = {
+
+        "rainfall_total": round(
+            rainfall_total, 2
+        ),
+
+        "latest_rainfall": round(
+            latest_rainfall, 2
+        ),
+
+        "demand_total": round(
+            demand_total, 2
+        ),
+
+        "reservoir_level": round(
+            reservoir_level, 2
+        ),
+
+        "reservoir_capacity": round(
+            reservoir_capacity, 2
+        ),
+
+        "reservoir_percent": round(
+            reservoir_percent, 1
+        ),
+
+        "availability": round(
+            base_availability, 1
+        ),
+
+        "demand_index": round(
+            base_demand_index, 1
+        ),
+
+        "resilience": round(
+            base_resilience, 1
+        )
+    }
+
+
+    return render_template(
+        "digital_twin.html",
+        digital_twin=digital_twin_data
+    )
+
+# ============================================================
+# ERROR 404
+# ============================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    if template_exists(
+        "404.html"
     ):
 
-        countries = sorted(
+        return render_template(
+            "404.html"
+        ), 404
 
-            df[
-                "country"
-            ]
-            .dropna()
-            .astype(str)
-            .unique()
-            .tolist()
-
-        )
-
-    if not countries:
-
-        countries = [
-            "India",
-            "USA",
-            "China",
-            "Brazil",
-            "Australia"
-        ]
-
-    return render_template(
-
-        "global_water.html",
-
-        countries=countries,
-
-        global_water_data=
-            records,
-
-        selected_country=
-            request.args.get(
-                "country",
-                ""
-            ),
-
-    )
+    return (
+        "<h1>404 - Page Not Found</h1>"
+        "<a href='/dashboard'>Dashboard</a>"
+    ), 404
 
 
 # ============================================================
-# RUN
+# ERROR 500
+# ============================================================
+
+@app.errorhandler(500)
+def internal_server_error(error):
+
+    return (
+        "<h1>AETHERA Server Error</h1>"
+        "<p>Something went wrong.</p>"
+        "<a href='/dashboard'>Return Dashboard</a>"
+    ), 500
+
+
+# ============================================================
+# RUN SERVER
 # ============================================================
 
 if __name__ == "__main__":
 
-    app.run(
+    print()
 
-        host="127.0.0.1",
+    print("========================================")
 
-        port=5000,
-
-        debug=True
-
+    print(
+        " AETHERA WATER INTELLIGENCE"
     )
+
+    print("========================================")
+
+    print(
+        "PROJECT ROOT :",
+        PROJECT_ROOT
+    )
+
+    print(
+        "CURATED DIR  :",
+        CURATED_DIR
+    )
+
+    print(
+        "DATA DIR     :",
+        DATA_DIR
+    )
+
+    print("========================================")
+
+    print("SERVER:")
+
+    print(
+        "http://127.0.0.1:8000"
+    )
+
+    print("========================================")
+
+    print()
+
     app.run(
-    debug=True,
-    host="127.0.0.1",
-    port=8000
-)
+        debug=True,
+        host="127.0.0.1",
+        port=8000
+    )

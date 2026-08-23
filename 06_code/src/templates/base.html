@@ -1,35 +1,791 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Aethera: an AI-powered water intelligence platform by Chatake Innoworks Pvt. Ltd.">
-  <title>{% block title %}Aethera{% endblock %} · Chatake Innoworks</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  {% block head %}{% endblock %}
+
+    <meta charset="utf-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <meta name="description"
+          content="Aethera: an AI-powered water intelligence platform by Chatake Innoworks Pvt. Ltd.">
+
+    <title>
+        {% block title %}Aethera{% endblock %} · Chatake Innoworks
+    </title>
+
+
+    <!-- ============================================================
+         GOOGLE FONTS
+    ============================================================ -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+
+    <!-- ============================================================
+         MAIN CSS
+    ============================================================ -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+
+
+    <!-- ============================================================
+         AETHERA NAVBAR + GLOBAL HEADER FORMATTING
+    ============================================================ -->
+
+    <style>
+
+        /* ========================================================
+           GLOBAL
+        ======================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Manrope", Arial, Helvetica, sans-serif;
+        }
+
+
+        /* ========================================================
+           AETHERA HEADER
+        ======================================================== */
+
+        .site-header {
+
+            width: 100%;
+
+            min-height: 78px;
+
+            padding: 16px 35px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 28px;
+
+            position: relative;
+
+            z-index: 1000;
+
+            background: rgba(255, 255, 255, 0.96);
+
+            border-bottom: 1px solid rgba(8, 47, 42, 0.10);
+
+            box-shadow:
+                0 5px 20px rgba(8, 47, 42, 0.06);
+
+        }
+
+
+        /* ========================================================
+           AETHERA LOGO
+        ======================================================== */
+
+        .site-header .brand {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 9px;
+
+            text-decoration: none;
+
+            color: #082f2a;
+
+            font-size: 20px;
+
+            font-weight: 900;
+
+            letter-spacing: 1.5px;
+
+            white-space: nowrap;
+
+        }
+
+
+        .site-header .brand-mark {
+
+            width: 34px;
+
+            height: 34px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #082f2a,
+                    #147d68
+                );
+
+            color: white;
+
+            font-size: 17px;
+
+            font-weight: 900;
+
+            box-shadow:
+                0 5px 15px rgba(8, 47, 42, 0.16);
+
+        }
+
+
+        /* ========================================================
+           NAVIGATION
+        ======================================================== */
+
+        .site-nav {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 26px;
+
+        }
+
+
+        .site-nav a {
+
+            position: relative;
+
+            padding: 8px 2px;
+
+            text-decoration: none;
+
+            color: #24443f;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            letter-spacing: 0.2px;
+
+            text-align: center;
+
+            transition:
+                color 0.2s ease,
+                transform 0.2s ease;
+
+        }
+
+
+        .site-nav a:hover {
+
+            color: #147d68;
+
+            transform: translateY(-1px);
+
+        }
+
+
+        .site-nav a::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            height: 2px;
+
+            border-radius: 10px;
+
+            background: #31c8d8;
+
+            transform: scaleX(0);
+
+            transform-origin: center;
+
+            transition:
+                transform 0.2s ease;
+
+        }
+
+
+        .site-nav a:hover::after {
+
+            transform: scaleX(1);
+
+        }
+
+
+        /* ========================================================
+           MENU BUTTON
+        ======================================================== */
+
+        .menu-toggle {
+
+            display: none;
+
+            padding: 9px 14px;
+
+            border: 1px solid rgba(8, 47, 42, 0.15);
+
+            border-radius: 10px;
+
+            background: white;
+
+            color: #082f2a;
+
+            font-family: inherit;
+
+            font-size: 12px;
+
+            font-weight: 900;
+
+            cursor: pointer;
+
+        }
+
+
+        /* ========================================================
+           OPEN WORKSPACE BUTTON
+        ======================================================== */
+
+        .header-cta {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+
+            padding: 11px 17px;
+
+            border-radius: 12px;
+
+            background: #082f2a;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: 900;
+
+            letter-spacing: 0.2px;
+
+            white-space: nowrap;
+
+            box-shadow:
+                0 7px 18px rgba(8, 47, 42, 0.14);
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+
+        }
+
+
+        .header-cta:hover {
+
+            background: #147d68;
+
+            transform: translateY(-2px);
+
+        }
+
+
+        .header-cta span {
+
+            font-size: 15px;
+
+            font-weight: 900;
+
+        }
+
+
+        /* ========================================================
+           MAIN
+        ======================================================== */
+
+        main {
+
+            width: 100%;
+
+        }
+
+
+        /* ========================================================
+           FOOTER
+        ======================================================== */
+
+        .site-footer {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 30px;
+
+            padding: 35px;
+
+            margin-top: 40px;
+
+            background: #082f2a;
+
+            color: white;
+
+        }
+
+
+        .site-footer .brand {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 900;
+
+            letter-spacing: 1.5px;
+
+        }
+
+
+        .site-footer .brand-mark {
+
+            width: 32px;
+
+            height: 32px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 9px;
+
+            background: #147d68;
+
+            color: white;
+
+            font-weight: 900;
+
+        }
+
+
+        .site-footer p {
+
+            margin: 10px 0 0;
+
+            color: rgba(255,255,255,0.65);
+
+            font-size: 12px;
+
+        }
+
+
+        .footer-meta {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 5px;
+
+            text-align: right;
+
+        }
+
+
+        .footer-meta span {
+
+            color: rgba(255,255,255,0.55);
+
+            font-size: 11px;
+
+        }
+
+
+        .footer-meta strong {
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+        }
+
+
+        .footer-meta small {
+
+            color: rgba(255,255,255,0.50);
+
+            font-size: 10px;
+
+        }
+
+
+        /* ========================================================
+           MOBILE HEADER
+        ======================================================== */
+
+        @media (max-width: 850px) {
+
+            .site-header {
+
+                min-height: 70px;
+
+                padding: 13px 18px;
+
+                justify-content: space-between;
+
+                gap: 12px;
+
+            }
+
+
+            .site-header .brand {
+
+                font-size: 18px;
+
+            }
+
+
+            .menu-toggle {
+
+                display: inline-flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+            }
+
+
+            .site-nav {
+
+                display: none;
+
+                position: absolute;
+
+                top: 70px;
+
+                left: 12px;
+
+                right: 12px;
+
+                flex-direction: column;
+
+                gap: 5px;
+
+                padding: 15px;
+
+                border-radius: 15px;
+
+                background: white;
+
+                border: 1px solid rgba(8,47,42,0.10);
+
+                box-shadow:
+                    0 15px 35px rgba(8,47,42,0.12);
+
+            }
+
+
+            .site-nav a {
+
+                width: 100%;
+
+                padding: 12px;
+
+                border-radius: 9px;
+
+            }
+
+
+            .site-nav a:hover {
+
+                background: #eef8f5;
+
+            }
+
+
+            .header-cta {
+
+                padding: 9px 12px;
+
+                font-size: 11px;
+
+            }
+
+        }
+
+
+        /* ========================================================
+           SMALL MOBILE
+        ======================================================== */
+
+        @media (max-width: 560px) {
+
+            .site-header {
+
+                flex-wrap: wrap;
+
+            }
+
+
+            .site-header .brand {
+
+                margin-right: auto;
+
+            }
+
+
+            .header-cta {
+
+                display: none;
+
+            }
+
+
+            .site-footer {
+
+                flex-direction: column;
+
+                align-items: center;
+
+                text-align: center;
+
+                padding: 28px 18px;
+
+            }
+
+
+            .footer-meta {
+
+                text-align: center;
+
+            }
+
+        }
+
+    </style>
+
+
+    {% block head %}{% endblock %}
+
 </head>
+
+
 <body>
-  <div class="atmosphere"></div>
-  <header class="site-header">
-    <a class="brand" href="{{ url_for('home') }}" aria-label="Aethera home"><span class="brand-mark">A</span><span>AETHERA</span></a>
-    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">Menu</button>
-    <nav class="site-nav" aria-label="Main navigation">
-      <a href="{{ url_for('dashboard') }}">Command center</a>
-      <a href="{{ url_for('digital_twin') }}">Digital twin</a>
-      <a href="{{ url_for('sustainability') }}">Impact</a>
-      <a href="{{ url_for('about') }}">About</a>
-    </nav>
-    <a class="header-cta" href="{{ url_for('dashboard') }}">Open workspace <span>↗</span></a>
-  </header>
-  <main>{% block content %}{% endblock %}</main>
-  <footer class="site-footer">
-    <div><a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">A</span><span>AETHERA</span></a><p>Water intelligence for resilient futures.</p></div>
-    <div class="footer-meta"><span>An engineering initiative by</span><strong>Chatake Innoworks Pvt. Ltd.</strong><small>MindforgeAI Division · © {{ current_year }}</small></div>
-  </footer>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-  {% block scripts %}{% endblock %}
+
+    <!-- ============================================================
+         BACKGROUND ATMOSPHERE
+    ============================================================ -->
+
+    <div class="atmosphere"></div>
+
+
+    <!-- ============================================================
+         AETHERA NAVBAR
+    ============================================================ -->
+
+    <header class="site-header">
+
+
+        <!-- LOGO -->
+
+        <a
+            class="brand"
+            href="{{ url_for('home') }}"
+            aria-label="Aethera home"
+        >
+
+            <span class="brand-mark">
+                A
+            </span>
+
+            <span>
+                AETHERA
+            </span>
+
+        </a>
+
+
+        <!-- MOBILE MENU BUTTON -->
+
+        <button
+            class="menu-toggle"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            Menu
+        </button>
+
+
+        <!-- NAVIGATION -->
+
+        <nav
+            class="site-nav"
+            aria-label="Main navigation"
+        >
+
+            <a href="{{ url_for('dashboard') }}">
+                Command Center
+            </a>
+
+            <a href="{{ url_for('digital_twin') }}">
+                Digital Twin
+            </a>
+
+            <a href="{{ url_for('sustainability') }}">
+                Impact
+            </a>
+
+            <a href="{{ url_for('about') }}">
+                About
+            </a>
+
+        </nav>
+
+
+        <!-- WORKSPACE BUTTON -->
+
+        <a
+            class="header-cta"
+            href="{{ url_for('dashboard') }}"
+        >
+
+            Open Workspace
+
+            <span>
+                ↗
+            </span>
+
+        </a>
+
+
+    </header>
+
+
+    <!-- ============================================================
+         MAIN CONTENT
+    ============================================================ -->
+
+    <main>
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+
+    <footer class="site-footer">
+
+
+        <div>
+
+            <a
+                class="brand"
+                href="{{ url_for('home') }}"
+            >
+
+                <span class="brand-mark">
+                    A
+                </span>
+
+                <span>
+                    AETHERA
+                </span>
+
+            </a>
+
+            <p>
+                Water intelligence for resilient futures.
+            </p>
+
+        </div>
+
+
+        <div class="footer-meta">
+
+            <span>
+                An engineering initiative by
+            </span>
+
+            <strong>
+                Chatake Innoworks Pvt. Ltd.
+            </strong>
+
+            <small>
+                MindforgeAI Division · © {{ current_year }}
+            </small>
+
+        </div>
+
+
+    </footer>
+
+
+    <!-- ============================================================
+         JAVASCRIPT
+    ============================================================ -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}">
+    </script>
+
+
+    {% block scripts %}
+
+    {% endblock %}
+
+
 </body>
+
 </html>

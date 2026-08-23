@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}AETHERA | Rainfall Prediction{% endblock %}
+
+{% block content %}
+
+<style>
+    .rainfall-page {
+        padding: 30px;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 32px;
+    }
+
+    .page-header p {
+        color: #667085;
+        margin-top: 8px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 14px;
+        padding: 22px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+        font-size: 14px;
+        color: #667085;
+        margin-bottom: 10px;
+    }
+
+    .card-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .section {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 25px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .section h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .chart-box {
+        height: 380px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+        background: #f8fafc;
+    }
+
+    .prediction {
+        background: #eef6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .prediction-value {
+        font-size: 34px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 10px;
+        text-decoration: none;
+    }
+
+    @media (max-width: 900px) {
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .rainfall-page {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="rainfall-page">
+
+    <div class="page-header">
+        <h1>🌧️ Rainfall Prediction</h1>
+        <p>AETHERA Water Intelligence — Rainfall Analysis & Prediction</p>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-title">
+                Total Rainfall — 2026
+            </div>
+
+            <div class="card-value">
+                {{ rainfall_2026_total }} mm
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Total Runoff
+            </div>
+
+            <div class="card-value">
+                {{ runoff_2026_total }} MCM
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Groundwater Recharge
+            </div>
+
+            <div class="card-value">
+                {{ recharge_2026_total }} MCM
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Latest Rainfall
+            </div>
+
+            <div class="card-value">
+                {% if rainfall_data %}
+                    {{ rainfall_data[-1].rainfall_mm }} mm
+                {% else %}
+                    0 mm
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- PREDICTION -->
+
+    <div class="section">
+
+        <h2>🔮 Next Rainfall Prediction</h2>
+
+        <div class="prediction">
+
+            <div>
+                Based on the available rainfall data
+            </div>
+
+            <div
+                id="predictionValue"
+                class="prediction-value"
+            >
+                Calculating...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHART -->
+
+    <div class="section">
+
+        <h2>📊 Monthly Rainfall Trend</h2>
+
+        <div class="chart-box">
+
+            <canvas id="rainfallChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- DATA TABLE -->
+
+    <div class="section">
+
+        <h2>📋 Rainfall Data</h2>
+
+        {% if rainfall_data %}
+
+        <div style="overflow-x:auto;">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Rainfall (mm)</th>
+                        <th>Runoff (MCM)</th>
+                        <th>Groundwater Recharge (MCM)</th>
+                        <th>Quality</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for row in rainfall_data %}
+
+                    <tr>
+
+                        <td>
+                            {{ row.date }}
+                        </td>
+
+                        <td>
+                            {{ row.year }}
+                        </td>
+
+                        <td>
+                            {{ row.month }}
+                        </td>
+
+                        <td>
+                            {{ row.rainfall_mm }}
+                        </td>
+
+                        <td>
+                            {{ row.runoff_mcm }}
+                        </td>
+
+                        <td>
+                            {{ row.groundwater_recharge_mcm }}
+                        </td>
+
+                        <td>
+                            {{ row.quality_flag }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <p>
+            No rainfall data available.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <a
+        href="/dashboard"
+        class="back-link"
+    >
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+
+<!-- CHART.JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+
+<script>
+
+    const rainfallData =
+        {{ rainfall_data | tojson }};
+
+
+    const labels =
+        rainfallData.map(
+            row => row.month || row.date
+        );
+
+
+    const rainfallValues =
+        rainfallData.map(
+            row => Number(row.rainfall_mm || 0)
+        );
+
+
+    const ctx =
+        document
+        .getElementById("rainfallChart")
+        .getContext("2d");
+
+
+    new Chart(
+        ctx,
+        {
+            type: "line",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+                    {
+                        label: "Rainfall (mm)",
+
+                        data: rainfallValues,
+
+                        tension: 0.3,
+
+                        fill: false,
+
+                        borderWidth: 3,
+
+                        pointRadius: 4
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: true
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: "Rainfall (mm)"
+                        }
+
+                    },
+
+                    x: {
+
+                        title: {
+                            display: true,
+                            text: "Month"
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /*
+       Simple frontend estimation.
+       The actual Python ML model remains separate.
+    */
+
+    if (rainfallValues.length > 0) {
+
+        const recentValues =
+            rainfallValues.slice(-3);
+
+        const average =
+            recentValues.reduce(
+                (sum, value) =>
+                    sum + value,
+                0
+            ) / recentValues.length;
+
+
+        document.getElementById(
+            "predictionValue"
+        ).innerText =
+            average.toFixed(2)
+            + " mm";
+
+    } else {
+
+        document.getElementById(
+            "predictionValue"
+        ).innerText =
+            "No data available";
+
+    }
+
+</script>
+
+{% endblock %}

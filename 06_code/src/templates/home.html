@@ -1,0 +1,814 @@
+{% extends "base.html" %}
+
+{% block title %}
+AETHERA | Water Intelligence
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* ============================================================
+   AETHERA MAIN PAGE
+============================================================ */
+
+.aethera-home {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    padding: 45px 25px 65px;
+}
+
+
+/* ============================================================
+   HERO
+============================================================ */
+
+.aethera-hero {
+    max-width: 1200px;
+    min-height: 470px;
+
+    margin: 0 auto;
+    padding: 55px 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 50px;
+
+    position: relative;
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    border-radius: 28px;
+
+    border: 1px solid rgba(89, 216, 255, 0.18);
+
+    background:
+        radial-gradient(
+            circle at 85% 45%,
+            rgba(89, 216, 255, 0.12),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(7, 30, 43, 0.98),
+            rgba(4, 16, 28, 0.98)
+        );
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ============================================================
+   HERO CONTENT
+============================================================ */
+
+.aethera-content {
+    max-width: 700px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.aethera-eyebrow {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 18px;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #59d8ff;
+}
+
+.aethera-eyebrow-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #59d8ff;
+
+    box-shadow:
+        0 0 13px rgba(89, 216, 255, 0.9);
+}
+
+
+/* ============================================================
+   TITLE
+============================================================ */
+
+.aethera-content h1 {
+    margin: 0;
+
+    font-size: clamp(
+        48px,
+        7vw,
+        82px
+    );
+
+    line-height: 0.98;
+
+    letter-spacing: -4px;
+
+    font-weight: 850;
+
+    color: #f5fcff;
+}
+
+.aethera-title-main {
+    display: block;
+}
+
+.aethera-title-sub {
+    display: block;
+
+    margin-top: 8px;
+
+    color: #59d8ff;
+}
+
+
+/* ============================================================
+   DESCRIPTION
+============================================================ */
+
+.aethera-content p {
+    max-width: 620px;
+
+    margin: 24px 0 0;
+
+    font-size: 15px;
+
+    line-height: 1.75;
+
+    color:
+        rgba(
+            225,
+            241,
+            248,
+            0.68
+        );
+}
+
+
+/* ============================================================
+   WATER VISUAL
+============================================================ */
+
+.aethera-visual {
+    width: 300px;
+    height: 300px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+}
+
+.aethera-circle {
+    width: 245px;
+    height: 245px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    border:
+        1px solid
+        rgba(
+            89,
+            216,
+            255,
+            0.25
+        );
+
+    box-shadow:
+        0 0 60px
+        rgba(
+            89,
+            216,
+            255,
+            0.09
+        );
+}
+
+.aethera-circle::before {
+    content: "";
+
+    position: absolute;
+
+    width: 175px;
+    height: 175px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(
+            79,
+            124,
+            255,
+            0.25
+        );
+}
+
+.aethera-center {
+    width: 90px;
+    height: 90px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 30px;
+
+    color: #59d8ff;
+
+    background:
+        rgba(
+            8,
+            24,
+            39,
+            0.95
+        );
+
+    border:
+        1px solid
+        rgba(
+            89,
+            216,
+            255,
+            0.25
+        );
+
+    box-shadow:
+        0 0 35px
+        rgba(
+            89,
+            216,
+            255,
+            0.15
+        );
+}
+
+.aethera-dot {
+    position: absolute;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #59d8ff;
+
+    box-shadow:
+        0 0 14px
+        rgba(
+            89,
+            216,
+            255,
+            0.9
+        );
+}
+
+.aethera-dot.one {
+    top: 24px;
+    right: 55px;
+}
+
+.aethera-dot.two {
+    bottom: 35px;
+    left: 38px;
+
+    background: #6ee7b7;
+}
+
+.aethera-dot.three {
+    top: 110px;
+    left: 5px;
+
+    background: #818cf8;
+}
+
+
+/* ============================================================
+   MODULE SECTION
+============================================================ */
+
+.aethera-modules {
+    max-width: 1200px;
+
+    margin: 42px auto 0;
+}
+
+.aethera-heading {
+    margin-bottom: 20px;
+}
+
+.aethera-heading span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #59d8ff;
+}
+
+.aethera-heading h2 {
+    margin: 0;
+
+    font-size: 27px;
+
+    color: #f4fbff;
+}
+
+.aethera-heading p {
+    margin: 8px 0 0;
+
+    font-size: 13px;
+
+    color:
+        rgba(
+            220,
+            239,
+            248,
+            0.55
+        );
+}
+
+
+/* ============================================================
+   MODULE GRID
+============================================================ */
+
+.aethera-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+
+    gap: 18px;
+}
+
+
+/* ============================================================
+   MODULE CARD
+============================================================ */
+
+.aethera-card {
+    min-height: 155px;
+
+    padding: 23px;
+
+    box-sizing: border-box;
+
+    border-radius: 17px;
+
+    text-decoration: none;
+
+    border:
+        1px solid
+        rgba(
+            89,
+            216,
+            255,
+            0.12
+        );
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(
+                11,
+                27,
+                44,
+                0.96
+            ),
+            rgba(
+                6,
+                15,
+                27,
+                0.97
+            )
+        );
+
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+.aethera-card:hover {
+    transform: translateY(-4px);
+
+    border-color:
+        rgba(
+            89,
+            216,
+            255,
+            0.28
+        );
+
+    box-shadow:
+        0 18px 45px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+}
+
+.aethera-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 11px;
+
+    color: #59d8ff;
+
+    background:
+        rgba(
+            89,
+            216,
+            255,
+            0.07
+        );
+
+    border:
+        1px solid
+        rgba(
+            89,
+            216,
+            255,
+            0.12
+        );
+}
+
+.aethera-card h3 {
+    margin: 0 0 7px;
+
+    font-size: 16px;
+
+    color: #f4fbff;
+}
+
+.aethera-card p {
+    margin: 0;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+    color:
+        rgba(
+            220,
+            239,
+            248,
+            0.55
+        );
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 950px) {
+
+    .aethera-hero {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 45px 35px;
+    }
+
+    .aethera-visual {
+        align-self: center;
+    }
+
+    .aethera-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .aethera-home {
+        padding: 25px 15px 50px;
+    }
+
+    .aethera-hero {
+        padding: 32px 24px;
+
+        text-align: left;
+    }
+
+    .aethera-content h1 {
+        letter-spacing: -2px;
+    }
+
+    .aethera-visual {
+        width: 100%;
+        height: 250px;
+    }
+
+    .aethera-circle {
+        width: 205px;
+        height: 205px;
+    }
+
+    .aethera-circle::before {
+        width: 150px;
+        height: 150px;
+    }
+
+    .aethera-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+
+<!-- ============================================================
+     AETHERA MAIN PAGE
+============================================================ -->
+
+<section class="aethera-home">
+
+
+    <!-- HERO -->
+
+    <div class="aethera-hero">
+
+
+        <div class="aethera-content">
+
+
+            <div class="aethera-eyebrow">
+
+                <span class="aethera-eyebrow-dot"></span>
+
+                AETHERA WATER INTELLIGENCE
+
+            </div>
+
+
+            <h1>
+
+                <span class="aethera-title-main">
+                    AETHERA
+                </span>
+
+                <span class="aethera-title-sub">
+                    Water Intelligence
+                </span>
+
+            </h1>
+
+
+            <p>
+
+                Water intelligence for resilient futures.
+                Explore the existing AETHERA intelligence
+                modules and use evidence to understand
+                rainfall, demand, reservoirs and water systems.
+
+            </p>
+
+
+        </div>
+
+
+        <!-- WATER VISUAL -->
+
+        <div class="aethera-visual">
+
+            <div class="aethera-circle">
+
+                <div class="aethera-center">
+                    ◇
+                </div>
+
+                <div class="aethera-dot one"></div>
+
+                <div class="aethera-dot two"></div>
+
+                <div class="aethera-dot three"></div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- MODULES -->
+
+    <div class="aethera-modules">
+
+
+        <div class="aethera-heading">
+
+            <span>
+                AETHERA INTELLIGENCE
+            </span>
+
+            <h2>
+                Explore the platform
+            </h2>
+
+            <p>
+                Open the existing AETHERA modules.
+            </p>
+
+        </div>
+
+
+        <div class="aethera-grid">
+
+
+            <!-- RAINFALL -->
+
+            <a
+                href="{{ url_for('rainfall') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ◌
+                </div>
+
+                <h3>
+                    Rainfall Prediction
+                </h3>
+
+                <p>
+                    Open rainfall intelligence.
+                </p>
+
+            </a>
+
+
+            <!-- DEMAND -->
+
+            <a
+                href="{{ url_for('demand') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ◇
+                </div>
+
+                <h3>
+                    Water Demand
+                </h3>
+
+                <p>
+                    Open water demand intelligence.
+                </p>
+
+            </a>
+
+
+            <!-- RESERVOIR -->
+
+            <a
+                href="{{ url_for('reservoir') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ▱
+                </div>
+
+                <h3>
+                    Reservoir
+                </h3>
+
+                <p>
+                    Open reservoir monitoring.
+                </p>
+
+            </a>
+
+
+            <!-- WATER QUALITY -->
+
+            <a
+                href="{{ url_for('water_quality') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ◈
+                </div>
+
+                <h3>
+                    Water Quality
+                </h3>
+
+                <p>
+                    Open water quality intelligence.
+                </p>
+
+            </a>
+
+
+            <!-- DIGITAL TWIN -->
+
+            <a
+                href="{{ url_for('digital_twin') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ◎
+                </div>
+
+                <h3>
+                    Digital Twin
+                </h3>
+
+                <p>
+                    Open the existing Digital Twin.
+                </p>
+
+            </a>
+
+
+            <!-- IMPACT -->
+
+            <a
+                href="{{ url_for('sustainability') }}"
+                class="aethera-card"
+            >
+
+                <div class="aethera-icon">
+                    ✦
+                </div>
+
+                <h3>
+                    Impact
+                </h3>
+
+                <p>
+                    Open the existing Impact module.
+                </p>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
