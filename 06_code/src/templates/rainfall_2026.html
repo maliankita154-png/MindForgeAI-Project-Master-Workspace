@@ -122,7 +122,7 @@
 
     <div class="page-header">
         <h1>🌧️ Rainfall Prediction</h1>
-        <p>AETHERA Water Intelligence — Rainfall Analysis & Prediction</p>
+        <p>AETHERA Water Intelligence — 2025 and 2026 Rainfall Analysis</p>
     </div>
 
     <!-- SUMMARY CARDS -->
@@ -141,21 +141,31 @@
 
         <div class="card">
             <div class="card-title">
-                Total Runoff
+                Total Rainfall — 2025
             </div>
 
             <div class="card-value">
-                {{ runoff_2026_total }} MCM
+                {{ rainfall_2025_total }} mm
             </div>
         </div>
 
         <div class="card">
             <div class="card-title">
-                Groundwater Recharge
+                Runoff — 2025 / 2026
             </div>
 
             <div class="card-value">
-                {{ recharge_2026_total }} MCM
+                {{ runoff_2025_total }} / {{ runoff_2026_total }} MCM
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                Recharge — 2025 / 2026
+            </div>
+
+            <div class="card-value">
+                {{ recharge_2025_total }} / {{ recharge_2026_total }} MCM
             </div>
         </div>
 
@@ -320,7 +330,8 @@
 
     const labels =
         rainfallData.map(
-            row => row.month || row.date
+            row => (row.year ? row.year + " " : "")
+                + (row.month || row.date)
         );
 
 

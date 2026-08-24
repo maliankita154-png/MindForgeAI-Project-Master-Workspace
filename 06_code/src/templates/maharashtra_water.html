@@ -12,6 +12,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
     <style>
 
         body {
@@ -123,6 +128,12 @@
             max-height: 400px;
         }
 
+        #maharashtraMap {
+            width: 100%;
+            height: 520px;
+            border-radius: 12px;
+        }
+
     </style>
 
 </head>
@@ -141,6 +152,14 @@
         Maharashtra district-wise rivers, dams,
         reservoir storage, rainfall and water-use intelligence.
     </p>
+
+    <div class="card chart-card">
+
+        <h2>Maharashtra Hydrology Map</h2>
+
+        <div id="maharashtraMap"></div>
+
+    </div>
 
 
     <!-- SUMMARY -->
@@ -386,6 +405,62 @@ function filterTable() {
     );
 
 }
+
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const maharashtraMap = L.map("maharashtraMap").setView(
+    [19.7515, 75.7139],
+    6
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(maharashtraMap);
+
+const districtCoordinates = {
+    Ahmednagar: [19.0952, 74.7496], Akola: [20.7002, 77.0082],
+    Amravati: [20.9374, 77.7796], Aurangabad: [19.8762, 75.3433],
+    Beed: [18.9891, 75.7601], Bhandara: [21.1700, 79.6500],
+    Buldhana: [20.5293, 76.1842], Chandrapur: [19.9615, 79.2961],
+    Dhule: [20.9042, 74.7749], Gadchiroli: [20.1809, 80.0030],
+    Gondia: [21.4624, 80.2209], Hingoli: [19.7160, 77.1500],
+    Jalgaon: [21.0077, 75.5626], Jalna: [19.8347, 75.8816],
+    Kolhapur: [16.7050, 74.2433], Latur: [18.4088, 76.5604],
+    Mumbai: [19.0760, 72.8777], Nagpur: [21.1458, 79.0882],
+    Nanded: [19.1383, 77.3210]
+};
+
+const maharashtraData = {{ data | default([], true) | tojson }};
+
+maharashtraData.forEach(record => {
+    const coordinates = districtCoordinates[record.district];
+
+    if (!coordinates) {
+        return;
+    }
+
+    L.circleMarker(coordinates, {
+        radius: 8,
+        color: record.status === "High" ? "#ff6b6b" : "#25b8e8",
+        fillColor: record.status === "High" ? "#ff6b6b" : "#25b8e8",
+        fillOpacity: 0.85,
+        weight: 2
+    }).addTo(maharashtraMap).bindPopup(`
+        <strong>${record.district}</strong><br>
+        River: ${record.river}<br>
+        Dam: ${record.dam}<br>
+        Storage: ${record.storage_pct}%<br>
+        Available: ${record.water_available_mcm} MCM
+    `);
+});
 
 </script>
 

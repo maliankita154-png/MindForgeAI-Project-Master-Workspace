@@ -1061,9 +1061,7 @@ html {
 
         </article>
 
-
     </section>
-
 
     <!-- ========================================================
          2026 WATER USE
@@ -1754,6 +1752,9 @@ const rainfall2025 =
 const rainfall2026 =
     {{ rainfall_2026_data | default([], true) | tojson }};
 
+const water2025 =
+    {{ water_use_2025_data | default([], true) | tojson }};
+
 const water2026 =
     {{ water_use_2026_data | default([], true) | tojson }};
 
@@ -1768,6 +1769,16 @@ const supplyDemandData =
 
 const waterSummary =
     {{ water_use_2026_summary | default({}, true) | tojson }};
+
+window.AETHERA_DATA = {
+    rainfall2025: rainfall2025,
+    rainfall2026: rainfall2026,
+    rainfallCompare: rainfall2025.concat(rainfall2026),
+    water2025: water2025,
+    water2026: water2026,
+    reservoir: reservoirData,
+    reservoirCompare: reservoirCompareData
+};
 
 
 /* ============================================================
@@ -1786,39 +1797,6 @@ function numberValue(value) {
     return Number.isFinite(n) ? n : 0;
 
 }
-
-
-function monthMatch(rowMonth, selectedMonth) {
-
-    if (!selectedMonth || selectedMonth === "all") {
-        return true;
-    }
-
-    const m = normal(rowMonth);
-    const s = normal(selectedMonth);
-
-    const monthMap = {
-        january: "jan",
-        february: "feb",
-        march: "mar",
-        april: "apr",
-        may: "may",
-        june: "jun",
-        july: "jul",
-        august: "aug",
-        september: "sep",
-        october: "oct",
-        november: "nov",
-        december: "dec"
-    };
-
-    return (
-        m === s ||
-        m === monthMap[s]
-    );
-
-}
-
 
 function yearMatch(rowYear, selectedYear) {
 
@@ -2311,7 +2289,12 @@ function searchAethera() {
             : "all";
 
 
-    if (!query) {
+    const hasActiveFilters =
+        selectedYear !== "all" ||
+        selectedMonth !== "all" ||
+        selectedType !== "all";
+
+    if (!query && !hasActiveFilters) {
 
         showResults(
             [],
@@ -2323,99 +2306,67 @@ function searchAethera() {
     }
 
 
+    const queryYear =
+        query.match(/\b2025\b|\b2026\b/);
+
+    const queryMonths = {
+        january: "Jan", february: "Feb", march: "Mar",
+        april: "Apr", may: "May", june: "Jun", july: "Jul",
+        august: "Aug", september: "Sep", october: "Oct",
+        november: "Nov", december: "Dec", jan: "Jan", feb: "Feb",
+        mar: "Mar", apr: "Apr", jun: "Jun", jul: "Jul", aug: "Aug",
+        sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec"
+    };
+
+    const queryMonth = Object.keys(queryMonths).find(month =>
+        query.split(/\s+/).includes(month)
+    );
+
+    const queryType =
+        query.includes("rain") || query.includes("precipitation")
+            ? "rainfall"
+            : query.includes("reservoir") || query.includes("dam") ||
+              query.includes("storage")
+                ? "reservoir"
+                : query.includes("water") || query.includes("agriculture") ||
+                  query.includes("industry") || query.includes("domestic")
+                    ? "water"
+                    : null;
+
+    const activeYear = queryYear ? queryYear[0] : selectedYear;
+    const activeMonth = queryMonth ? queryMonths[queryMonth] : selectedMonth;
+    const activeType = queryType || selectedType;
     const results = [];
 
+    if (activeType === "all" || activeType === "rainfall") {
+        rainfall2025.concat(rainfall2026).forEach(row => {
+            const text = Object.values(row).join(" ").toLowerCase();
+            const monthNames = {
+                jan: "january", feb: "february", mar: "march", apr: "april",
+                may: "may", jun: "june", jul: "july", aug: "august",
+                sep: "september", oct: "october", nov: "november", dec: "december"
+            };
+            const searchableText = [
+                text, "rainfall", "rain", "precipitation",
+                monthNames[normal(row.month)] || ""
+            ].join(" ");
 
-    /* ========================================================
-       RAINFALL SEARCH
-    ======================================================== */
-
-    if (
-        selectedType === "all" ||
-        selectedType === "rainfall"
-    ) {
-
-        rainfall2025
-            .concat(rainfall2026)
-            .forEach(row => {
-
-                const text =
-                    Object.values(row)
-                        .join(" ")
-                        .toLowerCase();
-
-
-                const matchesQuery =
-                    text.includes(query) ||
-                    query.includes("rain") ||
-                    query.includes("rainfall") ||
-                    query.includes("precipitation");
-
-
-                const matchesYear =
-                    yearMatch(
-                        row.year,
-                        selectedYear
-                    );
-
-
-                const matchesMonth =
-                    monthMatch(
-                        row.month,
-                        selectedMonth
-                    );
-
-
-                if (
-                    matchesQuery &&
-                    matchesYear &&
-                    matchesMonth
-                ) {
-
-                    results.push(`
-
-                        <strong>
-                            🌧 Rainfall
-                        </strong>
-
-                        <br>
-
-                        Date:
-                        ${row.date || "N/A"}
-
-                        <br>
-
-                        Year:
-                        ${row.year || "N/A"}
-
-                        <br>
-
-                        Month:
-                        ${row.month || "N/A"}
-
-                        <br>
-
-                        Rainfall:
-                        <strong>
-                            ${row.rainfall_mm || 0} mm
-                        </strong>
-
-                        <br>
-
-                        Runoff:
-                        ${row.runoff_mcm || 0} MCM
-
-                        <br>
-
-                        Groundwater Recharge:
-                        ${row.groundwater_recharge_mcm || 0} MCM
-
-                    `);
-
-                }
-
-            });
-
+            if (
+                query.split(/\s+/).every(term => searchableText.includes(term)) &&
+                yearMatch(row.year, activeYear) &&
+                monthMatch(row.month, activeMonth)
+            ) {
+                results.push(`
+                    <strong>Rainfall</strong><br>
+                    Date: ${row.date || "N/A"}<br>
+                    Year: ${row.year || "N/A"}<br>
+                    Month: ${row.month || "N/A"}<br>
+                    Rainfall: <strong>${row.rainfall_mm || 0} mm</strong><br>
+                    Runoff: ${row.runoff_mcm || 0} MCM<br>
+                    Groundwater Recharge: ${row.groundwater_recharge_mcm || 0} MCM
+                `);
+            }
+        });
     }
 
 
@@ -2424,11 +2375,11 @@ function searchAethera() {
     ======================================================== */
 
     if (
-        selectedType === "all" ||
-        selectedType === "water"
+        activeType === "all" ||
+        activeType === "water"
     ) {
 
-        water2026.forEach(row => {
+        water2025.concat(water2026).forEach(row => {
 
             const text =
                 Object.values(row)
@@ -2538,8 +2489,8 @@ function searchAethera() {
     ======================================================== */
 
     if (
-        selectedType === "all" ||
-        selectedType === "reservoir"
+        activeType === "all" ||
+        activeType === "reservoir"
     ) {
 
         reservoirChartData.forEach(row => {
@@ -2699,22 +2650,18 @@ function applyFilters() {
             ? yearFilter.value
             : "all";
 
-
     const month =
         monthFilter
             ? monthFilter.value
             : "all";
-
 
     const type =
         dataFilter
             ? dataFilter.value
             : "all";
 
-
     const rows =
         document.querySelectorAll(".data-row");
-
 
     rows.forEach(row => {
 
@@ -2851,8 +2798,6 @@ if (resetFilters) {
 /* ============================================================
    INITIAL FILTER STATE
 ============================================================ */
-
-applyFilters();
 
 </script>
 

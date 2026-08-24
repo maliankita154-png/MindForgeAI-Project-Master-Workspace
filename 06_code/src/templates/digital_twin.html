@@ -1,767 +1,238 @@
-<!-- ============================================================
-     DIGITAL TWIN — DATA VISUALIZATION
-============================================================ -->
+{% extends "base.html" %}
 
-<section class="digital-twin-charts">
+{% block title %}
+AETHERA | Digital Twin
+{% endblock %}
 
-    <div class="twin-chart-grid">
 
-        <!-- WATER BALANCE -->
-        <div class="twin-chart-card">
-            <div class="chart-card-header">
-                <span class="chart-eyebrow">WATER BALANCE</span>
-                <h3>Availability vs Demand</h3>
-            </div>
+{% block head %}
 
-            <div class="chart-container">
-                <canvas id="waterBalanceChart"></canvas>
-            </div>
-        </div>
-
-
-        <!-- RESERVOIR -->
-        <div class="twin-chart-card">
-            <div class="chart-card-header">
-                <span class="chart-eyebrow">RESERVOIR</span>
-                <h3>Current Storage Level</h3>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="reservoirChart"></canvas>
-            </div>
-        </div>
-
-
-        <!-- RAINFALL -->
-        <div class="twin-chart-card">
-            <div class="chart-card-header">
-                <span class="chart-eyebrow">RAINFALL</span>
-                <h3>Rainfall Intelligence</h3>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="rainfallChart"></canvas>
-            </div>
-        </div>
-
-
-        <!-- SYSTEM HEALTH -->
-        <div class="twin-chart-card">
-            <div class="chart-card-header">
-                <span class="chart-eyebrow">SYSTEM HEALTH</span>
-                <h3>Digital Twin Indicators</h3>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="systemHealthChart"></canvas>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- ========================================================
-         SCENARIO STUDIO GRAPH
-    ========================================================= -->
-
-    <div class="scenario-graph-card">
-
-        <div class="scenario-graph-header">
-            <span>SCENARIO ANALYSIS</span>
-
-            <h3>Policy Scenario Performance</h3>
-
-            <p>
-                Comparison of the selected scenario conditions
-                and projected system outcomes.
-            </p>
-        </div>
-
-        <div class="scenario-graph-container">
-            <canvas id="scenarioPerformanceChart"></canvas>
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     CHART.JS
-============================================================ -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    /* ========================================================
-       DATA FROM FLASK
-    ======================================================== */
-
-    const rainfallTotal =
-        Number("{{ digital_twin.rainfall_total | default(0) }}");
-
-    const latestRainfall =
-        Number("{{ digital_twin.latest_rainfall | default(0) }}");
-
-    const demandTotal =
-        Number("{{ digital_twin.demand_total | default(0) }}");
-
-    const reservoirLevel =
-        Number("{{ digital_twin.reservoir_level | default(0) }}");
-
-    const reservoirCapacity =
-        Number("{{ digital_twin.reservoir_capacity | default(0) }}");
-
-    const reservoirPercent =
-        Number("{{ digital_twin.reservoir_percent | default(0) }}");
-
-    const availability =
-        Number("{{ digital_twin.availability | default(0) }}");
-
-    const demandIndex =
-        Number("{{ digital_twin.demand_index | default(0) }}");
-
-    const resilience =
-        Number("{{ digital_twin.resilience | default(0) }}");
-
-
-    /* ========================================================
-       SAFE VALUES
-    ======================================================== */
-
-    const safeAvailability =
-        Number.isFinite(availability)
-            ? Math.max(0, Math.min(100, availability))
-            : 0;
-
-    const safeDemandIndex =
-        Number.isFinite(demandIndex)
-            ? Math.max(0, Math.min(100, demandIndex))
-            : 0;
-
-    const safeResilience =
-        Number.isFinite(resilience)
-            ? Math.max(0, Math.min(100, resilience))
-            : 0;
-
-    const safeReservoirPercent =
-        Number.isFinite(reservoirPercent)
-            ? Math.max(0, Math.min(100, reservoirPercent))
-            : 0;
-
-
-    /* ========================================================
-       COMMON CHART OPTIONS
-    ======================================================== */
-
-    const commonOptions = {
-
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        animation: {
-            duration: 900
-        },
-
-        plugins: {
-
-            legend: {
-                display: true,
-                labels: {
-                    color: "#dff7ff",
-                    font: {
-                        size: 12,
-                        weight: "600"
-                    }
-                }
-            },
-
-            tooltip: {
-                backgroundColor: "#071522",
-                titleColor: "#ffffff",
-                bodyColor: "#dff7ff",
-                borderColor: "#59d8ff",
-                borderWidth: 1,
-                padding: 12
-            }
-
-        },
-
-        scales: {
-
-            x: {
-                ticks: {
-                    color: "#c7e7f2"
-                },
-
-                grid: {
-                    color: "rgba(150, 210, 230, 0.10)"
-                }
-            },
-
-            y: {
-                beginAtZero: true,
-
-                ticks: {
-                    color: "#c7e7f2"
-                },
-
-                grid: {
-                    color: "rgba(150, 210, 230, 0.10)"
-                }
-            }
-
-        }
-
-    };
-
-
-    /* ========================================================
-       1. WATER BALANCE
-       Availability = Aethera availability index
-       Demand = Aethera demand index
-    ======================================================== */
-
-    new Chart(
-        document.getElementById("waterBalanceChart"),
-        {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Availability",
-                    "Demand"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Water Index",
-
-                        data: [
-                            safeAvailability,
-                            safeDemandIndex
-                        ],
-
-                        backgroundColor: [
-                            "#59d8ff",
-                            "#4f7cff"
-                        ],
-
-                        borderColor: [
-                            "#59d8ff",
-                            "#4f7cff"
-                        ],
-
-                        borderWidth: 1,
-
-                        borderRadius: 8
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                ...commonOptions,
-
-                scales: {
-
-                    x: {
-                        ...commonOptions.scales.x
-                    },
-
-                    y: {
-                        ...commonOptions.scales.y,
-
-                        max: 100,
-
-                        ticks: {
-                            color: "#c7e7f2",
-                            callback: function(value) {
-                                return value + "%";
-                            }
-                        }
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       2. RESERVOIR
-       Current reservoir percentage from Flask
-    ======================================================== */
-
-    new Chart(
-        document.getElementById("reservoirChart"),
-        {
-
-            type: "doughnut",
-
-            data: {
-
-                labels: [
-                    "Stored Water",
-                    "Available Capacity"
-                ],
-
-                datasets: [
-
-                    {
-                        data: [
-                            safeReservoirPercent,
-                            100 - safeReservoirPercent
-                        ],
-
-                        backgroundColor: [
-                            "#59d8ff",
-                            "rgba(91, 120, 145, 0.20)"
-                        ],
-
-                        borderColor: [
-                            "#59d8ff",
-                            "rgba(91, 120, 145, 0.18)"
-                        ],
-
-                        borderWidth: 1,
-
-                        hoverOffset: 6
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                cutout: "68%",
-
-                plugins: {
-
-                    legend: {
-
-                        position: "bottom",
-
-                        labels: {
-                            color: "#dff7ff",
-                            padding: 18,
-                            font: {
-                                size: 12,
-                                weight: "600"
-                            }
-                        }
-
-                    },
-
-                    tooltip: {
-                        backgroundColor: "#071522",
-                        titleColor: "#ffffff",
-                        bodyColor: "#dff7ff",
-                        borderColor: "#59d8ff",
-                        borderWidth: 1,
-                        padding: 12,
-
-                        callbacks: {
-
-                            label: function(context) {
-                                return " " +
-                                    context.label +
-                                    ": " +
-                                    Number(context.raw).toFixed(1) +
-                                    "%";
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       3. RAINFALL
-       Total and latest rainfall from Flask
-    ======================================================== */
-
-    new Chart(
-        document.getElementById("rainfallChart"),
-        {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Total 2026",
-                    "Latest"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Rainfall (mm)",
-
-                        data: [
-                            Number.isFinite(rainfallTotal)
-                                ? rainfallTotal
-                                : 0,
-
-                            Number.isFinite(latestRainfall)
-                                ? latestRainfall
-                                : 0
-                        ],
-
-                        backgroundColor: [
-                            "#38bdf8",
-                            "#6ee7b7"
-                        ],
-
-                        borderColor: [
-                            "#38bdf8",
-                            "#6ee7b7"
-                        ],
-
-                        borderWidth: 1,
-
-                        borderRadius: 8
-                    }
-
-                ]
-
-            },
-
-            options: commonOptions
-
-        }
-    );
-
-
-    /* ========================================================
-       4. SYSTEM HEALTH
-       Current Aethera system indicators
-    ======================================================== */
-
-    new Chart(
-        document.getElementById("systemHealthChart"),
-        {
-
-            type: "radar",
-
-            data: {
-
-                labels: [
-                    "Availability",
-                    "Demand",
-                    "Resilience",
-                    "Reservoir"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Current State",
-
-                        data: [
-                            safeAvailability,
-                            safeDemandIndex,
-                            safeResilience,
-                            safeReservoirPercent
-                        ],
-
-                        backgroundColor:
-                            "rgba(89, 216, 255, 0.16)",
-
-                        borderColor:
-                            "#59d8ff",
-
-                        pointBackgroundColor:
-                            "#ffffff",
-
-                        pointBorderColor:
-                            "#59d8ff",
-
-                        pointHoverBackgroundColor:
-                            "#59d8ff",
-
-                        pointHoverBorderColor:
-                            "#ffffff",
-
-                        borderWidth: 2,
-
-                        pointRadius: 4
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        labels: {
-                            color: "#dff7ff",
-                            font: {
-                                size: 12,
-                                weight: "600"
-                            }
-                        }
-
-                    },
-
-                    tooltip: {
-                        backgroundColor: "#071522",
-                        titleColor: "#ffffff",
-                        bodyColor: "#dff7ff",
-                        borderColor: "#59d8ff",
-                        borderWidth: 1
-                    }
-
-                },
-
-                scales: {
-
-                    r: {
-
-                        beginAtZero: true,
-
-                        max: 100,
-
-                        ticks: {
-                            display: false
-                        },
-
-                        grid: {
-                            color: "rgba(150, 210, 230, 0.16)"
-                        },
-
-                        angleLines: {
-                            color: "rgba(150, 210, 230, 0.16)"
-                        },
-
-                        pointLabels: {
-                            color: "#dff7ff",
-                            font: {
-                                size: 12,
-                                weight: "600"
-                            }
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    );
-
-
-    /* ========================================================
-       5. SCENARIO STUDIO
-       These values match the Scenario Studio shown above:
-
-       Dry-season severity = 25%
-       Demand growth       = 12%
-       Conservation effort = 18%
-       Availability        = 70%
-       Demand index        = 61
-       Resilience          = 89%
-    ======================================================== */
-
-    new Chart(
-        document.getElementById("scenarioPerformanceChart"),
-        {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Dry-season severity",
-                    "Demand growth",
-                    "Conservation effort",
-                    "Availability",
-                    "Demand index",
-                    "Resilience"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Scenario Value",
-
-                        data: [
-                            25,
-                            12,
-                            18,
-                            70,
-                            61,
-                            89
-                        ],
-
-                        backgroundColor: [
-                            "#4f7cff",
-                            "#59d8ff",
-                            "#6ee7b7",
-                            "#38bdf8",
-                            "#818cf8",
-                            "#22d3ee"
-                        ],
-
-                        borderColor: [
-                            "#4f7cff",
-                            "#59d8ff",
-                            "#6ee7b7",
-                            "#38bdf8",
-                            "#818cf8",
-                            "#22d3ee"
-                        ],
-
-                        borderWidth: 1,
-
-                        borderRadius: 8
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                animation: {
-                    duration: 1000
-                },
-
-                plugins: {
-
-                    legend: {
-                        display: false
-                    },
-
-                    tooltip: {
-
-                        backgroundColor: "#071522",
-
-                        titleColor: "#ffffff",
-
-                        bodyColor: "#dff7ff",
-
-                        borderColor: "#59d8ff",
-
-                        borderWidth: 1,
-
-                        padding: 12,
-
-                        callbacks: {
-
-                            label: function(context) {
-
-                                return (
-                                    " Value: " +
-                                    context.raw +
-                                    "%"
-                                );
-
-                            }
-
-                        }
-
-                    }
-
-                },
-
-                scales: {
-
-                    x: {
-
-                        ticks: {
-                            color: "#dff7ff",
-                            font: {
-                                size: 11,
-                                weight: "600"
-                            },
-                            maxRotation: 0,
-                            minRotation: 0
-                        },
-
-                        grid: {
-                            display: false
-                        }
-
-                    },
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        max: 100,
-
-                        ticks: {
-
-                            color: "#c7e7f2",
-
-                            callback: function(value) {
-                                return value + "%";
-                            }
-
-                        },
-
-                        grid: {
-                            color:
-                                "rgba(150, 210, 230, 0.10)"
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    );
-
-});
-</script>
-
-
-<!-- ============================================================
-     DIGITAL TWIN CHART STYLING
-============================================================ -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
 
 <style>
+
+/* ============================================================
+   AETHERA DIGITAL TWIN
+============================================================ */
+
+.digital-twin-page {
+
+    width: 100%;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ============================================================
+   PAGE HEADER
+============================================================ */
+
+.digital-twin-header {
+
+    margin-bottom: 30px;
+
+}
+
+
+.digital-twin-header .eyebrow {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #59d8ff;
+
+}
+
+
+.digital-twin-header h1 {
+
+    margin: 0 0 8px;
+
+    font-size: 32px;
+
+    font-weight: 800;
+
+    color: #f4fbff;
+
+}
+
+
+.digital-twin-header p {
+
+    margin: 0;
+
+    max-width: 720px;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    color: rgba(220, 239, 248, 0.68);
+
+}
+
+
+/* ============================================================
+   HYDROLOGY MAP
+============================================================ */
+
+.twin-map-card {
+
+    width: 100%;
+
+    margin-bottom: 35px;
+
+    padding: 26px;
+
+    box-sizing: border-box;
+
+    border-radius: 20px;
+
+    border:
+        1px solid
+        rgba(89, 216, 255, 0.22);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(12, 27, 45, 0.97),
+            rgba(7, 16, 29, 0.97)
+        );
+
+    box-shadow:
+        0 20px 50px
+        rgba(0, 0, 0, 0.30);
+
+}
+
+
+.twin-map-header {
+
+    margin-bottom: 20px;
+
+}
+
+
+.twin-map-header span {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #59d8ff;
+
+}
+
+
+.twin-map-header h3 {
+
+    margin: 0 0 7px;
+
+    font-size: 21px;
+
+    color: #f4fbff;
+
+}
+
+
+.twin-map-header p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+    color: rgba(220, 239, 248, 0.68);
+
+}
+
+
+#digitalTwinMap {
+
+    width: 100%;
+
+    height: 460px;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+}
+
+
+.map-location-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 16px;
+
+}
+
+
+.map-location-item {
+
+    padding: 14px;
+
+    border: 1px solid rgba(89, 216, 255, 0.16);
+
+    border-radius: 12px;
+
+    background: rgba(5, 18, 31, 0.72);
+
+}
+
+
+.map-location-item strong {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #f4fbff;
+
+    font-size: 13px;
+
+}
+
+
+.map-location-item span {
+
+    display: block;
+
+    color: rgba(220, 239, 248, 0.70);
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+}
+
+
+/* ============================================================
+   CHART SECTION
+============================================================ */
 
 .digital-twin-charts {
 
@@ -773,6 +244,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 }
 
+
+/* ============================================================
+   CHART GRID
+============================================================ */
 
 .twin-chart-grid {
 
@@ -786,6 +261,10 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
+/* ============================================================
+   CHART CARD
+============================================================ */
+
 .twin-chart-card {
 
     position: relative;
@@ -793,6 +272,8 @@ document.addEventListener("DOMContentLoaded", function () {
     min-height: 370px;
 
     padding: 26px;
+
+    box-sizing: border-box;
 
     border-radius: 20px;
 
@@ -813,8 +294,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     backdrop-filter: blur(14px);
 
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+
 }
 
+
+.twin-chart-card:hover {
+
+    border-color:
+        rgba(89, 216, 255, 0.42);
+
+    box-shadow:
+        0 22px 55px
+        rgba(0, 0, 0, 0.36);
+
+    transform:
+        translateY(-3px);
+
+}
+
+
+/* ============================================================
+   CHART HEADER
+============================================================ */
 
 .chart-card-header {
 
@@ -857,6 +362,10 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
+/* ============================================================
+   CHART CONTAINER
+============================================================ */
+
 .chart-container {
 
     position: relative;
@@ -882,6 +391,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     padding: 28px;
 
+    box-sizing: border-box;
+
     border-radius: 20px;
 
     border:
@@ -901,8 +412,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     backdrop-filter: blur(14px);
 
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+
 }
 
+
+.scenario-graph-card:hover {
+
+    border-color:
+        rgba(89, 216, 255, 0.42);
+
+    box-shadow:
+        0 24px 58px
+        rgba(0, 0, 0, 0.38);
+
+    transform:
+        translateY(-3px);
+
+}
+
+
+/* ============================================================
+   SCENARIO HEADER
+============================================================ */
 
 .scenario-graph-header {
 
@@ -958,6 +493,10 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
+/* ============================================================
+   SCENARIO GRAPH
+============================================================ */
+
 .scenario-graph-container {
 
     position: relative;
@@ -970,32 +509,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 /* ============================================================
-   HOVER
-============================================================ */
-
-.twin-chart-card:hover,
-.scenario-graph-card:hover {
-
-    border-color:
-        rgba(89, 216, 255, 0.38);
-
-    box-shadow:
-        0 20px 55px
-        rgba(0, 0, 0, 0.36);
-
-    transform: translateY(-2px);
-
-    transition:
-        all 0.25s ease;
-
-}
-
-
-/* ============================================================
    RESPONSIVE
 ============================================================ */
 
 @media (max-width: 900px) {
+
+    .digital-twin-page {
+
+        padding: 22px;
+
+    }
 
     .twin-chart-grid {
 
@@ -1020,8 +543,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 @media (max-width: 600px) {
 
+    .digital-twin-page {
+
+        padding: 15px;
+
+    }
+
+    .digital-twin-header h1 {
+
+        font-size: 26px;
+
+    }
+
     .twin-chart-card,
-    .scenario-graph-card {
+    .scenario-graph-card,
+    .twin-map-card {
 
         padding: 20px;
 
@@ -1041,6 +577,1346 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    .map-location-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    #digitalTwinMap {
+
+        height: 340px;
+
+    }
+
 }
 
 </style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="digital-twin-page">
+
+
+    <!-- ========================================================
+         PAGE HEADER
+    ======================================================== -->
+
+    <div class="digital-twin-header">
+
+        <span class="eyebrow">
+            AETHERA DIGITAL INTELLIGENCE
+        </span>
+
+        <h1>
+            Digital Twin
+        </h1>
+
+        <p>
+            Real-time simulation and visualization of
+            water availability, demand, reservoir storage,
+            rainfall intelligence and system resilience.
+        </p>
+
+    </div>
+
+
+    <!-- ========================================================
+         HYDROLOGY MAP
+    ======================================================== -->
+
+    <section class="twin-map-card">
+
+        <div class="twin-map-header">
+
+            <span>
+                SPATIAL MONITORING
+            </span>
+
+            <h3>
+                Maharashtra Hydrology Map
+            </h3>
+
+            <p>
+                Live simulation view of major rivers and reservoirs.
+            </p>
+
+        </div>
+
+        <div id="digitalTwinMap"></div>
+
+        <div id="mapLocationGrid" class="map-location-grid"></div>
+
+    </section>
+
+
+    <!-- ========================================================
+         DIGITAL TWIN CHARTS
+    ======================================================== -->
+
+    <section class="digital-twin-charts">
+
+
+        <!-- ====================================================
+             FOUR CHART CARDS
+        ==================================================== -->
+
+        <div class="twin-chart-grid">
+
+
+            <!-- WATER BALANCE -->
+
+            <div class="twin-chart-card">
+
+                <div class="chart-card-header">
+
+                    <span class="chart-eyebrow">
+                        WATER BALANCE
+                    </span>
+
+                    <h3>
+                        Availability vs Demand
+                    </h3>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="waterBalanceChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESERVOIR -->
+
+            <div class="twin-chart-card">
+
+                <div class="chart-card-header">
+
+                    <span class="chart-eyebrow">
+                        RESERVOIR
+                    </span>
+
+                    <h3>
+                        Current Storage Level
+                    </h3>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="reservoirChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- RAINFALL -->
+
+            <div class="twin-chart-card">
+
+                <div class="chart-card-header">
+
+                    <span class="chart-eyebrow">
+                        RAINFALL
+                    </span>
+
+                    <h3>
+                        Rainfall Intelligence
+                    </h3>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="rainfallChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM HEALTH -->
+
+            <div class="twin-chart-card">
+
+                <div class="chart-card-header">
+
+                    <span class="chart-eyebrow">
+                        SYSTEM HEALTH
+                    </span>
+
+                    <h3>
+                        Digital Twin Indicators
+                    </h3>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="systemHealthChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ====================================================
+             SCENARIO STUDIO
+        ==================================================== -->
+
+        <div class="scenario-graph-card">
+
+            <div class="scenario-graph-header">
+
+                <span>
+                    SCENARIO ANALYSIS
+                </span>
+
+                <h3>
+                    Policy Scenario Performance
+                </h3>
+
+                <p>
+                    Comparison of selected scenario conditions
+                    and projected system outcomes.
+                </p>
+
+            </div>
+
+            <div class="scenario-graph-container">
+
+                <canvas
+                    id="scenarioPerformanceChart">
+                </canvas>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+</div>
+
+
+<!-- ============================================================
+     CHART.JS
+============================================================ -->
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js">
+</script>
+
+
+<script>
+
+const digitalTwinMap = L.map("digitalTwinMap").setView(
+    [19.7515, 75.7139],
+    6
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(digitalTwinMap);
+
+[
+    {
+        name: "Bhima River",
+        type: "River",
+        lat: 18.52,
+        lng: 73.86,
+        status: "Below Normal",
+        river: "Bhima",
+        storage: "Not applicable",
+        flow: "245 m³/s",
+        capacity: "Not applicable",
+        available: "Not applicable"
+    },
+    {
+        name: "Krishna River",
+        type: "River",
+        lat: 16.70,
+        lng: 74.22,
+        status: "Normal",
+        river: "Krishna",
+        storage: "Not applicable",
+        flow: "420 m³/s",
+        capacity: "Not applicable",
+        available: "Not applicable"
+    },
+    {
+        name: "Godavari River",
+        type: "River",
+        lat: 19.99,
+        lng: 73.78,
+        status: "Above Normal",
+        river: "Godavari",
+        storage: "Not applicable",
+        flow: "610 m³/s",
+        capacity: "Not applicable",
+        available: "Not applicable"
+    },
+    {
+        name: "Ujani Reservoir",
+        type: "Reservoir",
+        lat: 18.07,
+        lng: 74.75,
+        status: "High risk",
+        river: "Bhima",
+        storage: "39%",
+        flow: "Data unavailable",
+        capacity: "117 MCM",
+        available: "45.63 MCM"
+    },
+    {
+        name: "Koyna Reservoir",
+        type: "Reservoir",
+        lat: 17.40,
+        lng: 73.75,
+        status: "Storage 78%",
+        river: "Koyna",
+        storage: "78%",
+        flow: "Data unavailable",
+        capacity: "Data unavailable",
+        available: "Data unavailable"
+    },
+    {
+        name: "Jayakwadi Reservoir",
+        type: "Reservoir",
+        lat: 19.48,
+        lng: 75.38,
+        status: "Watch",
+        river: "Godavari",
+        storage: "54%",
+        flow: "Data unavailable",
+        capacity: "2,909 MCM",
+        available: "156 MCM"
+    },
+    {
+        name: "Solapur Talav",
+        type: "Talav",
+        lat: 17.6713,
+        lng: 75.9029,
+        status: "Monitoring data pending",
+        river: "Local catchment (Bhima basin)",
+        storage: "Data unavailable",
+        flow: "Data unavailable",
+        capacity: "Data unavailable",
+        available: "Data unavailable"
+    },
+    {
+        name: "Kambar Talav",
+        type: "Talav",
+        lat: 17.6479,
+        lng: 75.9040,
+        status: "Monitoring data pending",
+        river: "Local catchment (Bhima basin)",
+        storage: "Data unavailable",
+        flow: "Data unavailable",
+        capacity: "Data unavailable",
+        available: "Data unavailable"
+    },
+    {
+        name: "Bhatsa Dam",
+        type: "Dam",
+        lat: 19.44,
+        lng: 73.33,
+        status: "Storage 76%",
+        river: "Bhatsa",
+        storage: "76%",
+        flow: "Data unavailable",
+        capacity: "976 MCM",
+        available: "741.76 MCM"
+    },
+    {
+        name: "Gosikhurd Dam",
+        type: "Dam",
+        lat: 21.17,
+        lng: 79.65,
+        status: "Storage 73%",
+        river: "Wainganga",
+        storage: "73%",
+        flow: "Data unavailable",
+        capacity: "1,146 MCM",
+        available: "836.58 MCM"
+    },
+    {
+        name: "Majalgaon Dam",
+        type: "Dam",
+        lat: 19.15,
+        lng: 76.20,
+        status: "Storage 48%",
+        river: "Manjra",
+        storage: "48%",
+        flow: "Data unavailable",
+        capacity: "455.7 MCM",
+        available: "218.74 MCM"
+    },
+    {
+        name: "Panshet Dam",
+        type: "Dam",
+        lat: 18.65,
+        lng: 73.67,
+        status: "Storage 64%",
+        river: "Mutha",
+        storage: "Data unavailable",
+        flow: "Data unavailable",
+        capacity: "Data unavailable",
+        available: "Data unavailable"
+    }
+].forEach(location => {
+
+    L.circleMarker(
+        [location.lat, location.lng],
+        {
+            radius: location.type === "Reservoir" || location.type === "Dam" ? 9 : 7,
+            color: location.type === "Reservoir" || location.type === "Dam"
+                ? "#ffbf69"
+                : location.type === "Talav"
+                    ? "#8ee3a8"
+                    : "#59d8ff",
+            fillColor: location.type === "Reservoir" || location.type === "Dam"
+                ? "#ffbf69"
+                : location.type === "Talav"
+                    ? "#8ee3a8"
+                    : "#59d8ff",
+            fillOpacity: 0.9,
+            weight: 2
+        }
+    ).addTo(digitalTwinMap).bindPopup(
+        `<strong>${location.name}</strong><br>`
+        + `Type: ${location.type}<br>`
+        + `River: ${location.river}<br>`
+        + `Flow: ${location.flow}<br>`
+        + `Storage: ${location.storage}<br>`
+        + `Capacity: ${location.capacity}<br>`
+        + `Available: ${location.available}<br>`
+        + `Status: ${location.status}`
+    ).bindTooltip(location.name);
+
+    const locationItem = document.createElement("div");
+    locationItem.className = "map-location-item";
+    locationItem.innerHTML =
+        `<strong>${location.name}</strong>`
+        + `<span>Type: ${location.type}</span>`
+        + `<span>River: ${location.river}</span>`
+        + `<span>Flow: ${location.flow}</span>`
+        + `<span>Storage: ${location.storage}</span>`
+        + `<span>Capacity: ${location.capacity}</span>`
+        + `<span>Available: ${location.available}</span>`;
+    document.getElementById("mapLocationGrid").appendChild(locationItem);
+
+});
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* ====================================================
+           DATA FROM FLASK
+        ==================================================== */
+
+        const rainfallTotal = Number(
+            "{{ digital_twin.rainfall_total | default(0) }}"
+        );
+
+        const latestRainfall = Number(
+            "{{ digital_twin.latest_rainfall | default(0) }}"
+        );
+
+        const demandTotal = Number(
+            "{{ digital_twin.demand_total | default(0) }}"
+        );
+
+        const reservoirLevel = Number(
+            "{{ digital_twin.reservoir_level | default(0) }}"
+        );
+
+        const reservoirCapacity = Number(
+            "{{ digital_twin.reservoir_capacity | default(0) }}"
+        );
+
+        const reservoirPercent = Number(
+            "{{ digital_twin.reservoir_percent | default(0) }}"
+        );
+
+        const availability = Number(
+            "{{ digital_twin.availability | default(0) }}"
+        );
+
+        const demandIndex = Number(
+            "{{ digital_twin.demand_index | default(0) }}"
+        );
+
+        const resilience = Number(
+            "{{ digital_twin.resilience | default(0) }}"
+        );
+
+
+        /* ====================================================
+           SAFE VALUES
+        ==================================================== */
+
+        const safeAvailability =
+            Number.isFinite(availability)
+                ? Math.max(
+                    0,
+                    Math.min(100, availability)
+                  )
+                : 0;
+
+
+        const safeDemandIndex =
+            Number.isFinite(demandIndex)
+                ? Math.max(
+                    0,
+                    Math.min(100, demandIndex)
+                  )
+                : 0;
+
+
+        const safeResilience =
+            Number.isFinite(resilience)
+                ? Math.max(
+                    0,
+                    Math.min(100, resilience)
+                  )
+                : 0;
+
+
+        const safeReservoirPercent =
+            Number.isFinite(reservoirPercent)
+                ? Math.max(
+                    0,
+                    Math.min(100, reservoirPercent)
+                  )
+                : 0;
+
+
+        /* ====================================================
+           COMMON OPTIONS
+        ==================================================== */
+
+        const commonOptions = {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            animation: {
+                duration: 900
+            },
+
+            plugins: {
+
+                legend: {
+
+                    display: true,
+
+                    labels: {
+
+                        color: "#dff7ff",
+
+                        font: {
+                            size: 12,
+                            weight: "600"
+                        }
+
+                    }
+
+                },
+
+                tooltip: {
+
+                    backgroundColor: "#071522",
+
+                    titleColor: "#ffffff",
+
+                    bodyColor: "#dff7ff",
+
+                    borderColor: "#59d8ff",
+
+                    borderWidth: 1,
+
+                    padding: 12
+
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    ticks: {
+                        color: "#c7e7f2"
+                    },
+
+                    grid: {
+                        color:
+                            "rgba(150, 210, 230, 0.10)"
+                    }
+
+                },
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+                        color: "#c7e7f2"
+                    },
+
+                    grid: {
+                        color:
+                            "rgba(150, 210, 230, 0.10)"
+                    }
+
+                }
+
+            }
+
+        };
+
+
+        /* ====================================================
+           1. WATER BALANCE
+        ==================================================== */
+
+        new Chart(
+
+            document.getElementById(
+                "waterBalanceChart"
+            ),
+
+            {
+
+                type: "bar",
+
+                data: {
+
+                    labels: [
+                        "Availability",
+                        "Demand"
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Water Index",
+
+                            data: [
+
+                                safeAvailability,
+
+                                safeDemandIndex
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#59d8ff",
+
+                                "#4f7cff"
+
+                            ],
+
+                            borderColor: [
+
+                                "#59d8ff",
+
+                                "#4f7cff"
+
+                            ],
+
+                            borderWidth: 1,
+
+                            borderRadius: 8
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    ...commonOptions,
+
+                    scales: {
+
+                        x: {
+                            ...commonOptions.scales.x
+                        },
+
+                        y: {
+
+                            ...commonOptions.scales.y,
+
+                            max: 100,
+
+                            ticks: {
+
+                                color: "#c7e7f2",
+
+                                callback:
+                                    function (value) {
+
+                                        return value + "%";
+
+                                    }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+        /* ====================================================
+           2. RESERVOIR
+        ==================================================== */
+
+        new Chart(
+
+            document.getElementById(
+                "reservoirChart"
+            ),
+
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+
+                        "Stored Water",
+
+                        "Available Capacity"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            data: [
+
+                                safeReservoirPercent,
+
+                                100 -
+                                safeReservoirPercent
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#59d8ff",
+
+                                "rgba(91, 120, 145, 0.20)"
+
+                            ],
+
+                            borderColor: [
+
+                                "#59d8ff",
+
+                                "rgba(91, 120, 145, 0.18)"
+
+                            ],
+
+                            borderWidth: 1,
+
+                            hoverOffset: 6
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: "68%",
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom",
+
+                            labels: {
+
+                                color: "#dff7ff",
+
+                                padding: 18,
+
+                                font: {
+
+                                    size: 12,
+
+                                    weight: "600"
+
+                                }
+
+                            }
+
+                        },
+
+                        tooltip: {
+
+                            backgroundColor: "#071522",
+
+                            titleColor: "#ffffff",
+
+                            bodyColor: "#dff7ff",
+
+                            borderColor: "#59d8ff",
+
+                            borderWidth: 1,
+
+                            padding: 12,
+
+                            callbacks: {
+
+                                label:
+                                    function (context) {
+
+                                        return (
+                                            " " +
+                                            context.label +
+                                            ": " +
+                                            Number(
+                                                context.raw
+                                            ).toFixed(1) +
+                                            "%"
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+        /* ====================================================
+           3. RAINFALL
+        ==================================================== */
+
+        new Chart(
+
+            document.getElementById(
+                "rainfallChart"
+            ),
+
+            {
+
+                type: "bar",
+
+                data: {
+
+                    labels: [
+
+                        "Total 2026",
+
+                        "Latest"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Rainfall (mm)",
+
+                            data: [
+
+                                Number.isFinite(
+                                    rainfallTotal
+                                )
+                                    ? rainfallTotal
+                                    : 0,
+
+                                Number.isFinite(
+                                    latestRainfall
+                                )
+                                    ? latestRainfall
+                                    : 0
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#38bdf8",
+
+                                "#6ee7b7"
+
+                            ],
+
+                            borderColor: [
+
+                                "#38bdf8",
+
+                                "#6ee7b7"
+
+                            ],
+
+                            borderWidth: 1,
+
+                            borderRadius: 8
+
+                        }
+
+                    ]
+
+                },
+
+                options: commonOptions
+
+            }
+
+        );
+
+
+        /* ====================================================
+           4. SYSTEM HEALTH
+        ==================================================== */
+
+        new Chart(
+
+            document.getElementById(
+                "systemHealthChart"
+            ),
+
+            {
+
+                type: "radar",
+
+                data: {
+
+                    labels: [
+
+                        "Availability",
+
+                        "Demand",
+
+                        "Resilience",
+
+                        "Reservoir"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Current State",
+
+                            data: [
+
+                                safeAvailability,
+
+                                safeDemandIndex,
+
+                                safeResilience,
+
+                                safeReservoirPercent
+
+                            ],
+
+                            backgroundColor:
+                                "rgba(89, 216, 255, 0.16)",
+
+                            borderColor:
+                                "#59d8ff",
+
+                            pointBackgroundColor:
+                                "#ffffff",
+
+                            pointBorderColor:
+                                "#59d8ff",
+
+                            pointHoverBackgroundColor:
+                                "#59d8ff",
+
+                            pointHoverBorderColor:
+                                "#ffffff",
+
+                            borderWidth: 2,
+
+                            pointRadius: 4
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+
+                            labels: {
+
+                                color: "#dff7ff",
+
+                                font: {
+
+                                    size: 12,
+
+                                    weight: "600"
+
+                                }
+
+                            }
+
+                        },
+
+                        tooltip: {
+
+                            backgroundColor: "#071522",
+
+                            titleColor: "#ffffff",
+
+                            bodyColor: "#dff7ff",
+
+                            borderColor: "#59d8ff",
+
+                            borderWidth: 1
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        r: {
+
+                            beginAtZero: true,
+
+                            max: 100,
+
+                            ticks: {
+
+                                display: false
+
+                            },
+
+                            grid: {
+
+                                color:
+                                    "rgba(150, 210, 230, 0.16)"
+
+                            },
+
+                            angleLines: {
+
+                                color:
+                                    "rgba(150, 210, 230, 0.16)"
+
+                            },
+
+                            pointLabels: {
+
+                                color: "#dff7ff",
+
+                                font: {
+
+                                    size: 12,
+
+                                    weight: "600"
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+        /* ====================================================
+           5. SCENARIO PERFORMANCE
+        ==================================================== */
+
+        new Chart(
+
+            document.getElementById(
+                "scenarioPerformanceChart"
+            ),
+
+            {
+
+                type: "bar",
+
+                data: {
+
+                    labels: [
+
+                        "Dry-season severity",
+
+                        "Demand growth",
+
+                        "Conservation effort",
+
+                        "Availability",
+
+                        "Demand index",
+
+                        "Resilience"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Scenario Value",
+
+                            data: [
+
+                                25,
+
+                                12,
+
+                                18,
+
+                                70,
+
+                                61,
+
+                                89
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#4f7cff",
+
+                                "#59d8ff",
+
+                                "#6ee7b7",
+
+                                "#38bdf8",
+
+                                "#818cf8",
+
+                                "#22d3ee"
+
+                            ],
+
+                            borderColor: [
+
+                                "#4f7cff",
+
+                                "#59d8ff",
+
+                                "#6ee7b7",
+
+                                "#38bdf8",
+
+                                "#818cf8",
+
+                                "#22d3ee"
+
+                            ],
+
+                            borderWidth: 1,
+
+                            borderRadius: 8
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    animation: {
+
+                        duration: 1000
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+
+                            display: false
+
+                        },
+
+                        tooltip: {
+
+                            backgroundColor: "#071522",
+
+                            titleColor: "#ffffff",
+
+                            bodyColor: "#dff7ff",
+
+                            borderColor: "#59d8ff",
+
+                            borderWidth: 1,
+
+                            padding: 12,
+
+                            callbacks: {
+
+                                label:
+                                    function (context) {
+
+                                        return (
+                                            " Value: " +
+                                            context.raw +
+                                            "%"
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        x: {
+
+                            ticks: {
+
+                                color: "#dff7ff",
+
+                                font: {
+
+                                    size: 11,
+
+                                    weight: "600"
+
+                                },
+
+                                maxRotation: 0,
+
+                                minRotation: 0
+
+                            },
+
+                            grid: {
+
+                                display: false
+
+                            }
+
+                        },
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            max: 100,
+
+                            ticks: {
+
+                                color: "#c7e7f2",
+
+                                callback:
+                                    function (value) {
+
+                                        return value + "%";
+
+                                    }
+
+                            },
+
+                            grid: {
+
+                                color:
+                                    "rgba(150, 210, 230, 0.10)"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

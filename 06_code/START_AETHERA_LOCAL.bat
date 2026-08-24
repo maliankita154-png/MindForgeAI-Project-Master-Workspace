@@ -20,7 +20,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Starting Aethera at http://127.0.0.1:5000
+echo Starting Aethera at http://127.0.0.1:8000
 echo Keep this window open while using the website.
 echo Press Ctrl+C here to stop the local server.
 echo.

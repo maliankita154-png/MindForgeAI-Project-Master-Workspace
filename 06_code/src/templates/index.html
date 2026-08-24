@@ -8,815 +8,679 @@ AETHERA | Command Center
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 /* ============================================================
-   SUPPLY VS DEMAND CHART FIX
-============================================================ */
-
-#supplyDemandChart {
-    display: block !important;
-    width: 100% !important;
-    height: 300px !important;
-}
-
-.chart-card.wide .chart-box {
-    min-height: 320px;
-}
-<style>
-
-/* ============================================================
-   AETHERA COMMAND CENTER — PREMIUM UI
-============================================================ */
-
-* {
-    box-sizing: border-box;
-}
-
-:root {
-    --aether-dark: #082f2a;
-    --aether-deep: #0b4038;
-    --aether-green: #147d68;
-    --aether-cyan: #31c8d8;
-    --aether-light: #eef8f5;
-    --aether-card: rgba(255,255,255,.92);
-    --aether-border: rgba(8,47,42,.10);
-    --text-main: #102f2b;
-    --text-muted: #71827e;
-    --shadow: 0 12px 35px rgba(8,47,42,.08);
-}
-
-/* ============================================================
-   PAGE
+   AETHERA COMMAND CENTER — FINAL CLEAN FORMATTING
 ============================================================ */
 
 .command-center {
-    width: min(1480px, calc(100% - 42px));
-    margin: 30px auto 80px;
-    color: var(--text-main);
+    width: min(1500px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 25px 0 60px;
 }
 
-/* ============================================================
-   HEADINGS
-============================================================ */
-
-.hero h1 {
-    text-align: center;
-    font-weight: 900;
-}
-
-.hero-content {
-    text-align: center;
-    width: 100%;
-}
-
-.hero p {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.hero-label {
-    justify-content: center;
-    width: 100%;
-}
-
-.chart-title {
-    text-align: center;
-}
-
-.chart-title span {
-    font-weight: 900;
-}
-
-.chart-title h2 {
-    font-weight: 900;
-    text-align: center;
-}
-
-.section-header {
-    justify-content: center;
-    text-align: center;
-}
-
-.section-header > div {
-    width: 100%;
-}
-
-.section h2 {
-    text-align: center;
-    font-weight: 900;
-}
-
-.section-subtitle {
-    text-align: center;
-    font-weight: 600;
-}
-
-.kpi {
-    text-align: center;
-}
-
-.kpi span {
-    font-weight: 900;
-    text-align: center;
-}
-
-.kpi strong {
-    font-weight: 900;
-}
-
-.sector {
-    text-align: center;
-    font-weight: 800;
-}
-
-.sector strong {
-    font-weight: 900;
-    text-align: center;
-}
-
-.module {
-    text-align: center;
-}
-
-.module-icon {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.module h3 {
-    font-weight: 900;
-    text-align: center;
-}
-
-.module p {
-    text-align: center;
-    font-weight: 600;
-}
-
-.alert {
-    font-weight: 700;
-    text-align: center;
-}
-
-.data-table th {
-    font-weight: 900;
-    text-align: center;
-}
-
-.data-table td {
-    text-align: center;
-    font-weight: 600;
-}
-
-.data-table td strong {
-    font-weight: 900;
-}
-
-.search-box input {
-    font-weight: 600;
-}
-
-.search-box button {
-    font-weight: 900;
-}
-
-.filters select,
-.filters button {
-    font-weight: 800;
-}
 
 /* ============================================================
    HERO
 ============================================================ */
 
-.hero {
-    position: relative;
-    overflow: hidden;
+.command-center .hero {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    padding: 38px 42px;
-    margin-bottom: 24px;
-    border-radius: 28px;
+    gap: 30px;
 
-    background:
-        radial-gradient(
-            circle at 85% 20%,
-            rgba(49,200,216,.22),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #082f2a,
-            #0d5549
-        );
+    min-height: 210px;
 
-    color: white;
+    padding: 34px 38px;
+    margin-bottom: 22px;
 
-    box-shadow:
-        0 18px 45px rgba(8,47,42,.18);
+    border-radius: 22px;
+    box-sizing: border-box;
 }
 
-.hero::after {
-    content: "";
-    position: absolute;
-    width: 220px;
-    height: 220px;
-    right: -70px;
-    bottom: -100px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.15);
+.command-center .hero-content {
+    min-width: 0;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 2;
-}
+.command-center .hero h1 {
+    margin: 8px 0 10px;
 
-.hero-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #75e8e4;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 2px;
-}
-
-.hero h1 {
-    margin: 0;
-    font-size: clamp(36px, 5vw, 58px);
+    font-size: clamp(32px, 4vw, 52px);
     line-height: 1.05;
-    letter-spacing: -2px;
+
+    letter-spacing: -1.5px;
 }
 
-.hero p {
+.command-center .hero p {
     max-width: 760px;
-    margin: 14px 0 0;
-    color: rgba(255,255,255,.72);
-    line-height: 1.7;
-    font-size: 14px;
+    margin: 0;
+
+    line-height: 1.65;
 }
 
-.status {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 12px 18px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.10);
-    border: 1px solid rgba(255,255,255,.15);
-    backdrop-filter: blur(12px);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .8px;
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #4df3a7;
-    box-shadow: 0 0 12px #4df3a7;
-}
 
 /* ============================================================
    SEARCH
 ============================================================ */
 
-.search-section {
-    margin-bottom: 16px;
+.command-center .search-section {
+    margin-bottom: 22px;
 }
 
-.search-box {
-    display: flex;
-    gap: 10px;
-    padding: 7px;
-    background: white;
-    border: 1px solid var(--aether-border);
-    border-radius: 17px;
-    box-shadow: var(--shadow);
+.command-center .search-box {
+    display: grid;
+    grid-template-columns: 1fr 140px;
+    gap: 12px;
+
+    width: 100%;
 }
 
-.search-box input {
-    flex: 1;
-    min-width: 0;
-    padding: 14px 17px;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 14px;
-    color: var(--text-main);
-}
+.command-center .search-box input {
+    width: 100%;
+    min-height: 48px;
 
-.search-box input::placeholder {
-    color: #9aa9a5;
-}
+    padding: 0 16px;
 
-.search-box button {
-    border: none;
-    padding: 0 25px;
+    box-sizing: border-box;
     border-radius: 12px;
-    background: var(--aether-dark);
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .2s;
+
+    font-size: 14px;
 }
 
-.search-box button:hover {
-    background: var(--aether-green);
-    transform: translateY(-1px);
+.command-center .search-box button {
+    min-height: 48px;
+
+    border: 0;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 800;
 }
+
 
 /* ============================================================
-   SEARCH RESULTS
+   SEARCH RESULT
 ============================================================ */
 
-#searchResults {
-    margin-top: 10px;
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
+.command-center #searchResults {
+    margin-top: 12px;
 }
 
-.search-result {
-    padding: 14px 17px;
-    border-bottom: 1px solid #edf1ef;
-    font-size: 13px;
+.command-center .search-result {
+    padding: 14px 16px;
+
+    border-radius: 12px;
+    border: 1px solid var(--border);
+
+    background: #ffffff;
+
+    line-height: 1.6;
 }
 
-.search-result:last-child {
-    border-bottom: none;
-}
 
 /* ============================================================
    FILTERS
 ============================================================ */
 
-.filters {
+.command-center .filters {
     display: grid;
-    grid-template-columns: repeat(3, 1fr) 120px;
-    gap: 10px;
-    margin-bottom: 22px;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr))
+        130px;
+
+    gap: 14px;
+
+    align-items: end;
+
+    margin-bottom: 24px;
 }
 
-.filters select,
-.filters button {
+.command-center .filters select {
     width: 100%;
-    padding: 13px 15px;
-    border-radius: 13px;
-    border: 1px solid var(--aether-border);
-    background: white;
-    color: var(--text-main);
-    font-size: 13px;
-    outline: none;
+    min-height: 44px;
+
+    padding: 0 12px;
+
+    border-radius: 11px;
+
+    box-sizing: border-box;
 }
 
-.filters button {
-    background: #e9f3ef;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .2s;
+.command-center .filters button {
+    min-height: 44px;
+
+    border-radius: 11px;
 }
 
-.filters button:hover {
-    background: var(--aether-dark);
-    color: white;
-}
-
-/* ============================================================
-   KPI GRID
-============================================================ */
-
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.kpi {
-    position: relative;
-    overflow: hidden;
-    min-height: 145px;
-    padding: 22px;
-    border-radius: 20px;
-    background: var(--aether-card);
-    border: 1px solid var(--aether-border);
-    box-shadow: var(--shadow);
-    transition: .25s;
-}
-
-.kpi:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(8,47,42,.12);
-}
-
-.kpi::after {
-    content: "";
-    position: absolute;
-    width: 90px;
-    height: 90px;
-    right: -30px;
-    bottom: -35px;
-    border-radius: 50%;
-    background: rgba(49,200,216,.08);
-}
-
-.kpi span {
-    display: block;
-    margin-bottom: 14px;
-    color: var(--text-muted);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .7px;
-}
-
-.kpi strong {
-    display: inline-block;
-    font-size: 30px;
-    line-height: 1;
-    color: var(--aether-dark);
-}
-
-.kpi small {
-    margin-left: 5px;
-    color: var(--text-muted);
-    font-size: 11px;
-}
-
-/* ============================================================
-   CHARTS
-============================================================ */
-
-.chart-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-    margin: 22px 0;
-}
-
-.chart-card {
-    min-width: 0;
-    padding: 24px;
-    border-radius: 22px;
-    background: white;
-    border: 1px solid var(--aether-border);
-    box-shadow: var(--shadow);
-}
-
-.chart-card.wide {
-    grid-column: 1 / -1;
-}
-
-.chart-title {
-    margin-bottom: 18px;
-}
-
-.chart-title span {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--aether-green);
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1.4px;
-}
-
-.chart-title h2 {
-    margin: 0;
-    font-size: 19px;
-    letter-spacing: -.4px;
-}
-
-.chart-box {
-    position: relative;
-    width: 100%;
-    height: 320px;
-}
 
 /* ============================================================
    SECTION
 ============================================================ */
 
-.section {
-    margin-bottom: 20px;
-    padding: 25px;
-    border-radius: 22px;
-    background: white;
-    border: 1px solid var(--aether-border);
-    box-shadow: var(--shadow);
-}
-
-.section-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.section-header > div {
+.command-center .section {
     width: 100%;
+    margin-bottom: 24px;
+
+    box-sizing: border-box;
 }
 
-.section h2 {
+.command-center .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 14px;
+}
+
+.command-center .section-header h2 {
     margin: 0;
-    font-size: 20px;
-    letter-spacing: -.5px;
+
+    font-size: 21px;
+    line-height: 1.25;
 }
 
-.section-subtitle {
-    margin-top: 5px;
-    color: var(--text-muted);
+.command-center .section-subtitle {
+    margin: 5px 0 0;
+
     font-size: 12px;
+    line-height: 1.5;
 }
+
+
+/* ============================================================
+   KPI
+============================================================ */
+
+.command-center .kpi-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-bottom: 24px;
+}
+
+.command-center .kpi {
+    min-width: 0;
+    min-height: 145px;
+
+    padding: 21px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    box-sizing: border-box;
+}
+
+.command-center .kpi span {
+    display: block;
+
+    min-height: 20px;
+
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.command-center .kpi strong {
+    display: block;
+
+    margin-top: 12px;
+
+    font-size: 28px;
+    line-height: 1.1;
+
+    font-weight: 900;
+
+    font-variant-numeric: tabular-nums;
+
+    overflow-wrap: anywhere;
+}
+
+.command-center .kpi small {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   CHART GRID
+============================================================ */
+
+.command-center .chart-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 24px;
+}
+
+.command-center .chart-card {
+    min-width: 0;
+    min-height: 410px;
+
+    padding: 22px;
+
+    box-sizing: border-box;
+}
+
+.command-center .chart-card.wide {
+    grid-column: 1 / -1;
+}
+
+.command-center .chart-title {
+    margin-bottom: 15px;
+}
+
+.command-center .chart-title span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+.command-center .chart-title h2 {
+    margin: 0;
+
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.command-center .chart-box {
+    position: relative;
+
+    width: 100%;
+    height: 315px;
+}
+
+.command-center .chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 
 /* ============================================================
    SECTOR GRID
 ============================================================ */
 
-.sector-grid {
+.command-center .sector-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 13px;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 24px;
 }
 
-.sector {
+.command-center .sector {
+    min-width: 0;
+    min-height: 120px;
+
     padding: 19px;
-    border-radius: 16px;
-    background: linear-gradient(145deg, #f5faf8, #edf5f2);
-    border: 1px solid rgba(8,47,42,.06);
-    color: #647570;
-    font-size: 12px;
-    font-weight: 700;
-    transition: .2s;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    box-sizing: border-box;
 }
 
-.sector:hover {
-    transform: translateY(-3px);
-    border-color: rgba(20,125,104,.2);
+.command-center .sector span {
+    font-size: 11px;
+    font-weight: 800;
 }
 
-.sector strong {
+.command-center .sector strong {
     display: block;
-    margin-top: 9px;
-    color: var(--aether-dark);
-    font-size: 23px;
+
+    margin-top: 10px;
+
+    font-size: 22px;
     line-height: 1.15;
-    word-break: break-word;
+
+    font-weight: 900;
+
+    font-variant-numeric: tabular-nums;
+
+    overflow-wrap: anywhere;
 }
+
+.command-center .sector small {
+    margin-top: 5px;
+
+    font-size: 10px;
+}
+
 
 /* ============================================================
    ALERTS
 ============================================================ */
 
-.alert-grid {
+.command-center .alert-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 24px;
 }
 
-.alert {
-    padding: 18px 19px;
-    border-radius: 15px;
-    background: #f5f8f7;
-    border-left: 4px solid #39a86f;
-    color: #40534f;
-    font-size: 13px;
+.command-center .alert {
+    min-width: 0;
+    min-height: 100px;
+
+    padding: 18px;
+
+    box-sizing: border-box;
+}
+
+.command-center .alert strong {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 14px;
+}
+
+.command-center .alert p {
+    margin: 0;
+
+    font-size: 11px;
     line-height: 1.55;
 }
 
-.alert.high {
-    border-left-color: #d64545;
-    background: #fff6f6;
-}
-
-.alert.medium {
-    border-left-color: #d99a22;
-    background: #fffaf0;
-}
-
-.alert.low {
-    border-left-color: #39a86f;
-}
 
 /* ============================================================
    TABLE
 ============================================================ */
 
-.table-wrap {
-    overflow-x: auto;
-    border: 1px solid #e8eeeb;
-    border-radius: 15px;
-}
-
-.data-table {
+.command-center .table-wrap {
     width: 100%;
-    min-width: 900px;
-    border-collapse: collapse;
-    background: white;
+
+    overflow-x: auto;
+
+    border-radius: 16px;
 }
 
-.data-table th {
-    padding: 14px;
-    background: #f2f7f5;
-    color: #647570;
+.command-center table {
+    width: 100%;
+    min-width: 950px;
+
+    border-collapse: collapse;
+}
+
+.command-center table th {
+    position: sticky;
+    top: 0;
+
+    z-index: 2;
+
+    padding: 14px 13px;
+
+    text-align: left;
+
+    white-space: nowrap;
+
     font-size: 10px;
     font-weight: 900;
-    letter-spacing: .5px;
-    text-align: center;
+}
+
+.command-center table td {
+    padding: 13px;
+
     white-space: nowrap;
+
+    font-size: 11px;
+
+    font-variant-numeric: tabular-nums;
 }
 
-.data-table td {
-    padding: 14px;
-    border-top: 1px solid #edf1ef;
-    font-size: 12px;
-    color: #455854;
-    text-align: center;
+.command-center table th:first-child,
+.command-center table td:first-child {
+    position: sticky;
+    left: 0;
+
+    z-index: 1;
 }
 
-.data-table tbody tr:hover {
-    background: #f7fbf9;
+.command-center table th:first-child {
+    z-index: 3;
 }
 
-.data-table td strong {
-    color: var(--aether-dark);
-    font-weight: 900;
-}
 
 /* ============================================================
    MODULES
 ============================================================ */
 
-.modules {
+.command-center .modules {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 13px;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 20px;
 }
 
-.module {
-    position: relative;
-    min-height: 155px;
-    padding: 20px;
-    border-radius: 17px;
-    background: linear-gradient(145deg, #f4faf7, #edf5f2);
-    border: 1px solid rgba(8,47,42,.07);
-    color: inherit;
-    text-decoration: none;
-    transition: .25s;
-    overflow: hidden;
+.command-center .module {
+    min-width: 0;
+    min-height: 135px;
+
+    padding: 18px;
+
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
 }
 
-.module:hover {
-    transform: translateY(-5px);
-    background: white;
-    border-color: rgba(20,125,104,.22);
-    box-shadow: 0 12px 28px rgba(8,47,42,.10);
-}
+.command-center .module h3 {
+    margin: 12px 0 7px;
 
-.module-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-    background: white;
-    box-shadow: 0 5px 15px rgba(8,47,42,.07);
-    font-size: 18px;
-}
-
-.module h3 {
-    margin: 13px 0 7px;
     font-size: 14px;
-    font-weight: 900;
+    line-height: 1.3;
 }
 
-.module p {
+.command-center .module p {
     margin: 0;
-    color: var(--text-muted);
+
     font-size: 11px;
     line-height: 1.5;
 }
 
-/* ============================================================
-   SCROLLBAR
-============================================================ */
-
-.table-wrap::-webkit-scrollbar {
-    height: 7px;
-}
-
-.table-wrap::-webkit-scrollbar-thumb {
-    background: #b8cbc5;
-    border-radius: 20px;
-}
 
 /* ============================================================
-   RESPONSIVE
+   1200px
 ============================================================ */
 
-@media (max-width: 1150px) {
+@media (max-width: 1200px) {
 
-    .modules {
-        grid-template-columns: repeat(3, 1fr);
+    .command-center .modules {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
     }
 
-    .sector-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .command-center .sector-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 950px) {
+
+/* ============================================================
+   1000px
+============================================================ */
+
+@media (max-width: 1000px) {
 
     .command-center {
-        width: min(100% - 28px, 900px);
+        width: min(100% - 28px, 920px);
     }
 
-    .hero {
-        padding: 30px;
+    .command-center .kpi-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
-    .chart-grid {
+    .command-center .chart-grid {
         grid-template-columns: 1fr;
     }
 
-    .chart-card.wide {
+    .command-center .chart-card.wide {
         grid-column: auto;
     }
 
-    .filters {
-        grid-template-columns: 1fr 1fr;
+    .command-center .sector-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
-    .alert-grid {
-        grid-template-columns: 1fr;
+    .command-center .alert-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .command-center .modules {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .command-center .filters {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 650px) {
+
+/* ============================================================
+   700px
+============================================================ */
+
+@media (max-width: 700px) {
 
     .command-center {
         width: calc(100% - 18px);
-        margin-top: 15px;
+
+        padding-top: 14px;
     }
 
-    .hero {
+    .command-center .hero {
         flex-direction: column;
-        align-items: center;
-        padding: 26px 22px;
-        border-radius: 22px;
+        align-items: flex-start;
+
+        padding: 28px 22px;
+
+        text-align: left;
     }
 
-    .hero h1 {
+    .command-center .hero-content {
+        width: 100%;
+    }
+
+    .command-center .hero h1 {
         font-size: 38px;
     }
 
-    .status {
-        align-self: center;
-        margin-top: 20px;
+    .command-center .search-box {
+        grid-template-columns: 1fr;
     }
 
-    .search-box {
+    .command-center .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .command-center .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .command-center .sector-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .command-center .alert-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .command-center .modules {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .command-center .chart-card {
+        min-height: 370px;
+
+        padding: 18px;
+    }
+
+    .command-center .chart-box {
+        height: 275px;
+    }
+
+    .command-center .section-header {
+        align-items: flex-start;
         flex-direction: column;
-        padding: 8px;
-    }
-
-    .search-box button {
-        padding: 14px;
-    }
-
-    .filters,
-    .sector-grid,
-    .modules {
-        grid-template-columns: 1fr;
-    }
-
-    .kpi-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .section,
-    .chart-card {
-        padding: 19px;
-    }
-
-    .chart-box {
-        height: 270px;
     }
 }
 
-</style>
+
+/* ============================================================
+   450px
+============================================================ */
+
+@media (max-width: 450px) {
+
+    .command-center {
+        width: calc(100% - 12px);
+    }
+
+    .command-center .hero {
+        padding: 24px 17px;
+    }
+
+    .command-center .hero h1 {
+        font-size: 32px;
+    }
+
+    .command-center .modules {
+        grid-template-columns: 1fr;
+    }
+
+    .command-center .kpi {
+        min-height: 130px;
+    }
+
+    .command-center .kpi strong {
+        font-size: 26px;
+    }
+
+    .command-center .sector strong {
+        font-size: 21px;
+    }
+
+    .command-center .chart-box {
+        height: 250px;
+    }
+}
 
 {% endblock %}
 
@@ -825,2079 +689,1533 @@ AETHERA | Command Center
 
 <div class="command-center">
 
-<!-- ============================================================
-     HERO
-============================================================ -->
 
-<section class="hero">
+    <!-- ======================================================
+         HERO
+    ======================================================= -->
 
-    <div class="hero-content">
+    <section class="command-hero">
 
-        <div class="hero-label">
-            ◈ AETHERA WATER INTELLIGENCE
-        </div>
+        <div class="command-hero-content">
 
-        <h1>
-            Command Center
-        </h1>
+            <div>
+                <h1>AETHERA Command Center</h1>
 
-        <p>
-            Search, compare and monitor rainfall, water demand,
-            reservoirs, water usage, risk and sustainability
-            across 2025–2026.
-        </p>
+                <p>
+                    AI-powered water intelligence and real-time
+                    resource monitoring dashboard.
+                </p>
+            </div>
 
-    </div>
+            <div class="hero-status">
 
-    <div class="status">
-        <span class="status-dot"></span>
-        SYSTEM ACTIVE
-    </div>
+                <span class="hero-status-dot"></span>
 
-</section>
+                SYSTEM ONLINE
 
-
-<!-- ============================================================
-     SEARCH
-============================================================ -->
-
-<section class="search-section">
-
-    <div class="search-box">
-
-        <input
-            id="waterSearch"
-            type="search"
-            placeholder="Search AETHERA data..."
-        >
-
-        <button id="searchButton">
-            🔎 Search
-        </button>
-
-    </div>
-
-    <div id="searchResults"></div>
-
-</section>
-
-
-<!-- ============================================================
-     FILTERS
-============================================================ -->
-
-<section class="filters">
-
-    <select id="yearFilter">
-
-        <option value="all">
-            All Years
-        </option>
-
-        <option value="2025">
-            2025
-        </option>
-
-        <option value="2026">
-            2026
-        </option>
-
-    </select>
-
-
-    <select id="monthFilter">
-
-        <option value="all">
-            All Months
-        </option>
-
-        <option value="Jan">Jan</option>
-        <option value="Feb">Feb</option>
-        <option value="Mar">Mar</option>
-        <option value="Apr">Apr</option>
-        <option value="May">May</option>
-        <option value="Jun">Jun</option>
-        <option value="Jul">Jul</option>
-        <option value="Aug">Aug</option>
-        <option value="Sep">Sep</option>
-        <option value="Oct">Oct</option>
-        <option value="Nov">Nov</option>
-        <option value="Dec">Dec</option>
-
-    </select>
-
-
-    <select id="dataFilter">
-
-        <option value="all">
-            All Data
-        </option>
-
-        <option value="rainfall">
-            Rainfall
-        </option>
-
-        <option value="water">
-            Water Use
-        </option>
-
-        <option value="reservoir">
-            Reservoir
-        </option>
-
-    </select>
-
-
-    <button id="resetFilters">
-        ↻ Reset
-    </button>
-
-</section>
-
-
-<!-- ============================================================
-     PRIMARY KPI
-============================================================ -->
-
-<section class="kpi-grid">
-
-    <div class="kpi">
-
-        <span>💧 WATER AVAILABLE</span>
-
-        <strong>
-            {{ data.water_available | default(0, true) }}
-        </strong>
-
-        <small>MCM</small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>📊 TODAY'S WATER DEMAND</span>
-
-        <strong>
-            {{ data.demand | default(0, true) }}
-        </strong>
-
-        <small>MLD</small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>🏞 RESERVOIR LEVEL</span>
-
-        <strong>
-            {{ data.reservoir | default(0, true) }}
-        </strong>
-
-        <small>%</small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>🌧 2026 RAINFALL</span>
-
-        <strong>
-            {{ data.rainfall_2026_total | default(0, true) }}
-        </strong>
-
-        <small>mm</small>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     SECONDARY KPI
-============================================================ -->
-
-<section class="kpi-grid">
-
-    <div class="kpi">
-
-        <span>🌧 LATEST RAINFALL</span>
-
-        <strong>
-            {{ data.latest_rainfall | default(0, true) }}
-        </strong>
-
-        <small>
-            mm · {{ data.latest_rainfall_month | default("N/A", true) }}
-        </small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>🌊 2026 RUNOFF</span>
-
-        <strong>
-            {{ data.runoff_2026_total | default(0, true) }}
-        </strong>
-
-        <small>MCM</small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>💦 GROUNDWATER RECHARGE</span>
-
-        <strong>
-            {{ data.groundwater_2026_total | default(0, true) }}
-        </strong>
-
-        <small>MCM</small>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <span>⚠️ RISK LEVEL</span>
-
-        <strong>
-            {{ data.risk_level | default("LOW", true) }}
-        </strong>
-
-        <small>Current assessment</small>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     CHARTS
-============================================================ -->
-
-<section class="chart-grid">
-
-    <article class="chart-card">
-
-        <div class="chart-title">
-
-            <span>
-                RAINFALL ANALYTICS
-            </span>
-
-            <h2>
-                2025 vs 2026 Rainfall
-            </h2>
-
-        </div>
-
-        <div class="chart-box">
-            <canvas id="rainfallChart"></canvas>
-        </div>
-
-    </article>
-
-
-    <article class="chart-card">
-
-        <div class="chart-title">
-
-            <span>
-                WATER UTILIZATION
-            </span>
-
-            <h2>
-                2026 Sector-wise Water Use
-            </h2>
-
-        </div>
-
-        <div class="chart-box">
-            <canvas id="waterChart"></canvas>
-        </div>
-
-    </article>
-
-
-    <article class="chart-card wide">
-
-        <div class="chart-title">
-
-            <span>
-                RESERVOIR MONITORING
-            </span>
-
-            <h2>
-                Reservoir Availability Trend
-            </h2>
-
-        </div>
-
-        <div class="chart-box">
-            <canvas id="reservoirChart"></canvas>
-        </div>
-
-    </article>
-
-
-    <article class="chart-card wide">
-
-        <div class="chart-title">
-
-            <span>
-                WATER BALANCE
-            </span>
-
-            <h2>
-                Supply vs Demand
-            </h2>
-
-        </div>
-
-        <div class="chart-box">
-            <canvas id="supplyDemandChart"></canvas>
-        </div>
-
-    </article>
-
-</section>
-
-
-<!-- ============================================================
-     2026 SECTOR SUMMARY
-============================================================ -->
-
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                2026 Water Use by Sector
-            </h2>
-
-            <div class="section-subtitle">
-                Current water utilization distribution
             </div>
 
         </div>
 
-    </div>
+    </section>
 
 
-    <div class="sector-grid">
+    <!-- ======================================================
+         FILTERS
+    ======================================================= -->
 
-        <div class="sector">
+    <section class="filter-panel">
 
-            Agriculture
+        <div class="filter-title">
 
-            <strong>
-                {{ water_use_2026_summary.agriculture | default(0, true) }}
-            </strong>
+            <h3>Dashboard Filters</h3>
 
-            MCM
-
-        </div>
-
-
-        <div class="sector">
-
-            Industry
-
-            <strong>
-                {{ water_use_2026_summary.industry | default(0, true) }}
-            </strong>
-
-            MCM
+            <p>
+                Filter the command center data by year, month
+                and data category.
+            </p>
 
         </div>
 
 
-        <div class="sector">
+        <div class="filter-grid">
 
-            Domestic
 
-            <strong>
-                {{ water_use_2026_summary.domestic | default(0, true) }}
-            </strong>
+            <div class="filter-field">
 
-            MCM
+                <label for="yearFilter">
+                    Year
+                </label>
+
+                <select id="yearFilter">
+
+                    <option value="all">
+                        All Years
+                    </option>
+
+                    {% if years is defined %}
+
+                        {% for year in years %}
+
+                            <option value="{{ year }}">
+                                {{ year }}
+                            </option>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="monthFilter">
+                    Month
+                </label>
+
+                <select id="monthFilter">
+
+                    <option value="all">
+                        All Months
+                    </option>
+
+                    {% for month in range(1, 13) %}
+
+                        <option value="{{ month }}">
+                            {{ month }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-field">
+
+                <label for="dataFilter">
+                    Data Type
+                </label>
+
+                <select id="dataFilter">
+
+                    <option value="all">
+                        All Data
+                    </option>
+
+                    <option value="rainfall">
+                        Rainfall
+                    </option>
+
+                    <option value="demand">
+                        Water Demand
+                    </option>
+
+                    <option value="reservoir">
+                        Reservoir
+                    </option>
+
+                    <option value="water-use">
+                        Water Use
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="resetFilters"
+                class="reset-btn"
+            >
+                Reset Filters
+            </button>
+
 
         </div>
 
-
-        <div class="sector">
-
-            Animal Husbandry
-
-            <strong>
-                {{ water_use_2026_summary.animal | default(0, true) }}
-            </strong>
-
-            MCM
-
-        </div>
+    </section>
 
 
-        <div class="sector">
+    <section class="search-section" aria-label="Search water data">
 
-            Power
+        <div class="search-box">
 
-            <strong>
-                {{ water_use_2026_summary.power | default(0, true) }}
-            </strong>
+            <input
+                id="waterSearch"
+                type="search"
+                placeholder="Search rainfall, water use, reservoir, month or year"
+            >
 
-            MCM
+            <button id="searchButton" type="button">
+                Search
+            </button>
 
         </div>
 
+        <div id="searchResults" hidden></div>
 
-        <div class="sector">
-
-            Environment
-
-            <strong>
-                {{ water_use_2026_summary.environment | default(0, true) }}
-            </strong>
-
-            MCM
-
-        </div>
+    </section>
 
 
-        <div class="sector">
+    <!-- ======================================================
+         KPI SECTION
+    ======================================================= -->
 
-            Other
+    <section class="dashboard-section">
 
-            <strong>
-                {{ water_use_2026_summary.other | default(0, true) }}
-            </strong>
+        <div class="section-heading">
 
-            MCM
+            <div>
 
-        </div>
+                <h2>Water Intelligence Overview</h2>
 
+                <p>
+                    Current water availability, demand,
+                    reservoir and rainfall indicators.
+                </p>
 
-        <div class="sector">
-
-            TOTAL
-
-            <strong>
-                {{ water_use_2026_summary.total | default(0, true) }}
-            </strong>
-
-            MCM
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     RESERVOIR
-============================================================ -->
-
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                🏞 Reservoir & Dam Monitoring
-            </h2>
-
-            <div class="section-subtitle">
-                Live reservoir availability and flow indicators
             </div>
 
         </div>
 
-    </div>
+
+        <div class="kpi-grid">
 
 
-    <div class="sector-grid">
+            <!-- TOTAL WATER -->
 
-        <div class="sector">
+            <div class="kpi-card">
 
-            Reservoir
+                <div class="kpi-icon">
+                    W
+                </div>
 
-            <strong>
-                {{ data.reservoir_name | default("N/A", true) }}
-            </strong>
+                <div class="kpi-label">
+                    Total Water Available
+                </div>
+
+                <div class="kpi-value">
+                    {{ water_available | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    MCM
+                </div>
+
+            </div>
+
+
+            <!-- DEMAND -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    D
+                </div>
+
+                <div class="kpi-label">
+                    Today's Water Demand
+                </div>
+
+                <div class="kpi-value">
+                    {{ demand | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    MCM
+                </div>
+
+            </div>
+
+
+            <!-- RESERVOIR -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    R
+                </div>
+
+                <div class="kpi-label">
+                    Reservoir Level
+                </div>
+
+                <div class="kpi-value">
+                    {{ reservoir | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    %
+                </div>
+
+            </div>
+
+
+            <!-- RAINFALL -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    P
+                </div>
+
+                <div class="kpi-label">
+                    Latest Rainfall
+                </div>
+
+                <div class="kpi-value">
+                    {{ latest_rainfall | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    mm
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL RAINFALL -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    R
+                </div>
+
+                <div class="kpi-label">
+                    2026 Rainfall
+                </div>
+
+                <div class="kpi-value">
+                    {{ rainfall_2026_total | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    mm total
+                </div>
+
+            </div>
+
+
+            <!-- RUNOFF -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    O
+                </div>
+
+                <div class="kpi-label">
+                    Total Runoff
+                </div>
+
+                <div class="kpi-value">
+                    {{ runoff_2026_total | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    MCM
+                </div>
+
+            </div>
+
+
+            <!-- GROUNDWATER -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    G
+                </div>
+
+                <div class="kpi-label">
+                    Groundwater
+                </div>
+
+                <div class="kpi-value">
+                    {{ groundwater_2026_total | default(0) }}
+                </div>
+
+                <div class="kpi-unit">
+                    MCM
+                </div>
+
+            </div>
+
+
+            <!-- RISK -->
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon">
+                    !
+                </div>
+
+                <div class="kpi-label">
+                    Risk Level
+                </div>
+
+                <div class="kpi-value">
+                    {{ risk_level | default("LOW") }}
+                </div>
+
+                <div class="kpi-unit">
+                    AI assessment
+                </div>
+
+            </div>
+
 
         </div>
 
-
-        <div class="sector">
-
-            Storage
-
-            <strong>
-                {{ data.reservoir | default(0, true) }}%
-            </strong>
-
-        </div>
+    </section>
 
 
-        <div class="sector">
+    <!-- ======================================================
+         CHARTS
+    ======================================================= -->
 
-            Capacity
+    <section class="dashboard-section">
 
-            <strong>
-                {{ data.reservoir_capacity | default(0, true) }}
-            </strong>
+        <div class="section-heading">
 
-            MCM
+            <div>
 
-        </div>
+                <h2>Water Analytics</h2>
 
+                <p>
+                    Visual analysis of supply, demand,
+                    rainfall and reservoir conditions.
+                </p>
 
-        <div class="sector">
-
-            Latest Inflow
-
-            <strong>
-                {{ data.reservoir_inflow | default(0, true) }}
-            </strong>
-
-            MCM
-
-        </div>
-
-
-        <div class="sector">
-
-            Latest Outflow
-
-            <strong>
-                {{ data.reservoir_outflow | default(0, true) }}
-            </strong>
-
-            MCM
-
-        </div>
-
-
-        <div class="sector">
-
-            Latest Date
-
-            <strong>
-                {{ data.reservoir_latest_date | default("N/A", true) }}
-            </strong>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     ANIMAL WATER
-============================================================ -->
-
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                🐄 Animal Water Intelligence
-            </h2>
-
-            <div class="section-subtitle">
-                Livestock water consumption indicators
             </div>
 
         </div>
 
-    </div>
+
+        <div class="chart-grid">
 
 
-    <div class="sector-grid">
+            <!-- SUPPLY VS DEMAND -->
 
-        <div class="sector">
+            <div class="chart-card chart-card-wide">
 
-            Total Animals
+                <div class="chart-header">
 
-            <strong>
-                {{ animal_summary.total_animals | default(0, true) }}
-            </strong>
+                    <div>
+
+                        <h3>
+                            Supply vs Demand
+                        </h3>
+
+                        <span>
+                            Water balance analysis
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas id="supplyDemandChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- RAINFALL -->
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <h3>
+                            Rainfall Trend
+                        </h3>
+
+                        <span>
+                            2026 monthly rainfall
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas id="rainfallChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESERVOIR -->
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <h3>
+                            Reservoir Level
+                        </h3>
+
+                        <span>
+                            Storage level monitoring
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas id="reservoirChart"></canvas>
+
+                </div>
+
+            </div>
+
 
         </div>
 
-
-        <div class="sector">
-
-            Daily Water
-
-            <strong>
-                {{ animal_summary.daily_water | default(0, true) }}
-            </strong>
-
-            L/day
-
-        </div>
+    </section>
 
 
-        <div class="sector">
+    <!-- ======================================================
+         SECTOR WATER USE
+    ======================================================= -->
 
-            Monthly Water
+    <section class="dashboard-section">
 
-            <strong>
-                {{ animal_summary.monthly_water | default(0, true) }}
-            </strong>
+        <div class="section-heading">
 
-            L/month
+            <div>
 
-        </div>
+                <h2>2026 Water Use by Sector</h2>
 
+                <p>
+                    Sector-wise water consumption summary.
+                </p>
 
-        <div class="sector">
-
-            Highest Consumer
-
-            <strong>
-                {{ animal_summary.highest_consumer | default("N/A", true) }}
-            </strong>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     RISK & ALERTS
-============================================================ -->
-
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                ⚠️ Risk & AI Alerts
-            </h2>
-
-            <div class="section-subtitle">
-                Current water intelligence alerts
             </div>
 
         </div>
 
-    </div>
 
+        <div class="sector-grid">
 
-    <div class="alert-grid">
 
-        {% for alert in alerts %}
+            {% if water_use_2026_summary is defined %}
 
-        <div class="alert">
-            {{ alert }}
-        </div>
 
-        {% else %}
+                {% for key, value in water_use_2026_summary.items() %}
 
-        <div class="alert low">
-            No active alerts.
-        </div>
+                    <div
+                        class="
+                            sector-card
+                            {% if loop.last %}
+                                sector-total
+                            {% endif %}
+                        "
+                    >
 
-        {% endfor %}
+                        <div class="sector-name">
+                            {{ key | replace("_", " ") | title }}
+                        </div>
 
-    </div>
+                        <div class="sector-value">
+                            {{ value | default(0) }}
+                        </div>
 
-</section>
+                        <div class="sector-unit">
+                            MCM
+                        </div>
 
+                    </div>
 
-<!-- ============================================================
-     GLOBAL WATER
-============================================================ -->
+                {% endfor %}
 
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                🌍 Global Water Intelligence
-            </h2>
-
-            <div class="section-subtitle">
-                Global sector-wise water usage overview
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="sector-grid">
-
-        <div class="sector">
-
-            Countries
-
-            <strong>
-                {{ water_summary.countries | default(0, true) }}
-            </strong>
-
-        </div>
-
-
-        <div class="sector">
-
-            Agriculture
-
-            <strong>
-                {{ water_summary.agriculture | default(0, true) }}%
-            </strong>
-
-        </div>
-
-
-        <div class="sector">
-
-            Industry
-
-            <strong>
-                {{ water_summary.industry | default(0, true) }}%
-            </strong>
-
-        </div>
-
-
-        <div class="sector">
-
-            Domestic
-
-            <strong>
-                {{ water_summary.domestic | default(0, true) }}%
-            </strong>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ============================================================
-     MONTHLY DATA
-============================================================ -->
-
-<section class="section">
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                📊 2026 Monthly Water Use Data
-            </h2>
-
-            <div class="section-subtitle">
-                Monthly sector-wise consumption records
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="table-wrap">
-
-        <table class="data-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>MONTH</th>
-                    <th>AGRICULTURE</th>
-                    <th>INDUSTRY</th>
-                    <th>DOMESTIC</th>
-                    <th>ANIMAL</th>
-                    <th>POWER</th>
-                    <th>ENVIRONMENT</th>
-                    <th>OTHER</th>
-                    <th>TOTAL</th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-            {% for row in water_use_2026_data %}
-
-                <tr
-                    class="data-row"
-                    data-month="{{ row.month | default('', true) }}"
-                    data-year="2026"
-                >
-
-                    <td>
-                        {{ row.month | default("N/A", true) }}
-                    </td>
-
-                    <td>
-                        {{ row.agriculture_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.industry_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.domestic_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.animal_husbandry_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.power_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.environment_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-                        {{ row.other_mcm | default(0, true) }}
-                    </td>
-
-                    <td>
-
-                        <strong>
-                            {{ row.total_use_mcm | default(0, true) }}
-                        </strong>
-
-                    </td>
-
-                </tr>
 
             {% else %}
 
-                <tr>
 
-                    <td colspan="9">
-                        No 2026 water-use data available.
-                    </td>
+                <div class="sector-card">
 
-                </tr>
+                    <div class="sector-name">
+                        Agriculture
+                    </div>
 
-            {% endfor %}
+                    <div class="sector-value">
+                        0
+                    </div>
 
-            </tbody>
+                    <div class="sector-unit">
+                        MCM
+                    </div>
 
-        </table>
-
-    </div>
-
-</section>
+                </div>
 
 
-<!-- ============================================================
-     MODULES
-============================================================ -->
+                <div class="sector-card">
 
-<section class="section">
+                    <div class="sector-name">
+                        Industry
+                    </div>
 
-    <div class="section-header">
+                    <div class="sector-value">
+                        0
+                    </div>
 
-        <div>
+                    <div class="sector-unit">
+                        MCM
+                    </div>
 
-            <h2>
-                AETHERA Intelligence Modules
-            </h2>
+                </div>
 
-            <div class="section-subtitle">
-                Explore the complete water intelligence platform
+
+                <div class="sector-card">
+
+                    <div class="sector-name">
+                        Domestic
+                    </div>
+
+                    <div class="sector-value">
+                        0
+                    </div>
+
+                    <div class="sector-unit">
+                        MCM
+                    </div>
+
+                </div>
+
+
+                <div class="sector-card sector-total">
+
+                    <div class="sector-name">
+                        Total Use
+                    </div>
+
+                    <div class="sector-value">
+                        0
+                    </div>
+
+                    <div class="sector-unit">
+                        MCM
+                    </div>
+
+                </div>
+
+
+            {% endif %}
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         MONTHLY DATA TABLE
+    ======================================================= -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Monthly Water Use Data
+                </h2>
+
+                <p>
+                    Detailed 2026 sector-wise water consumption.
+                </p>
+
             </div>
 
         </div>
 
-    </div>
+
+        <div class="table-card">
+
+            <div class="table-scroll">
+
+                <table
+                    class="data-table"
+                    id="waterUseTable"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            {% if water_use_2026_records is defined
+                                  and water_use_2026_records|length > 0 %}
+
+                                {% for key in water_use_2026_records[0].keys() %}
+
+                                    <th>
+                                        {{ key
+                                            | replace("_", " ")
+                                            | title }}
+                                    </th>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <th>
+                                    Month
+                                </th>
+
+                                <th>
+                                    Agriculture
+                                </th>
+
+                                <th>
+                                    Industry
+                                </th>
+
+                                <th>
+                                    Domestic
+                                </th>
+
+                                <th>
+                                    Power
+                                </th>
+
+                                <th>
+                                    Animal Husbandry
+                                </th>
+
+                                <th>
+                                    Environment
+                                </th>
+
+                                <th>
+                                    Other
+                                </th>
+
+                                <th>
+                                    Total Use
+                                </th>
+
+                            {% endif %}
+
+                        </tr>
+
+                    </thead>
 
 
-    <div class="modules">
+                    <tbody>
+
+                        {% if water_use_2026_records is defined
+                              and water_use_2026_records|length > 0 %}
 
 
-        <a class="module" href="{{ url_for('rainfall') }}">
+                            {% for row in water_use_2026_records %}
 
-            <div class="module-icon">
-                🌧️
+                                <tr>
+
+                                    {% for key, value in row.items() %}
+
+                                        <td>
+                                            {{ value }}
+                                        </td>
+
+                                    {% endfor %}
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        {% else %}
+
+                            <tr>
+
+                                <td colspan="9">
+
+                                    <div class="empty-state">
+                                        No monthly water-use data available.
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
+
             </div>
 
-            <h3>
-                Rainfall Prediction
-            </h3>
+        </div>
 
-            <p>
-                Rainfall trends and recharge.
-            </p>
-
-        </a>
+    </section>
 
 
-        <a class="module" href="{{ url_for('demand') }}">
+    <!-- ======================================================
+         AI ALERTS
+    ======================================================= -->
 
-            <div class="module-icon">
-                💧
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    AI Alerts & Risk Monitoring
+                </h2>
+
+                <p>
+                    Current intelligence generated from
+                    available water data.
+                </p>
+
             </div>
 
-            <h3>
-                Water Demand
-            </h3>
-
-            <p>
-                Demand monitoring.
-            </p>
-
-        </a>
+        </div>
 
 
-        <a class="module" href="{{ url_for('reservoir') }}">
+        <div class="alert-grid">
 
-            <div class="module-icon">
-                🏞️
+
+            <div class="alert-card">
+
+                <div class="alert-title">
+                    Water Demand
+                </div>
+
+                <div class="alert-text">
+                    Monitor demand continuously against
+                    available water supply.
+                </div>
+
             </div>
 
-            <h3>
-                Reservoir
-            </h3>
 
-            <p>
-                Dam and storage monitoring.
-            </p>
+            <div class="alert-card">
 
-        </a>
+                <div class="alert-title">
+                    Reservoir
+                </div>
 
+                <div class="alert-text">
+                    Reservoir storage levels are tracked
+                    for operational planning.
+                </div>
 
-        <a class="module" href="{{ url_for('water_quality') }}">
-
-            <div class="module-icon">
-                🧪
             </div>
 
-            <h3>
-                Water Quality
-            </h3>
 
-            <p>
-                Quality intelligence.
-            </p>
+            <div class="alert-card">
 
-        </a>
+                <div class="alert-title">
+                    Rainfall
+                </div>
 
+                <div class="alert-text">
+                    Rainfall trends support water availability
+                    and risk assessment.
+                </div>
 
-        <a class="module" href="{{ url_for('water_allocation') }}">
-
-            <div class="module-icon">
-                🚰
             </div>
 
-            <h3>
-                Water Allocation
-            </h3>
 
-            <p>
-                Sector allocation.
-            </p>
+        </div>
 
-        </a>
+    </section>
 
 
-        <a class="module" href="{{ url_for('risk_alerts') }}">
+    <!-- ======================================================
+         AETHERA MODULES
+    ======================================================= -->
 
-            <div class="module-icon">
-                ⚠️
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    AETHERA Intelligence Modules
+                </h2>
+
+                <p>
+                    Access the different water intelligence
+                    capabilities.
+                </p>
+
             </div>
 
-            <h3>
-                Risk & Alerts
-            </h3>
-
-            <p>
-                Water risk monitoring.
-            </p>
-
-        </a>
+        </div>
 
 
-        <a class="module" href="{{ url_for('digital_twin') }}">
-
-            <div class="module-icon">
-                🧬
-            </div>
-
-            <h3>
-                Digital Twin
-            </h3>
-
-            <p>
-                What-if simulation.
-            </p>
-
-        </a>
+        <div class="module-grid">
 
 
-        <a class="module" href="{{ url_for('sustainability') }}">
+            <a
+                href="{{ url_for('rainfall') }}"
+                class="module-card"
+            >
 
-            <div class="module-icon">
-                🌱
-            </div>
+                <h3>
+                    Rainfall Prediction
+                </h3>
 
-            <h3>
-                Sustainability
-            </h3>
+                <p>
+                    Rainfall monitoring and prediction.
+                </p>
 
-            <p>
-                Sustainability indicators.
-            </p>
-
-        </a>
-
-
-        <a class="module" href="{{ url_for('analytics') }}">
-
-            <div class="module-icon">
-                📈
-            </div>
-
-            <h3>
-                Analytics
-            </h3>
-
-            <p>
-                Advanced analytics.
-            </p>
-
-        </a>
+            </a>
 
 
-        <a class="module" href="{{ url_for('global_water') }}">
+            <a
+                href="{{ url_for('demand') }}"
+                class="module-card"
+            >
 
-            <div class="module-icon">
-                🌍
-            </div>
+                <h3>
+                    Water Demand
+                </h3>
 
-            <h3>
-                Global Water
-            </h3>
+                <p>
+                    Water consumption and demand analysis.
+                </p>
 
-            <p>
-                Global water usage.
-            </p>
-
-        </a>
+            </a>
 
 
-    </div>
+            <a
+                href="{{ url_for('reservoir') }}"
+                class="module-card"
+            >
 
-</section>
+                <h3>
+                    Reservoir
+                </h3>
+
+                <p>
+                    Reservoir level and storage monitoring.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('water_quality') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Water Quality
+                </h3>
+
+                <p>
+                    Water quality intelligence and monitoring.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('water_allocation') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Water Allocation
+                </h3>
+
+                <p>
+                    Intelligent allocation planning.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('risk_alerts') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Risk & Alerts
+                </h3>
+
+                <p>
+                    AI-powered water risk monitoring.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('digital_twin') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Digital Twin
+                </h3>
+
+                <p>
+                    Digital representation of the water system.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('sustainability') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Sustainability
+                </h3>
+
+                <p>
+                    Sustainability and resource planning.
+                </p>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('analytics') }}"
+                class="module-card"
+            >
+
+                <h3>
+                    Analytics
+                </h3>
+
+                <p>
+                    Advanced water analytics and insights.
+                </p>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
 
 </div>
 
 
 <!-- ============================================================
-     JAVASCRIPT
+     CHART DATA
 ============================================================ -->
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    /* ============================================================
-       DATA
-    ============================================================ */
-
-    const rainfall2025 =
-        {{ rainfall_2025_data | default([], true) | tojson }};
-
-    const rainfall2026 =
-        {{ rainfall_2026_data | default([], true) | tojson }};
-
-    const water2026 =
-        {{ water_use_2026_data | default([], true) | tojson }};
-
-    const reservoirData =
-        {{ reservoir_data | default([], true) | tojson }};
-
-    const supplyDemandData =
-        {{ supply_demand_data | default([], true) | tojson }};
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
 
-    /* ============================================================
-       CHART DEFAULTS
-    ============================================================ */
-
-    if (typeof Chart !== "undefined") {
+        /* ========================================================
+           GLOBAL CHART SETTINGS
+        ======================================================== */
 
         Chart.defaults.font.family =
-            "Arial, Helvetica, sans-serif";
+            "Inter, Arial, sans-serif";
 
-        Chart.defaults.color =
-            "#647570";
+        Chart.defaults.color = "#6b817c";
 
         Chart.defaults.borderColor =
-            "rgba(8,47,42,.08)";
-
-    }
+            "#e4efeb";
 
 
-    /* ============================================================
-       RAINFALL CHART
-    ============================================================ */
+        /* ========================================================
+           SAFE DATA HELPER
+        ======================================================== */
 
-    const rainfallCanvas =
-        document.getElementById("rainfallChart");
+        function safeArray(value) {
 
-    if (
-        rainfallCanvas &&
-        typeof Chart !== "undefined"
-    ) {
+            return Array.isArray(value)
+                ? value
+                : [];
 
-        const months = [
-            "Jan", "Feb", "Mar", "Apr",
-            "May", "Jun", "Jul", "Aug",
-            "Sep", "Oct", "Nov", "Dec"
-        ];
+        }
 
 
-        const getRainfallValue =
-            function (dataset, month) {
+        /* ========================================================
+           RAINFALL DATA
+        ======================================================== */
 
-                const row =
-                    dataset.find(function (item) {
+        const rainfallData =
+            safeArray(
+                {{ rainfall_chart_data | default([]) | tojson }}
+            );
 
-                        return String(
-                            item.month || ""
-                        ).toLowerCase() ===
-                        month.toLowerCase();
 
-                    });
-
-                if (!row) {
-                    return 0;
+        const rainfallLabels =
+            rainfallData.map(
+                function (item) {
+                    return (
+                        item.month ||
+                        item.date ||
+                        item.label ||
+                        ""
+                    );
                 }
-
-                return Number(
-                    row.rainfall_mm || 0
-                );
-
-            };
+            );
 
 
-        const r2025 =
-            months.map(function (month) {
-
-                return getRainfallValue(
-                    rainfall2025,
-                    month
-                );
-
-            });
-
-
-        const r2026 =
-            months.map(function (month) {
-
-                return getRainfallValue(
-                    rainfall2026,
-                    month
-                );
-
-            });
+        const rainfallValues =
+            rainfallData.map(
+                function (item) {
+                    return Number(
+                        item.rainfall ||
+                        item.value ||
+                        0
+                    );
+                }
+            );
 
 
-        new Chart(
-            rainfallCanvas,
-            {
-                type: "line",
+        const rainfallCanvas =
+            document.getElementById(
+                "rainfallChart"
+            );
 
-                data: {
 
-                    labels: months,
+        if (rainfallCanvas) {
 
-                    datasets: [
+            new Chart(
+                rainfallCanvas,
+                {
+                    type: "line",
 
-                        {
-                            label: "2025 Rainfall (mm)",
-                            data: r2025,
-                            borderWidth: 3,
-                            tension: 0.35,
-                            pointRadius: 3
+                    data: {
+                        labels: rainfallLabels,
+
+                        datasets: [
+                            {
+                                label: "Rainfall (mm)",
+
+                                data: rainfallValues,
+
+                                tension: 0.35,
+
+                                fill: true,
+
+                                pointRadius: 4
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
                         },
 
-                        {
-                            label: "2026 Rainfall (mm)",
-                            data: r2026,
-                            borderWidth: 3,
-                            tension: 0.35,
-                            pointRadius: 3
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
                         }
+                    }
+                }
+            );
 
-                    ]
+        }
 
-                },
 
-                options: {
+        /* ========================================================
+           RESERVOIR DATA
+        ======================================================== */
 
-                    responsive: true,
-                    maintainAspectRatio: false,
+        const reservoirData =
+            safeArray(
+                {{ reservoir_chart_data | default([]) | tojson }}
+            );
 
-                    interaction: {
-                        mode: "index",
-                        intersect: false
+
+        const reservoirLabels =
+            reservoirData.map(
+                function (item) {
+                    return (
+                        item.month ||
+                        item.date ||
+                        item.label ||
+                        ""
+                    );
+                }
+            );
+
+
+        const reservoirValues =
+            reservoirData.map(
+                function (item) {
+                    return Number(
+                        item.level ||
+                        item.storage ||
+                        item.value ||
+                        0
+                    );
+                }
+            );
+
+
+        const reservoirCanvas =
+            document.getElementById(
+                "reservoirChart"
+            );
+
+
+        if (reservoirCanvas) {
+
+            new Chart(
+                reservoirCanvas,
+                {
+                    type: "line",
+
+                    data: {
+                        labels: reservoirLabels,
+
+                        datasets: [
+                            {
+                                label: "Reservoir Level",
+
+                                data: reservoirValues,
+
+                                tension: 0.35,
+
+                                fill: true,
+
+                                pointRadius: 4
+                            }
+                        ]
                     },
 
-                    plugins: {
+                    options: {
+                        responsive: true,
 
-                        legend: {
-                            position: "bottom"
+                        maintainAspectRatio: false,
+
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
                         }
+                    }
+                }
+            );
 
+        }
+
+
+        /* ========================================================
+           SUPPLY VS DEMAND
+        ======================================================== */
+
+        const supplyDemandData =
+            safeArray(
+                {{ supply_demand_chart_data | default([]) | tojson }}
+            );
+
+
+        const supplyDemandLabels =
+            supplyDemandData.map(
+                function (item) {
+                    return (
+                        item.month ||
+                        item.date ||
+                        item.label ||
+                        ""
+                    );
+                }
+            );
+
+
+        const supplyValues =
+            supplyDemandData.map(
+                function (item) {
+                    return Number(
+                        item.supply ||
+                        item.available ||
+                        0
+                    );
+                }
+            );
+
+
+        const demandValues =
+            supplyDemandData.map(
+                function (item) {
+                    return Number(
+                        item.demand ||
+                        item.water_demand ||
+                        0
+                    );
+                }
+            );
+
+
+        const supplyDemandCanvas =
+            document.getElementById(
+                "supplyDemandChart"
+            );
+
+
+        if (supplyDemandCanvas) {
+
+            new Chart(
+                supplyDemandCanvas,
+                {
+                    type: "bar",
+
+                    data: {
+
+                        labels:
+                            supplyDemandLabels,
+
+                        datasets: [
+
+                            {
+                                label: "Supply",
+
+                                data:
+                                    supplyValues
+                            },
+
+                            {
+                                label: "Demand",
+
+                                data:
+                                    demandValues
+                            }
+
+                        ]
                     },
 
-                    scales: {
+                    options: {
 
-                        y: {
-                            beginAtZero: true
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+                                display: true
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+                                beginAtZero: true
+                            }
+
                         }
 
                     }
+                }
+            );
+
+        }
+
+
+        /* ========================================================
+           FILTERS
+        ======================================================== */
+
+        const yearFilter =
+            document.getElementById(
+                "yearFilter"
+            );
+
+        const monthFilter =
+            document.getElementById(
+                "monthFilter"
+            );
+
+        const dataFilter =
+            document.getElementById(
+                "dataFilter"
+            );
+
+        const resetFilters =
+            document.getElementById(
+                "resetFilters"
+            );
+
+
+        function applyFilters() {
+
+            const selectedYear =
+                yearFilter
+                    ? yearFilter.value
+                    : "all";
+
+            const selectedMonth =
+                monthFilter
+                    ? monthFilter.value
+                    : "all";
+
+            const selectedData =
+                dataFilter
+                    ? dataFilter.value
+                    : "all";
+
+
+            console.log(
+                "AETHERA filters:",
+                {
+                    year: selectedYear,
+                    month: selectedMonth,
+                    data: selectedData
+                }
+            );
+
+        }
+
+
+        if (yearFilter) {
+
+            yearFilter.addEventListener(
+                "change",
+                applyFilters
+            );
+
+        }
+
+
+        if (monthFilter) {
+
+            monthFilter.addEventListener(
+                "change",
+                applyFilters
+            );
+
+        }
+
+
+        if (dataFilter) {
+
+            dataFilter.addEventListener(
+                "change",
+                applyFilters
+            );
+
+        }
+
+
+        if (resetFilters) {
+
+            resetFilters.addEventListener(
+                "click",
+                function () {
+
+                    if (yearFilter) {
+                        yearFilter.value = "all";
+                    }
+
+                    if (monthFilter) {
+                        monthFilter.value = "all";
+                    }
+
+                    if (dataFilter) {
+                        dataFilter.value = "all";
+                    }
+
+                    applyFilters();
 
                 }
+            );
 
-            }
-        );
-
-    }
+        }
 
 
-    /* ============================================================
-       WATER USE CHART
-    ============================================================ */
+        /* ========================================================
+           NUMBER FORMATTING
+        ======================================================== */
 
-    const waterCanvas =
-        document.getElementById("waterChart");
+        function formatNumbers() {
 
-    if (
-        waterCanvas &&
-        typeof Chart !== "undefined"
-    ) {
+            document
+                .querySelectorAll(
+                    ".kpi-value, .sector-value"
+                )
+                .forEach(
+                    function (element) {
 
-        new Chart(
-            waterCanvas,
-            {
+                        const raw =
+                            element.textContent.trim();
 
-                type: "doughnut",
-
-                data: {
-
-                    labels: [
-
-                        "Agriculture",
-                        "Industry",
-                        "Domestic",
-                        "Animal Husbandry",
-                        "Power",
-                        "Environment",
-                        "Other"
-
-                    ],
-
-                    datasets: [
-
-                        {
-
-                            data: [
-
-                                Number(
-                                    {{ water_use_2026_summary.agriculture | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.industry | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.domestic | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.animal | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.power | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.environment | default(0, true) }}
-                                ),
-
-                                Number(
-                                    {{ water_use_2026_summary.other | default(0, true) }}
+                        const number =
+                            Number(
+                                raw.replace(
+                                    /,/g,
+                                    ""
                                 )
-
-                            ],
-
-                            borderWidth: 2
-
-                        }
-
-                    ]
-
-                },
-
-                options: {
-
-                    responsive: true,
-                    maintainAspectRatio: false,
-
-                    cutout: "62%",
-
-                    plugins: {
-
-                        legend: {
-                            position: "bottom"
-                        }
-
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       RESERVOIR CHART
-    ============================================================ */
-
-    const reservoirCanvas =
-        document.getElementById("reservoirChart");
-
-
-    if (
-        reservoirCanvas &&
-        typeof Chart !== "undefined" &&
-        Array.isArray(reservoirData) &&
-        reservoirData.length > 0
-    ) {
-
-        const labels =
-            reservoirData.map(function (row) {
-
-                return (
-                    row.month ||
-                    row.date ||
-                    ""
-                );
-
-            });
-
-
-        const storage =
-            reservoirData.map(function (row) {
-
-                return Number(
-                    row.storage_pct ||
-                    row.availability_pct ||
-                    row.reservoir_pct ||
-                    0
-                );
-
-            });
-
-
-        new Chart(
-            reservoirCanvas,
-            {
-
-                type: "line",
-
-                data: {
-
-                    labels: labels,
-
-                    datasets: [
-
-                        {
-
-                            label:
-                                "Reservoir Storage (%)",
-
-                            data: storage,
-
-                            borderWidth: 3,
-
-                            tension: 0.35,
-
-                            pointRadius: 4,
-
-                            fill: false
-
-                        }
-
-                    ]
-
-                },
-
-                options: {
-
-                    responsive: true,
-                    maintainAspectRatio: false,
-
-                    interaction: {
-                        mode: "index",
-                        intersect: false
-                    },
-
-                    plugins: {
-
-                        legend: {
-                            position: "bottom"
-                        }
-
-                    },
-
-                    scales: {
-
-                        y: {
-
-                            beginAtZero: true,
-                            max: 100
-
-                        }
-
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-     /* ============================================================
-   SUPPLY VS DEMAND
-============================================================ */
-    /* ============================================================
-   SUPPLY VS DEMAND CHART
-============================================================ */
-
-const supplyDemandCanvas =
-    document.getElementById("supplyDemandChart");
-
-if (supplyDemandCanvas) {
-
-    /* Force canvas size */
-    supplyDemandCanvas.style.width = "100%";
-    supplyDemandCanvas.style.height = "300px";
-
-    /* Demo values - graph will definitely display */
-    const supplyValue = 850;
-    const demandValue = 620;
-
-    new Chart(
-        supplyDemandCanvas,
-        {
-            type: "bar",
-
-            data: {
-                labels: [
-                    "Water Available",
-                    "Water Demand"
-                ],
-
-                datasets: [
-                    {
-                        label: "Water Balance",
-
-                        data: [
-                            supplyValue,
-                            demandValue
-                        ],
-
-                        backgroundColor: [
-                            "#59d8ff",
-                            "#4f7cff"
-                        ],
-
-                        borderColor: [
-                            "#31c8d8",
-                            "#4f7cff"
-                        ],
-
-                        borderWidth: 2,
-
-                        borderRadius: 10,
-
-                        borderSkipped: false,
-
-                        barThickness: 80
-                    }
-                ]
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                animation: {
-                    duration: 1000
-                },
-
-                plugins: {
-
-                    legend: {
-                        display: true,
-                        position: "bottom"
-                    },
-
-                    tooltip: {
-                        enabled: true
-                    }
-
-                },
-
-                scales: {
-
-                    x: {
-                        grid: {
-                            display: false
-                        },
-
-                        ticks: {
-                            color: "#102f2b",
-
-                            font: {
-                                size: 13,
-                                weight: "700"
-                            }
-                        }
-                    },
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        grid: {
-                            color: "rgba(8,47,42,.10)"
-                        },
-
-                        ticks: {
-                            color: "#647570",
-
-                            font: {
-                                size: 11,
-                                weight: "600"
-                            }
-                        }
-                    }
-
-                }
-
-            }
-        }
-    );
-
-}
-
-
-    /* ---------------------------------------------------------
-       Try supply-demand dataset first
-    --------------------------------------------------------- */
-
-    if (
-        Array.isArray(supplyDemandData) &&
-        supplyDemandData.length > 0
-    ) {
-
-        const latest =
-            supplyDemandData[
-                supplyDemandData.length - 1
-            ];
-
-        const possibleSupply = Number(
-            latest.supply ??
-            latest.available ??
-            latest.water_available ??
-            latest.water_available_mcm ??
-            latest.availability ??
-            0
-        );
-
-        const possibleDemand = Number(
-            latest.demand ??
-            latest.water_demand ??
-            latest.water_demand_mld ??
-            latest.water_use ??
-            latest.demand_index ??
-            0
-        );
-
-        if (
-            Number.isFinite(possibleSupply) &&
-            possibleSupply > 0
-        ) {
-            supply = possibleSupply;
-        }
-
-        if (
-            Number.isFinite(possibleDemand) &&
-            possibleDemand > 0
-        ) {
-            demand = possibleDemand;
-        }
-
-    }
-
-
-    /* ---------------------------------------------------------
-       Safety fallback
-       Keeps the graph visible if backend values are empty.
-    --------------------------------------------------------- */
-
-    if (!Number.isFinite(supply) || supply <= 0) {
-        supply = 850;
-    }
-
-    if (!Number.isFinite(demand) || demand <= 0) {
-        demand = 620;
-    }
-
-
-    /* ---------------------------------------------------------
-       CREATE CHART
-    --------------------------------------------------------- */
-
-    new Chart(
-        supplyDemandCanvas,
-        {
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Water Available",
-                    "Water Demand"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Water Balance",
-
-                        data: [
-                            supply,
-                            demand
-                        ],
-
-                        backgroundColor: [
-                            "#59d8ff",
-                            "#4f7cff"
-                        ],
-
-                        borderColor: [
-                            "#31c8d8",
-                            "#4f7cff"
-                        ],
-
-                        borderWidth: 2,
-
-                        borderRadius: 10,
-
-                        borderSkipped: false,
-
-                        maxBarThickness: 90
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                animation: {
-                    duration: 1000
-                },
-
-                plugins: {
-
-                    legend: {
-                        display: true,
-                        position: "bottom"
-                    },
-
-                    tooltip: {
-
-                        enabled: true,
-
-                        callbacks: {
-
-                            label: function(context) {
-
-                                return (
-                                    " " +
-                                    Number(
-                                        context.raw
-                                    ).toLocaleString() +
-                                    " units"
-                                );
-
-                            }
-
-                        }
-
-                    }
-
-
-    /* ============================================================
-       SEARCH
-    ============================================================ */
-
-    const searchInput =
-        document.getElementById("waterSearch");
-
-    const searchButton =
-        document.getElementById("searchButton");
-
-    const searchResults =
-        document.getElementById("searchResults");
-
-
-    async function performSearch() {
-
-        if (!searchInput || !searchResults) {
-            return;
-        }
-
-
-        const query =
-            searchInput.value.trim();
-
-
-        if (!query) {
-
-            searchResults.innerHTML = "";
-
-            return;
-
-        }
-
-
-        searchResults.innerHTML =
-            "<div class='search-result'>🔎 Searching AETHERA data...</div>";
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/api/search?q=" +
-                    encodeURIComponent(query)
-                );
-
-
-            if (!response.ok) {
-                throw new Error(
-                    "Search request failed"
-                );
-            }
-
-
-            const results =
-                await response.json();
-
-
-            if (
-                !Array.isArray(results) ||
-                results.length === 0
-            ) {
-
-                searchResults.innerHTML =
-                    "<div class='search-result'>No matching data found.</div>";
-
-                return;
-
-            }
-
-
-            searchResults.innerHTML =
-                results.map(
-                    function (result) {
-
-                        const data =
-                            result.data || {};
-
-
-                        const values =
-                            Object.entries(data)
-                            .map(
-                                function ([key, value]) {
-
-                                    return (
-                                        "<b>" +
-                                        key +
-                                        "</b>: " +
-                                        value
-                                    );
-
-                                }
-                            )
-                            .join(
-                                " &nbsp; | &nbsp; "
                             );
 
 
-                        return (
-                            '<div class="search-result">' +
-                            "<b>" +
-                            (result.dataset || "Dataset") +
-                            "</b><br>" +
-                            values +
-                            "</div>"
-                        );
+                        if (
+                            raw !== "" &&
+                            Number.isFinite(number)
+                        ) {
+
+                            element.textContent =
+                                number.toLocaleString(
+                                    "en-IN",
+                                    {
+                                        maximumFractionDigits: 2
+                                    }
+                                );
+
+                        }
 
                     }
-                ).join("");
+                );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AETHERA search error:",
-                error
-            );
+        formatNumbers();
 
-            searchResults.innerHTML =
-                "<div class='search-result'>Search error. Please try again.</div>";
-
-        }
 
     }
-
-
-    if (searchButton) {
-
-        searchButton.addEventListener(
-            "click",
-            performSearch
-        );
-
-    }
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (event.key === "Enter") {
-
-                    event.preventDefault();
-
-                    performSearch();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       FILTERS
-    ============================================================ */
-
-    const yearFilter =
-        document.getElementById("yearFilter");
-
-    const monthFilter =
-        document.getElementById("monthFilter");
-
-    const dataFilter =
-        document.getElementById("dataFilter");
-
-    const resetFilters =
-        document.getElementById("resetFilters");
-
-
-    function applyFilters() {
-
-        const year =
-            yearFilter
-                ? yearFilter.value
-                : "all";
-
-
-        const month =
-            monthFilter
-                ? monthFilter.value
-                : "all";
-
-
-        const dataType =
-            dataFilter
-                ? dataFilter.value
-                : "all";
-
-
-        const rows =
-            document.querySelectorAll(
-                ".data-row"
-            );
-
-
-        rows.forEach(function (row) {
-
-            let show = true;
-
-
-            const rowYear =
-                row.dataset.year || "2026";
-
-
-            const rowMonth =
-                row.dataset.month || "";
-
-
-            if (
-                year !== "all" &&
-                rowYear !== year
-            ) {
-
-                show = false;
-
-            }
-
-
-            if (
-                month !== "all" &&
-                rowMonth.toLowerCase() !==
-                month.toLowerCase()
-            ) {
-
-                show = false;
-
-            }
-
-
-            /*
-             * The table currently contains water-use data.
-             * Therefore Rainfall and Reservoir selections
-             * hide these rows instead of causing an error.
-             */
-
-            if (
-                dataType !== "all" &&
-                dataType !== "water"
-            ) {
-
-                show = false;
-
-            }
-
-
-            row.style.display =
-                show ? "" : "none";
-
-        });
-
-    }
-
-
-    if (yearFilter) {
-
-        yearFilter.addEventListener(
-            "change",
-            applyFilters
-        );
-
-    }
-
-
-    if (monthFilter) {
-
-        monthFilter.addEventListener(
-            "change",
-            applyFilters
-        );
-
-    }
-
-
-    if (dataFilter) {
-
-        dataFilter.addEventListener(
-            "change",
-            applyFilters
-        );
-
-    }
-
-
-    if (resetFilters) {
-
-        resetFilters.addEventListener(
-            "click",
-            function () {
-
-                if (yearFilter) {
-                    yearFilter.value = "all";
-                }
-
-                if (monthFilter) {
-                    monthFilter.value = "all";
-                }
-
-                if (dataFilter) {
-                    dataFilter.value = "all";
-                }
-
-                applyFilters();
-
-            }
-        );
-
-    }
-
-});
+);
 
 </script>
 

@@ -232,10 +232,10 @@
 
         const rows = [];
 
-        const source =
-            DATA.water2026 ||
-            DATA.waterUse2026 ||
-            [];
+        const source = [
+            ...(DATA.water2025 || []),
+            ...(DATA.water2026 || DATA.waterUse2026 || [])
+        ];
 
         if (Array.isArray(source)) {
 
@@ -246,6 +246,13 @@
                 }
 
                 rows.push({
+
+                    year:
+                        text(
+                            row.year ||
+                            row.Year ||
+                            yearFrom(row.date)
+                        ),
 
                     month:
                         text(
@@ -1006,7 +1013,10 @@
         water.forEach(row => {
 
             const searchable =
-                `${row.month}
+                `${row.year}
+                 ${row.month}
+                 water
+                 water use
                  agriculture
                  industry
                  domestic
@@ -1131,8 +1141,8 @@
                             ${result.type}
                         </strong>
 
-                        <div>
-                            ${result.text}
+                        <div class="search-result-data">
+                            ${result.text.replace(/\s*\|\s*/g, "<br>")}
                         </div>
 
                     </div>

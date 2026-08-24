@@ -126,6 +126,13 @@ GLOBAL_WATER_FILE = os.path.join(
     "water_use.csv"
 )
 
+MAHARASHTRA_WATER_FILE = os.path.join(
+    os.path.dirname(__file__),
+    "static",
+    "css",
+    "maharashtra_water_resources.csv"
+)
+
 
 # ============================================================
 # SAFE CSV LOADER
@@ -1131,6 +1138,11 @@ def build_dashboard_context():
         "rainfall_2026_data":
             rainfall_2026_data,
 
+        "rainfall_2025_data":
+            dataframe_records(
+                rainfall_2025_df
+            ),
+
         "rainfall_2026_total":
             rainfall_2026_total,
 
@@ -1263,13 +1275,61 @@ def analytics():
 @app.route("/rainfall")
 def rainfall():
 
-    df = load_csv(
+    rainfall_2025_df = load_csv(
+        RAINFALL_2025_FILE
+    )
+
+    rainfall_2026_df = load_csv(
         RAINFALL_FILE
     )
 
+    combined_df = pd.concat(
+        [rainfall_2025_df, rainfall_2026_df],
+        ignore_index=True
+    )
+
+    if "date" in combined_df.columns:
+        combined_df = combined_df.sort_values("date")
+
+    def rainfall_total(df, column):
+        if column not in df.columns:
+            return 0
+
+        return round(
+            pd.to_numeric(
+                df[column],
+                errors="coerce"
+            ).fillna(0).sum(),
+            2
+        )
+
     return render_template(
-        "rainfall.html",
-        rainfall_data=dataframe_records(df)
+        "rainfall_2026.html",
+        rainfall_data=dataframe_records(combined_df),
+        rainfall_2025_total=rainfall_total(
+            rainfall_2025_df,
+            "rainfall_mm"
+        ),
+        rainfall_2026_total=rainfall_total(
+            rainfall_2026_df,
+            "rainfall_mm"
+        ),
+        runoff_2025_total=rainfall_total(
+            rainfall_2025_df,
+            "runoff_mcm"
+        ),
+        runoff_2026_total=rainfall_total(
+            rainfall_2026_df,
+            "runoff_mcm"
+        ),
+        recharge_2025_total=rainfall_total(
+            rainfall_2025_df,
+            "groundwater_recharge_mcm"
+        ),
+        recharge_2026_total=rainfall_total(
+            rainfall_2026_df,
+            "groundwater_recharge_mcm"
+        )
     )
 
 
@@ -1659,6 +1719,21 @@ def water_allocation():
 
             sector["share"] = 0
 
+        sector["label"] = sector["name"]
+        sector["value"] = sector["share"]
+        sector["color"] = {
+            "Domestic": "#2f80ed",
+            "Agriculture": "#27ae60",
+            "Industry": "#f2994a",
+            "Power": "#9b51e0",
+            "Animal Husbandry": "#eb5757",
+            "Environment": "#219653",
+            "Other": "#56ccf2"
+        }.get(
+            sector["name"],
+            "#56ccf2"
+        )
+
     # --------------------------------------------------------
     # 14-DAY OUTLOOK
     # --------------------------------------------------------
@@ -1708,7 +1783,7 @@ def water_allocation():
 
     return render_template(
 
-        "water_allocation.html",
+        "demand.html",
 
         total_demand=round(
             total_demand,
@@ -2235,9 +2310,37 @@ def water_resorces():
 
 @app.route("/maharashtra-water")
 def maharashtra_water():
+    maharashtra_df = load_csv(
+        MAHARASHTRA_WATER_FILE
+    )
 
-    return render_existing_template(
+    data = dataframe_records(
+        maharashtra_df
+    )
+
+    def maharashtra_numbers(column):
+        if column not in maharashtra_df.columns:
+            return pd.Series(dtype="float64")
+
+        return pd.to_numeric(
+            maharashtra_df[column],
+            errors="coerce"
+        ).fillna(0)
+
+    summary = {
+        "districts": int(maharashtra_df["district"].nunique()) if "district" in maharashtra_df.columns else 0,
+        "rivers": int(maharashtra_df["river"].nunique()) if "river" in maharashtra_df.columns else 0,
+        "dams": int(maharashtra_df["dam"].nunique()) if "dam" in maharashtra_df.columns else 0,
+        "capacity": round(maharashtra_numbers("reservoir_capacity_mcm").sum(), 2),
+        "available": round(maharashtra_numbers("water_available_mcm").sum(), 2),
+        "storage": round(maharashtra_numbers("storage_pct").mean(), 2) if not maharashtra_numbers("storage_pct").empty else 0,
+        "water_use": round(maharashtra_numbers("water_use_mcm").sum(), 2)
+    }
+
+    return render_template(
         "maharashtra_water.html"
+        , data=data
+        , summary=summary
     )
 
 
@@ -2259,6 +2362,24 @@ def sustainability():
 
 @app.route("/digital_twin")
 def digital_twin():
+
+    rainfall_df = load_csv(
+        RAINFALL_FILE
+    )
+
+    water_use_2026_df = load_csv(
+        WATER_USE_2026_FILE
+    )
+
+    reservoir_df = load_csv(
+        RESERVOIR_FILE
+    )
+
+    if reservoir_df.empty:
+
+        reservoir_df = load_csv(
+            RESERVOIR_DEMO_FILE
+        )
 
     # --------------------------------------------------------
     # RAINFALL DATA
