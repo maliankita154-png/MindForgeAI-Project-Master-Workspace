@@ -2360,6 +2360,38 @@ def sustainability():
 # DIGITAL TWIN
 # ============================================================
 
+@app.route("/aethyra-platform")
+def aethyra_platform():
+
+    return render_template(
+        "aethyra_platform.html"
+    )
+
+
+@app.route("/aethyra-universal")
+def aethyra_universal():
+
+    return render_template(
+        "aethyra_universal_platform.html"
+    )
+
+
+@app.route("/aethyra-command-center")
+def aethyra_command_center():
+
+    return render_template(
+        "aethyra_command_center.html"
+    )
+
+
+@app.route("/aethyra-isro-nasa")
+def aethyra_isro_nasa():
+
+    return render_template(
+        "aethyra_isro_nasa_platform.html"
+    )
+
+
 @app.route("/digital_twin")
 def digital_twin():
 

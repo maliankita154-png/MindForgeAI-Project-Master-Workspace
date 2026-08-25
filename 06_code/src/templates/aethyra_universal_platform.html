@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Aethyra | Enterprise Hydrology Command</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        :root {
+            --bg-void: #020617; /* Slate 950 */
+            --panel-bg: rgba(15, 23, 42, 0.65); /* Slate 900 highly transparent */
+            --panel-border: rgba(51, 65, 85, 0.5);
+            --accent-cyan: #22d3ee;
+            --accent-blue: #3b82f6;
+            --accent-emerald: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --shadow-glow: 0 0 20px rgba(34, 211, 238, 0.15);
+        }
+
+        body {
+            margin: 0; overflow: hidden;
+            background-color: var(--bg-void); color: var(--text-main);
+            font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Fullscreen Viewports */
+        #webgl-container, #canvas2d-container {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;
+        }
+        #canvas2d-container { display: none; background: #020617; } 
+
+        /* Boot Sequence Splash */
+        #splash-screen {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #020617; z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: opacity 1.5s ease-out;
+        }
+        .boot-loader {
+            width: 300px; height: 2px; background: #1e293b; margin-top: 2rem; position: relative; overflow: hidden;
+        }
+        .boot-progress {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan); transition: width 0.5s;
+        }
+
+        /* High-End Glassmorphism */
+        .glass-panel {
+            background: var(--panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border); box-shadow: var(--shadow-glow);
+            pointer-events: auto; border-radius: 12px;
+        }
+
+        /* UI Overlays */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
+            pointer-events: none; display: flex; justify-content: space-between; padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        /* Collapsible Sidebars */
+        .sidebar { 
+            height: calc(100vh - 3rem); width: 400px; display: flex; flex-direction: column; 
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s;
+        }
+        #left-sidebar { transform: translateX(0); transform-origin: left; }
+        #left-sidebar.collapsed { transform: translateX(calc(-100% - 2rem)); opacity: 0; pointer-events: none; }
+        #right-sidebar { transform: translateX(0); width: 480px; transform-origin: right; }
+        #right-sidebar.collapsed { transform: translateX(calc(100% + 2rem)); opacity: 0; pointer-events: none; }
+
+        /* Floating Toggle Buttons */
+        .toggle-btn {
+            position: absolute; top: 1.5rem; pointer-events: auto; z-index: 110;
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--panel-border); color: white;
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; backdrop-filter: blur(8px); transition: all 0.3s;
+        }
+        .toggle-btn:hover { background: rgba(30, 41, 59, 0.9); border-color: var(--accent-cyan); transform: scale(1.05); }
+        #btn-toggle-left { left: 1.5rem; }
+        #btn-toggle-left.collapsed { background: var(--accent-cyan); color: #000; }
+        #btn-toggle-right { right: 1.5rem; }
+        #btn-toggle-right.collapsed { background: var(--accent-cyan); color: #000; }
+
+        /* Scrollbars */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        #textbook-modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 200; pointer-events: auto; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
+        }
+        #textbook-container {
+            width: 90vw; max-width: 1400px; height: 90vh; display: flex; 
+            background: #0f172a; border: 1px solid var(--panel-border); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+        #textbook-toc-side {
+            width: 350px; background: #020617; border-right: 1px solid #1e293b; 
+            display: flex; flex-col; height: 100%;
+        }
+        #textbook-content-side {
+            flex-grow: 1; background: #0f172a; display: flex; flex-direction: column; height: 100%;
+        }
+        
+        .tb-header { height: 60px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; padding: 0 1.5rem; justify-content: space-between; }
+        .tb-content { flex-grow: 1; overflow-y: auto; padding: 3rem 4rem; scroll-behavior: smooth; }
+        
+        /* Academic Typography for Reader */
+        .tb-content h1 { color: #f8fafc; font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .tb-content h2 { color: #38bdf8; font-size: 1.5rem; font-weight: 600; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; }
+        .tb-content h3 { color: #94a3b8; font-size: 1.25rem; margin-top: 2rem; margin-bottom: 1rem; font-weight: 500; }
+        .tb-content p { color: #cbd5e1; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem; }
+        .tb-content ul { color: #cbd5e1; margin-bottom: 1.5rem; padding-left: 1.5rem; list-style-type: disc; }
+        .tb-content li { margin-bottom: 0.75rem; line-height: 1.6; }
+        .tb-content strong { color: #f1f5f9; font-weight: 600; }
+        .tb-meta { font-size: 0.875rem; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-bottom: 3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Accordion TOC */
+        .toc-vol-btn { width: 100%; text-align: left; padding: 16px; background: transparent; border: none; border-bottom: 1px solid #1e293b; color: #e2e8f0; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; transition: background 0.2s; }
+        .toc-vol-btn:hover { background: rgba(30, 41, 59, 0.5); }
+        .toc-chap-container { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #0a0f1c; }
+        .toc-chap-btn { width: 100%; text-align: left; padding: 12px 16px 12px 32px; color: #94a3b8; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid #111827; border-left: 2px solid transparent; transition: all 0.2s; }
+        .toc-chap-btn:hover { color: #e2e8f0; background: rgba(15, 23, 42, 0.8); }
+        .toc-chap-btn.active { color: #22d3ee; border-left-color: #22d3ee; background: rgba(15, 23, 42, 0.8); font-weight: 500; }
+
+        /* Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent-cyan); cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px var(--accent-cyan); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(51, 65, 85, 0.8); border-radius: 2px; }
+
+        /* Switch Toggle */
+        .layer-toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(30, 41, 59, 0.4); border-radius: 8px; margin-bottom: 8px; border: 1px solid transparent; transition: border-color 0.2s; cursor: pointer;}
+        .layer-toggle:hover { border-color: rgba(51, 65, 85, 0.8); }
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-cyan); }
+        input:checked + .slider:before { transform: translateX(14px); }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="flex items-center gap-4 mb-6">
+            <svg class="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"></path></svg>
+            <h1 class="text-5xl font-bold text-white tracking-widest">AETHYRA</h1>
+        </div>
+        <p class="text-slate-400 mono text-sm tracking-widest uppercase mb-8">Universal Hydrology Command Center</p>
+        <button id="btn-init" class="px-8 py-3 bg-cyan-600/20 text-cyan-400 border border-cyan-500 font-bold rounded hover:bg-cyan-600 hover:text-white transition shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+            INITIALIZE SYSTEMS
+        </button>
+        <div class="boot-loader mt-8"><div id="boot-progress" class="boot-progress"></div></div>
+        <p class="text-slate-600 text-[10px] mt-4 uppercase mono">Establishing Audio Context & WebGL Shaders...</p>
+    </div>
+
+    <div id="webgl-container"></div>
+    <div id="canvas2d-container"><canvas id="simCanvas"></canvas></div>
+
+    <button id="btn-toggle-left" class="toggle-btn" onclick="SystemController.toggleLeft()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+
+    <div id="ui-layer">
+        
+        <!-- LEFT SIDEBAR: Telemetry & Controls -->
+        <div id="left-sidebar" class="sidebar glass-panel flex flex-col pt-16">
+            <div class="px-6 pb-4 border-b border-slate-700/50">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-bold text-white tracking-wide">COMMAND <span class="text-cyan-400">NODE</span></h2>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 mono">System Ver 4.2 - Active</div>
+                    </div>
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="p-4 border-b border-slate-700/50">
+                <div class="text-[10px] text-slate-500 uppercase font-bold mb-3 tracking-wider">Spatial Resolution Mode</div>
+                <div class="flex gap-2 p-1 bg-slate-900/50 rounded-lg border border-slate-800">
+                    <button onclick="SystemController.setMode('global')" id="btn-mode-global" class="flex-1 py-2 text-xs font-bold rounded transition bg-cyan-900/40 text-cyan-300 shadow-sm border border-cyan-800/50">MACRO (4D EARTH)</button>
+                    <button onclick="SystemController.setMode('local')" id="btn-mode-local" class="flex-1 py-2 text-xs font-bold rounded transition text-slate-400 hover:text-slate-200">MICRO (SOLAPUR)</button>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto custom-scroll p-4">
+                
+                <!-- GLOBAL CONTROLS -->
+                <div id="global-controls">
+                    <div class="text-[10px] text-slate-500 uppercase font-bold mb-3 tracking-wider">Global Shader Layers</div>
+                    
+                    <label class="layer-toggle">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">Atmospheric Scattering</div>
+                            <div class="text-[9px] text-slate-400 mono mt-0.5">Rayleigh simulation engine</div>
+                        </div>
+                        <div class="switch"><input type="checkbox" checked onchange="ThreeEngine.toggleLayer('atmosphere', this.checked)"><span class="slider"></span></div>
+                    </label>
+
+                    <label class="layer-toggle">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">Vapor Transport</div>
+                            <div class="text-[9px] text-slate-400 mono mt-0.5">Atmospheric Rivers mapping</div>
+                        </div>
+                        <div class="switch"><input type="checkbox" checked onchange="ThreeEngine.toggleLayer('rivers', this.checked)"><span class="slider"></span></div>
+                    </label>
+
+                    <label class="layer-toggle">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">Ocean Circulation</div>
+                            <div class="text-[9px] text-slate-400 mono mt-0.5">Thermohaline deep currents</div>
+                        </div>
+                        <div class="switch"><input type="checkbox" checked onchange="ThreeEngine.toggleLayer('currents', this.checked)"><span class="slider"></span></div>
+                    </label>
+
+                    <div class="mt-6 p-4 bg-blue-900/20 border border-blue-900/50 rounded-lg">
+                        <div class="text-xs font-bold text-blue-400 mb-2">Camera Mechanics</div>
+                        <div class="text-[10px] text-slate-300 space-y-1">
+                            • Left Click + Drag: Orbital Pan<br>
+                            • Right Click + Drag: Spatial Translate<br>
+                            • Scroll Wheel: Infinite Zoom
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LOCAL CONTROLS -->
+                <div id="local-controls" style="display: none;">
+                    <div class="text-[10px] text-slate-500 uppercase font-bold mb-3 tracking-wider">Micro-Twin Vitals (Solapur)</div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-800/40 p-3 rounded border border-slate-700/50">
+                            <div class="text-[9px] text-slate-400 uppercase">Sim Date</div>
+                            <div id="ui-local-date" class="text-sm font-bold text-cyan-400 mono">Aug 2026</div>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded border border-slate-700/50">
+                            <div class="text-[9px] text-slate-400 uppercase">Ujani Capacity</div>
+                            <div id="ui-local-dam" class="text-sm font-bold text-blue-400 mono">99.7%</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/40 p-4 rounded border border-slate-700/50 mb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="text-xs font-bold text-slate-200">Temporal Engine</div>
+                            <button onclick="CanvasEngine.resetSim()" class="text-[9px] uppercase bg-slate-700 px-2 py-1 rounded text-white hover:bg-slate-600">Reset</button>
+                        </div>
+                        <input type="range" id="timeSlider" min="1" max="1000" value="1" class="w-full mb-2">
+                        <div class="flex justify-between text-[10px] mono text-slate-400">
+                            <span>1x</span><span id="ui-time-multiplier" class="text-cyan-400 font-bold">1x</span><span>1000x</span>
+                        </div>
+                        <div class="text-[9px] text-slate-500 mt-2 text-center">Accelerate to predict scarcity thresholds.</div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-emerald-900/10 border border-emerald-900/30 rounded-lg">
+                        <div class="text-[10px] font-bold text-emerald-500 mb-1">Live Drain Matrix (MLD)</div>
+                        <div class="flex justify-between text-xs text-slate-300 mt-1"><span>Urban:</span> <span>162</span></div>
+                        <div class="flex justify-between text-xs text-slate-300 mt-1"><span>Industrial:</span> <span>45 (-15 RWH)</span></div>
+                        <div class="flex justify-between text-xs text-slate-300 mt-1"><span>Agriculture:</span> <span class="text-amber-400">4200 (Cane)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-700/50 flex justify-between items-center bg-slate-900/80 rounded-b-12">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sonification Engine</span>
+                <button id="btn-audio-mute" class="text-cyan-400 hover:text-white transition p-2 bg-slate-800 rounded-full">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v18c-4.97 0-9-4.03-9-9s4.03-9 9-9z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: Reader Access -->
+        <button id="btn-toggle-right" class="toggle-btn" onclick="SystemController.toggleRight()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </button>
+        <div id="right-sidebar" class="sidebar glass-panel flex flex-col pt-16">
+            <div class="p-6 border-b border-slate-700/50 flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-blue-900/30 rounded-full flex items-center justify-center mb-3 border border-blue-500/30">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h2 class="text-lg font-bold text-white tracking-wide mb-1">HYPERTEXTBOOK CORE</h2>
+                <div class="text-[10px] text-slate-400 leading-relaxed mb-4">Access the comprehensive 200+ page equivalent multi-scale hydrology research documentation.</div>
+                <button onclick="SystemController.openTextbook()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition shadow-lg flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    LAUNCH FULL READER
+                </button>
+            </div>
+            
+            <div class="p-4 flex-grow flex flex-col justify-end">
+                <div class="text-[10px] text-slate-500 uppercase font-bold mb-2 tracking-wider">Quick Jump Indices</div>
+                <div class="space-y-2">
+                    <button onclick="SystemController.jumpToChapter('Vol 1: The Cosmic Ocean', '1.1 Origins of Water')" class="w-full text-left p-3 bg-slate-800/40 rounded border border-slate-700/50 text-xs text-slate-300 hover:text-white hover:border-cyan-500/50 transition">Vol 1: Cosmic Origins</button>
+                    <button onclick="SystemController.jumpToChapter('Vol 3: Earth Macro-Hydrology', '3.1 The Global Water Cycle')" class="w-full text-left p-3 bg-slate-800/40 rounded border border-slate-700/50 text-xs text-slate-300 hover:text-white hover:border-cyan-500/50 transition">Vol 3: Global Water Cycle</button>
+                    <button onclick="SystemController.jumpToChapter('Vol 6: Indian Subcontinent', '6.1 The Monsoon Engine')" class="w-full text-left p-3 bg-slate-800/40 rounded border border-slate-700/50 text-xs text-slate-300 hover:text-white hover:border-cyan-500/50 transition">Vol 6: Indian Monsoon</button>
+                    <button onclick="SystemController.jumpToChapter('Vol 8: Solapur Digital Twin', '8.1 Case Study Overview')" class="w-full text-left p-3 bg-slate-800/40 rounded border border-slate-700/50 text-xs text-slate-300 hover:text-white hover:border-cyan-500/50 transition">Vol 8: Solapur Twin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="textbook-modal">
+        <div id="textbook-container">
+            <!-- Left Side: Table of Contents -->
+            <div id="textbook-toc-side">
+                <div class="tb-header">
+                    <span class="text-sm font-bold text-slate-200 tracking-wider">INDEX</span>
+                </div>
+                <div id="toc-accordion-container" class="flex-grow overflow-y-auto custom-scroll">
+                    <!-- JS Injected TOC -->
+                </div>
+            </div>
+            
+            <!-- Right Side: Content Reader -->
+            <div id="textbook-content-side">
+                <div class="tb-header bg-slate-900/50">
+                    <div id="reader-breadcrumb" class="text-[10px] font-bold text-cyan-400 mono uppercase tracking-widest">AETHYRA / READER</div>
+                    <button onclick="SystemController.closeTextbook()" class="text-slate-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="textbook-content-area" class="tb-content">
+                    <!-- JS Injected Content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulating a 200+ page textbook via deeply nested, comprehensive JSON
+        const MassiveHypertextbookData = {
+            "Vol 1: The Cosmic Ocean": {
+                "1.1 Origins of Water": {
+                    title: "Stellar Nucleosynthesis & Primordial Ice",
+                    content: `
+                        <div class="tb-meta">Section 1.1 | Cosmology & Astrochemistry</div>
+                        <h1>The Cosmic Origins of Water</h1>
+                        <p>Water (H₂O) is not an inherently terrestrial substance; it is a profound cosmic compound whose creation spans the history of the universe. To understand the water flowing through a municipal pipeline in India, one must look back 13.8 billion years to the Big Bang.</p>
+                        <h2>The Big Bang and Hydrogen</h2>
+                        <p>In the immediate aftermath of the Big Bang, the universe was a superheated soup of fundamental particles. As it expanded and cooled, protons and electrons combined to form the simplest and most abundant element: Hydrogen. Every single hydrogen atom in every molecule of water on Earth was forged during this epoch.</p>
+                        <h2>Supernovae and Oxygen</h2>
+                        <p>Oxygen, the heavier component of water, did not exist in the early universe. It requires the intense heat and pressure found only within the cores of massive stars. Through the process of stellar nucleosynthesis, stars fuse helium into carbon, and carbon into oxygen. When these massive stars exhaust their fuel, they explode in violent supernovae, scattering atomic oxygen across the interstellar medium.</p>
+                        <h2>Molecular Clouds and Dust Grains</h2>
+                        <p>In the freezing, desolate expanse of deep space, oxygen atoms wander until they encounter massive interstellar molecular clouds. Within these clouds, microscopic silicate and carbonaceous dust grains act as catalytic surfaces. When oxygen atoms collide with hydrogen gas on the surface of these freezing grains (at temperatures near 10 Kelvin), they bond to form water ice.</p>
+                        <p>This process coats the cosmic dust with mantles of ice. The Orion Nebula alone contains enough water vapor and ice to fill Earth's oceans millions of times over. This ancient, cosmic ice is the direct ancestor of all water in our solar system.</p>
+                    `
+                },
+                "1.2 Delivery to Earth": {
+                    title: "The Late Heavy Bombardment",
+                    content: `
+                        <div class="tb-meta">Section 1.2 | Planetary Formation</div>
+                        <h1>Delivery of Water to Early Earth</h1>
+                        <p>When the solar nebula collapsed to form our Sun and the protoplanetary disk, the inner solar system was far too hot for water ice to condense. Earth formed "dry" inside the snow line.</p>
+                        <h2>Cometary and Asteroidal Impacts</h2>
+                        <p>Current isotopic evidence (specifically the Deuterium-to-Hydrogen ratio) suggests that Earth's oceans were not primarily delivered by comets from the Oort cloud, as once thought, but rather by water-rich carbonaceous chondrite meteorites originating from the outer asteroid belt. During a period known as the Late Heavy Bombardment, Jupiter's migration perturbed these icy bodies, sending them hurtling into the inner solar system where they impacted the young Earth, delivering vast quantities of water.</p>
+                    `
+                }
+            },
+            "Vol 2: Solar System Reserves": {
+                "2.1 Mars and Venus": {
+                    title: "The Lost Oceans of the Inner Planets",
+                    content: `
+                        <div class="tb-meta">Section 2.1 | Planetary Science</div>
+                        <h1>Mars and Venus: Lost Oceans</h1>
+                        <p>Earth is unique in maintaining liquid surface water, but it was not always the only ocean world in the inner solar system.</p>
+                        <h2>Venus: The Runaway Greenhouse</h2>
+                        <p>Early Venus likely had shallow liquid water oceans. However, being closer to the Sun, rising temperatures caused water vapor to flood the atmosphere. Since water vapor is a potent greenhouse gas, this triggered a runaway greenhouse effect, boiling the oceans. Solar ultraviolet radiation then stripped the hydrogen atoms, allowing them to escape into space, leaving Venus bone-dry.</p>
+                        <h2>Mars: The Frozen History</h2>
+                        <p>Geological evidence—ancient river valleys, lake beds (like Jezero crater), and delta formations—proves Mars once hosted abundant liquid water. However, lacking a strong magnetic field, Mars's atmosphere was slowly stripped away by solar winds. As atmospheric pressure plummeted, water could no longer exist in liquid form on the surface. Today, Mars holds vast reserves of water ice at its poles and potentially massive aquifers deep underground.</p>
+                    `
+                },
+                "2.2 The Ocean Worlds": {
+                    title: "Europa, Enceladus, and Titan",
+                    content: `
+                        <div class="tb-meta">Section 2.2 | The Outer Solar System</div>
+                        <h1>The True Ocean Worlds</h1>
+                        <p>The greatest reservoirs of liquid water in our solar system are not on Earth, but locked beneath miles of ice on the moons of gas giants.</p>
+                        <ul>
+                            <li><strong>Europa (Jupiter):</strong> Beneath a 10-15 mile thick ice crust lies a global saltwater ocean estimated to be 40 to 100 miles deep. It contains twice as much liquid water as all of Earth's oceans combined, kept warm by tidal flexing caused by Jupiter's massive gravity.</li>
+                            <li><strong>Enceladus (Saturn):</strong> This small moon features a subsurface ocean that actively vents into space. The Cassini spacecraft flew through these geysers, detecting water vapor, molecular hydrogen, and complex organic compounds—the building blocks for life.</li>
+                            <li><strong>Ganymede (Jupiter):</strong> The largest moon in the solar system, containing a "club sandwich" model of alternating layers of ice and ocean deep within its interior.</li>
+                        </ul>
+                    `
+                }
+            },
+            "Vol 3: Earth Macro-Hydrology": {
+                "3.1 The Global Water Cycle": {
+                    title: "Earth's Closed-Loop System",
+                    content: `
+                        <div class="tb-meta">Section 3.1 | Global Systems</div>
+                        <h1>The Global Water Cycle</h1>
+                        <p>Earth's hydrology is a closed-loop system. The total mass of water on Earth remains remarkably constant over geological timescales, endlessly transitioning between solid, liquid, and gas phases.</p>
+                        <h2>Thermohaline Circulation (The Ocean Conveyor Belt)</h2>
+                        <p>This continuous system of deep-ocean currents is driven by differences in water density, controlled by temperature (thermo) and salinity (haline). Cold, dense, salty water sinks in the North Atlantic, traveling globally and regulating Earth's climate by transporting immense amounts of heat from the equator to the poles.</p>
+                        <h2>Atmospheric Rivers</h2>
+                        <p>These are narrow corridors of concentrated moisture in the atmosphere. A strong atmospheric river can transport water vapor equivalent to 15 times the average flow of liquid water at the mouth of the Mississippi River. They are the primary mechanism for delivering precipitation to western coastal regions globally.</p>
+                    `
+                },
+                "3.2 The Cryosphere": {
+                    title: "Glaciers and Ice Sheets",
+                    content: `
+                        <div class="tb-meta">Section 3.2 | Cryo-Hydrology</div>
+                        <h1>The Cryosphere</h1>
+                        <p>Roughly 68.7% of Earth's freshwater is locked in ice caps and glaciers. The Antarctic and Greenland ice sheets are the largest reservoirs. The melting of these sheets not only contributes directly to sea-level rise but also introduces massive influxes of freshwater into the oceans, which can disrupt the delicate density balance required to maintain Thermohaline circulation.</p>
+                    `
+                }
+            },
+            "Vol 4: Global River Systems": {
+                "4.1 The Amazon Basin": {
+                    title: "The South American Behemoth",
+                    content: `
+                        <div class="tb-meta">Section 4.1 | Major Basins</div>
+                        <h1>The Amazon River</h1>
+                        <p>The Amazon is the undisputed king of rivers by discharge volume. It pumps roughly 209,000 cubic meters of water per second into the Atlantic Ocean, representing about 20% of the global riverine discharge to the oceans. Its basin covers 7 million square kilometers.</p>
+                        <p>The Amazon also creates its own weather. Through transpiration, the rainforest canopy releases immense amounts of water vapor into the atmosphere, creating regional "flying rivers" that drive rainfall across South America.</p>
+                    `
+                },
+                "4.2 The Nile and Yangtze": {
+                    title: "Historical Lifelines",
+                    content: `
+                        <div class="tb-meta">Section 4.2 | Major Basins</div>
+                        <h1>The Nile and Yangtze</h1>
+                        <h2>The Nile (Africa)</h2>
+                        <p>Historically considered the longest river globally, it is the lifeline of the Sahara. Its hydrology is highly seasonal, historically flooding annually to deposit nutrient-rich silt. Today, it is heavily regulated by the Aswan High Dam and the upcoming Grand Ethiopian Renaissance Dam (GERD), altering historical flow patterns entirely.</p>
+                        <h2>The Yangtze (Asia)</h2>
+                        <p>The longest river in Asia. It plays a central role in China's economy and ecology. The construction of the Three Gorges Dam has significantly altered its natural flow, sediment transport, and the local micro-climate, while providing massive hydroelectric power and flood control.</p>
+                    `
+                }
+            },
+            "Vol 5: Global Groundwater": {
+                "5.1 Aquifer Depletion": {
+                    title: "The Invisible Crisis",
+                    content: `
+                        <div class="tb-meta">Section 5.1 | Subsurface Hydrology</div>
+                        <h1>Global Aquifer Depletion</h1>
+                        <p>Groundwater represents about 30% of all freshwater on Earth, vastly exceeding surface water lakes and rivers. It is stored in aquifers—permeable rocks and sediments.</p>
+                        <h2>Fossil Water</h2>
+                        <p>Many major aquifers contain "fossil water" that was deposited during the last Ice Age. This water takes thousands of years to recharge. Current agricultural extraction rates far exceed recharge rates.</p>
+                        <h2>GRACE Satellite Data</h2>
+                        <p>NASA's Gravity Recovery and Climate Experiment (GRACE) twin satellites measure changes in Earth's gravity field. Because massive volumes of water exert gravitational pull, GRACE can detect large-scale movements of groundwater. GRACE data has revealed severe, rapid depletion of major global aquifers, most notably the High Plains (Ogallala) Aquifer in the US, and the aquifers beneath Northwestern India.</p>
+                    `
+                }
+            },
+            "Vol 6: Indian Subcontinent": {
+                "6.1 The Monsoon Engine": {
+                    title: "The Pulse of India",
+                    content: `
+                        <div class="tb-meta">Section 6.1 | Regional Climate</div>
+                        <h1>The Southwest Monsoon Engine</h1>
+                        <p>India's hydrology is uniquely and precariously dependent on a single meteorological phenomenon: the Southwest Monsoon, which delivers nearly 75% of the country's annual rainfall between June and September.</p>
+                        <h2>The Mechanism</h2>
+                        <p>During summer, the Asian landmass heats up rapidly, creating a massive low-pressure zone over the Tibetan Plateau. This draws in moisture-laden winds from the high-pressure zone over the southern Indian Ocean. As these winds hit the Western Ghats and the Himalayas, they are forced upwards (orographic lift), cooling and releasing torrential rains.</p>
+                    `
+                },
+                "6.2 Himalayan vs Peninsular": {
+                    title: "Divergent River Systems",
+                    content: `
+                        <div class="tb-meta">Section 6.2 | Indian Geography</div>
+                        <h1>River Systems of India</h1>
+                        <h2>Himalayan Rivers</h2>
+                        <p>Rivers like the Ganga, Yamuna, and Brahmaputra are perennial. They receive water from both the monsoon rains and the continuous melting of Himalayan glaciers, ensuring year-round flow.</p>
+                        <h2>Peninsular Rivers</h2>
+                        <p>Rivers in central and southern India (Godavari, Krishna, Bhima, Cauvery) are rain-fed and highly seasonal. Their flow swells massively during the monsoon and can reduce to a trickle in the summer. Because they lack a glacial source, massive damming projects are strictly necessary to store monsoon water for the dry months.</p>
+                    `
+                }
+            },
+            "Vol 7: Maharashtra State Hydrology": {
+                "7.1 The Western Ghats": {
+                    title: "The Great Divide",
+                    content: `
+                        <div class="tb-meta">Section 7.1 | State Topography</div>
+                        <h1>Maharashtra Hydrology</h1>
+                        <p>The topography of Maharashtra is defined by the Sahyadri mountain range (Western Ghats) running parallel to the coast. This range acts as a massive barrier to the incoming monsoon clouds.</p>
+                        <p>The narrow coastal strip (Konkan) receives extreme rainfall (over 3000mm annually). However, the vast Deccan Plateau to the east of the Ghats lies in the "rain shadow" region. Clouds crossing the mountains have already dumped most of their moisture, leaving central/eastern districts (like Solapur, Marathwada) chronically drought-prone, receiving only 500-700mm annually.</p>
+                    `
+                }
+            },
+            "Vol 8: Solapur Digital Twin": {
+                "8.1 Case Study Overview": {
+                    title: "Solapur 2026 Baseline Demographics",
+                    content: `
+                        <div class="tb-meta">Section 8.1 | Micro-Simulation Data</div>
+                        <h1>Solapur City Case Study (2026)</h1>
+                        <p>Solapur represents a perfect case study for Aethyra's micro-simulation: a large population situated in a rain-shadow region with massive agricultural water demands.</p>
+                        <h2>Baseline Demographics & Footprint</h2>
+                        <ul>
+                            <li><strong>City Population:</strong> ~1.2 Million</li>
+                            <li><strong>District Population:</strong> ~4.8 Million</li>
+                            <li><strong>Livestock:</strong> ~1.8 Million Head (Massive rural requirement)</li>
+                            <li><strong>Industrial Zones:</strong> 9 major MIDC areas. Heavy textile processing and sugar milling presence.</li>
+                            <li><strong>Agriculture:</strong> ~1.5 Million Hectares. Heavily biased toward water-intensive sugarcane cultivation.</li>
+                        </ul>
+                        <h2>Water Source: The Ujani Dam</h2>
+                        <p>The primary lifeline is the Ujani Dam on the Bhima River. It holds a total capacity of 117.22 TMC, with a live storage of 53.5 TMC. Solapur city relies on a twin pipeline system from Ujani, covering over 100km, making transmission losses and illegal tapping significant variables in the simulation.</p>
+                    `
+                },
+                "8.2 Predictive Mathematics": {
+                    title: "Consumption Matrix & Time Acceleration",
+                    content: `
+                        <div class="tb-meta">Section 8.2 | ML Modeling</div>
+                        <h1>Requirement & Simulation Math</h1>
+                        <p>The Aethyra digital twin operates on a rigid mathematical consumption model, calculated in Million Liters per Day (MLD).</p>
+                        <h2>The Daily Drain</h2>
+                        <ul>
+                            <li><strong>Urban Potable:</strong> 1.2M pop × 135 LPCD = <strong>162 MLD</strong>.</li>
+                            <li><strong>Industrial:</strong> Gross 45 MLD. (Note: Sugar factories recycle approx 15 MLD from crushed cane juice, reducing net pull to 30 MLD during crushing season).</li>
+                            <li><strong>Agriculture:</strong> Sugarcane farming pulls an estimated <strong>4200 MLD</strong> through canal networks and groundwater pumping. This is the critical stress point on the entire regional system.</li>
+                        </ul>
+                        <h2>Accelerated Time Engine</h2>
+                        <p>By accelerating the simulation time via the UI, the system calculates this daily drain against historical/predicted monsoon recharge. Without adequate rainfall (averaging 600-750mm), the Ujani dam enters 'Dead Storage' rapidly due to the disproportionate agricultural pull, triggering municipal water cuts ( historically occurring once every 4-8 days in the city).</p>
+                    `
+                }
+            }
+        };
+
+        // Initialize UI Elements & Event Listeners
+        function initializeUI() {
+            // Populate Accordion
+            const tocContainer = document.getElementById('toc-accordion-container');
+            for (const [volume, chapters] of Object.entries(MassiveHypertextbookData)) {
+                const volBtn = document.createElement('button');
+                volBtn.className = 'toc-vol-btn';
+                volBtn.innerHTML = `<span>${volume}</span><span style="font-size: 0.7rem; transition: transform 0.3s">▼</span>`;
+                
+                const chapContainer = document.createElement('div');
+                chapContainer.className = 'toc-chap-container';
+                
+                for (const [chapKey, chapData] of Object.entries(chapters)) {
+                    const chapBtn = document.createElement('button');
+                    chapBtn.className = 'toc-chap-btn';
+                    chapBtn.innerText = chapData.title;
+                    chapBtn.onclick = (e) => {
+                        document.querySelectorAll('.toc-chap-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        document.getElementById('reader-breadcrumb').innerText = `AETHYRA / ${volume.toUpperCase()}`;
+                        document.getElementById('textbook-content-area').innerHTML = chapData.content;
+                        document.getElementById('textbook-content-area').scrollTop = 0;
+                    };
+                    chapContainer.appendChild(chapBtn);
+                }
+                
+                volBtn.onclick = function() {
+                    const icon = this.querySelector('span:last-child');
+                    if (chapContainer.style.maxHeight) {
+                        chapContainer.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        chapContainer.style.maxHeight = chapContainer.scrollHeight + "px";
+                        icon.style.transform = 'rotate(-180deg)';
+                    }
+                };
+                
+                tocContainer.appendChild(volBtn);
+                tocContainer.appendChild(chapContainer);
+            }
+        }
+    </script>
+
+    <script>
+        const SystemController = {
+            mode: 'global',
+            audioReady: false,
+            
+            init: async function() {
+                // Boot Animation
+                const progress = document.getElementById('boot-progress');
+                progress.style.width = '100%';
+                
+                // Initialize Audio context on user click
+                await Tone.start();
+                AudioEngine.init();
+                this.audioReady = true;
+
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('splash-screen').style.display = 'none';
+                        ThreeEngine.init();
+                        CanvasEngine.init();
+                        initializeUI();
+                        this.setMode('global');
+                    }, 1500);
+                }, 500);
+            },
+
+            setMode: function(newMode) {
+                this.mode = newMode;
+                const isGlobal = newMode === 'global';
+                
+                document.getElementById('btn-mode-global').className = isGlobal ? 'flex-1 py-2 text-xs font-bold rounded transition bg-cyan-900/40 text-cyan-300 shadow-sm border border-cyan-800/50' : 'flex-1 py-2 text-xs font-bold rounded transition text-slate-400 hover:text-slate-200';
+                document.getElementById('btn-mode-local').className = !isGlobal ? 'flex-1 py-2 text-xs font-bold rounded transition bg-cyan-900/40 text-cyan-300 shadow-sm border border-cyan-800/50' : 'flex-1 py-2 text-xs font-bold rounded transition text-slate-400 hover:text-slate-200';
+                
+                document.getElementById('global-controls').style.display = isGlobal ? 'block' : 'none';
+                document.getElementById('local-controls').style.display = !isGlobal ? 'block' : 'none';
+                
+                document.getElementById('webgl-container').style.display = isGlobal ? 'block' : 'none';
+                document.getElementById('canvas2d-container').style.display = !isGlobal ? 'block' : 'none';
+
+                if(this.audioReady) AudioEngine.switchMode(newMode);
+            },
+
+            toggleLeft: function() {
+                const sb = document.getElementById('left-sidebar');
+                const btn = document.getElementById('btn-toggle-left');
+                sb.classList.toggle('collapsed');
+                btn.classList.toggle('collapsed');
+            },
+            toggleRight: function() {
+                const sb = document.getElementById('right-sidebar');
+                const btn = document.getElementById('btn-toggle-right');
+                sb.classList.toggle('collapsed');
+                btn.classList.toggle('collapsed');
+            },
+
+            openTextbook: function() {
+                document.getElementById('textbook-modal').style.display = 'flex';
+                // Load first chapter if empty
+                if(document.getElementById('textbook-content-area').innerHTML.trim() === '') {
+                    this.jumpToChapter("Vol 1: The Cosmic Ocean", "1.1 Origins of Water");
+                }
+            },
+            closeTextbook: function() {
+                document.getElementById('textbook-modal').style.display = 'none';
+            },
+            jumpToChapter: function(vol, chap) {
+                this.openTextbook();
+                document.getElementById('reader-breadcrumb').innerText = `AETHYRA / ${vol.toUpperCase()}`;
+                document.getElementById('textbook-content-area').innerHTML = MassiveHypertextbookData[vol][chap].content;
+                document.getElementById('textbook-content-area').scrollTop = 0;
+            }
+        };
+
+        document.getElementById('btn-init').addEventListener('click', () => SystemController.init());
+    </script>
+
+    <script>
+        const AudioEngine = {
+            muted: false, drone: null, filter: null, river: null, riverFilter: null,
+            
+            init: function() {
+                // 1. Cosmic Drone (Global View)
+                this.drone = new Tone.Noise("pink");
+                this.filter = new Tone.Filter({ type: "lowpass", frequency: 100, Q: 2 }).toDestination();
+                const chorus = new Tone.Chorus(4, 2.5, 0.5).connect(this.filter).start();
+                this.drone.connect(chorus).start();
+                this.drone.volume.value = -Infinity;
+
+                // 2. Fluid Flow (Local View)
+                this.river = new Tone.Noise("brown");
+                this.riverFilter = new Tone.AutoFilter({ frequency: "4n", baseFrequency: 800, octaves: 2 }).toDestination();
+                this.river.connect(this.riverFilter).start();
+                this.riverFilter.start();
+                this.river.volume.value = -Infinity;
+
+                document.getElementById('btn-audio-mute').addEventListener('click', (e) => this.toggleMute(e));
+            },
+
+            switchMode: function(mode) {
+                if (this.muted) return;
+                if (mode === 'global') {
+                    this.drone.volume.rampTo(-15, 2);
+                    this.river.volume.rampTo(-Infinity, 1);
+                } else {
+                    this.drone.volume.rampTo(-Infinity, 1);
+                    this.river.volume.rampTo(-20, 1);
+                }
+            },
+
+            toggleMute: function(e) {
+                this.muted = !this.muted;
+                const btn = e.currentTarget;
+                if (this.muted) {
+                    btn.classList.replace('text-cyan-400', 'text-slate-600');
+                    Tone.Destination.mute = true;
+                } else {
+                    btn.classList.replace('text-slate-600', 'text-cyan-400');
+                    Tone.Destination.mute = false;
+                }
+            }
+        };
+    </script>
+
+    <script>
+        const ThreeEngine = {
+            scene: null, camera: null, renderer: null, controls: null,
+            earth: null, atmosphere: null, currents: null, rivers: null,
+            clock: new THREE.Clock(),
+
+            init: function() {
+                const container = document.getElementById('webgl-container');
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x020617);
+
+                this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.set(0, 0, 4);
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(this.renderer.domElement);
+
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.minDistance = 1.5;
+                this.controls.maxDistance = 15;
+                
+                // Add Lights for Specular reflections on custom shader
+                const light = new THREE.DirectionalLight(0xffffff, 1.5);
+                light.position.set(5, 3, 5);
+                this.scene.add(light);
+                this.scene.add(new THREE.AmbientLight(0x404040, 0.5));
+
+                this.buildAdvancedEarth(light.position);
+                this.buildAtmosphere();
+                this.buildDataSplines();
+
+                window.addEventListener('resize', () => this.resize());
+                this.animate();
+            },
+
+            buildAdvancedEarth: function(lightPos) {
+                const geometry = new THREE.SphereGeometry(1, 128, 128);
+                
+                const vertexShader = `
+                    varying vec2 vUv;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                        vUv = uv;
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `;
+                
+                // Advanced 4-Octave fBM Noise for realistic topography & Specular calculation
+                const fragmentShader = `
+                    uniform float time;
+                    uniform vec3 lightPosition;
+                    varying vec2 vUv;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    // Simplex 3D Noise function (Ashima Arts)
+                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+                    
+                    float snoise(vec3 v) {
+                        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                        vec3 i  = floor(v + dot(v, C.yyy));
+                        vec3 x0 = v - i + dot(i, C.xxx);
+                        vec3 g = step(x0.yzx, x0.xyz);
+                        vec3 l = 1.0 - g;
+                        vec3 i1 = min(g.xyz, l.zxy);
+                        vec3 i2 = max(g.xyz, l.zxy);
+                        vec3 x1 = x0 - i1 + C.xxx;
+                        vec3 x2 = x0 - i2 + C.yyy;
+                        vec3 x3 = x0 - D.yyy;
+                        i = mod289(i);
+                        vec4 p = permute(permute(permute(
+                                  i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                                + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                                + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                        float n_ = 0.142857142857;
+                        vec3 ns = n_ * D.wyz - D.xzx;
+                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                        vec4 x_ = floor(j * ns.z);
+                        vec4 y_ = floor(j - 7.0 * x_);
+                        vec4 x = x_ *ns.x + ns.yyyy;
+                        vec4 y = y_ *ns.x + ns.yyyy;
+                        vec4 h = 1.0 - abs(x) - abs(y);
+                        vec4 b0 = vec4(x.xy, y.xy);
+                        vec4 b1 = vec4(x.zw, y.zw);
+                        vec4 s0 = floor(b0)*2.0 + 1.0;
+                        vec4 s1 = floor(b1)*2.0 + 1.0;
+                        vec4 sh = -step(h, vec4(0.0));
+                        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                        vec3 p0 = vec3(a0.xy,h.x);
+                        vec3 p1 = vec3(a0.zw,h.y);
+                        vec3 p2 = vec3(a1.xy,h.z);
+                        vec3 p3 = vec3(a1.zw,h.w);
+                        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                        m = m * m; return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+                    }
+
+                    // Fractional Brownian Motion
+                    float fbm(vec3 p) {
+                        float v = 0.0; float a = 0.5; vec3 shift = vec3(100.0);
+                        for (int i = 0; i < 5; ++i) {
+                            v += a * snoise(p);
+                            p = p * 2.0 + shift; a *= 0.5;
+                        }
+                        return v;
+                    }
+
+                    void main() {
+                        vec3 p = normalize(vPosition);
+                        float elevation = fbm(p * 2.5); // Continent mapping
+                        
+                        vec3 oceanDeep = vec3(0.01, 0.05, 0.15);
+                        vec3 oceanShallow = vec3(0.05, 0.3, 0.5);
+                        vec3 coast = vec3(0.5, 0.45, 0.3);
+                        vec3 landLow = vec3(0.1, 0.25, 0.1);
+                        vec3 landHigh = vec3(0.3, 0.3, 0.25);
+                        
+                        vec3 color;
+                        float specularStrength = 0.0;
+
+                        if(elevation < 0.05) {
+                            // Ocean
+                            float depth = smoothstep(-0.8, 0.05, elevation);
+                            color = mix(oceanDeep, oceanShallow, depth);
+                            specularStrength = 1.0; // Water is shiny
+                        } else {
+                            // Land
+                            if(elevation < 0.1) color = mix(coast, landLow, smoothstep(0.05, 0.1, elevation));
+                            else color = mix(landLow, landHigh, smoothstep(0.1, 0.6, elevation));
+                            specularStrength = 0.0; // Land is matte
+                        }
+
+                        // Lighting Calc
+                        vec3 lightDir = normalize(lightPosition - vPosition);
+                        vec3 viewDir = normalize(cameraPosition - vPosition);
+                        vec3 reflectDir = reflect(-lightDir, vNormal);
+                        
+                        float diff = max(dot(vNormal, lightDir), 0.0);
+                        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0) * specularStrength;
+                        
+                        vec3 ambient = color * 0.2;
+                        vec3 diffuse = color * diff;
+                        vec3 specular = vec3(1.0) * spec; // White sun reflection
+
+                        gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
+                    }
+                `;
+
+                const material = new THREE.ShaderMaterial({
+                    vertexShader, fragmentShader,
+                    uniforms: { 
+                        time: { value: 0 },
+                        lightPosition: { value: lightPos } 
+                    }
+                });
+                
+                this.earth = new THREE.Mesh(geometry, material);
+                this.scene.add(this.earth);
+            },
+
+            buildAtmosphere: function() {
+                // Slightly larger sphere for Rayleigh scattering simulation
+                const geo = new THREE.SphereGeometry(1.04, 64, 64);
+                
+                const vertexShader = `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `;
+                
+                const fragmentShader = `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                        vec3 viewDir = normalize(cameraPosition - vPosition);
+                        float fresnel = dot(viewDir, vNormal);
+                        fresnel = clamp(1.0 - fresnel, 0.0, 1.0);
+                        fresnel = pow(fresnel, 4.0); // Sharp falloff for thin atmosphere
+                        
+                        vec3 atmosColor = vec3(0.1, 0.4, 1.0); // Cyan/Blue
+                        gl_FragColor = vec4(atmosColor, fresnel * 0.8);
+                    }
+                `;
+
+                const mat = new THREE.ShaderMaterial({
+                    vertexShader, fragmentShader,
+                    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+                });
+
+                this.atmosphere = new THREE.Mesh(geo, mat);
+                this.scene.add(this.atmosphere);
+            },
+
+            buildDataSplines: function() {
+                this.currents = new THREE.Group();
+                this.rivers = new THREE.Group();
+
+                const createSpline = (color, rOffset, speed, opacity, width) => {
+                    const pts = [];
+                    // Generate a winding path around the sphere
+                    for(let i=0; i<150; i++) {
+                        let t = i/150;
+                        let phi = t * Math.PI * (Math.random()*4 + 2);
+                        let theta = Math.sin(t * Math.PI * 2) * 1.5;
+                        let r = 1.0 + rOffset;
+                        pts.push(new THREE.Vector3(r * Math.cos(theta)*Math.sin(phi), r * Math.sin(theta)*Math.sin(phi), r * Math.cos(phi)));
+                    }
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: opacity });
+                    const mesh = new THREE.Line(geo, mat);
+                    return { mesh, speed };
+                };
+
+                // Ocean Currents (Deep Teal, very close to surface)
+                for(let i=0; i<12; i++) {
+                    let spline = createSpline(0x0d9488, 0.005, (Math.random()-0.5)*0.002, 0.4);
+                    spline.mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+                    this.currents.add(spline.mesh);
+                }
+                
+                // Atmospheric Rivers (Cyan, higher altitude, faster)
+                for(let i=0; i<8; i++) {
+                    let spline = createSpline(0x22d3ee, 0.06, 0.005 + Math.random()*0.005, 0.6);
+                    spline.mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+                    this.rivers.add(spline.mesh);
+                }
+
+                this.scene.add(this.currents);
+                this.scene.add(this.rivers);
+            },
+
+            toggleLayer: function(layer, state) {
+                if(this[layer]) this[layer].visible = state;
+            },
+
+            resize: function() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            },
+
+            animate: function() {
+                requestAnimationFrame(() => this.animate());
+                if (SystemController.mode !== 'global') return;
+                
+                const time = this.clock.getElapsedTime();
+                
+                // Slow planet rotation
+                this.earth.rotation.y = time * 0.02;
+                this.atmosphere.rotation.y = time * 0.02;
+                
+                // Data animation
+                this.currents.children.forEach(c => c.rotation.y += 0.001);
+                this.rivers.children.forEach(r => { r.rotation.z -= 0.003; r.rotation.y += 0.001; });
+
+                this.controls.update();
+                this.renderer.render(this.scene, this.camera);
+            }
+        };
+    </script>
+
+    <script>
+        const CanvasEngine = {
+            canvas: null, ctx: null, 
+            scale: 1, offsetX: 0, offsetY: 0, isDragging: false, dragStart: {x:0, y:0},
+            timeMult: 1, lastTime: 0, date: new Date(2026, 7, 15), damTMC: 116.8, particles: [],
+            
+            init: function() {
+                this.canvas = document.getElementById('simCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                
+                window.addEventListener('resize', () => this.resize());
+                
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.scale *= e.deltaY < 0 ? 1.1 : 0.9;
+                    this.scale = Math.max(0.3, Math.min(this.scale, 3)); 
+                });
+                this.canvas.addEventListener('mousedown', (e) => { this.isDragging = true; this.dragStart = {x: e.offsetX - this.offsetX, y: e.offsetY - this.offsetY}; });
+                this.canvas.addEventListener('mouseup', () => this.isDragging = false);
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if(this.isDragging) { this.offsetX = e.offsetX - this.dragStart.x; this.offsetY = e.offsetY - this.dragStart.y; }
+                });
+
+                document.getElementById('timeSlider').addEventListener('input', (e) => {
+                    this.timeMult = parseInt(e.target.value);
+                    document.getElementById('ui-time-multiplier').innerText = this.timeMult + 'x';
+                });
+
+                this.lastTime = performance.now();
+                this.animate();
+            },
+
+            resize: function() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.offsetX = this.canvas.width / 2;
+                this.offsetY = this.canvas.height / 2;
+            },
+
+            resetSim: function() {
+                this.date = new Date(2026, 7, 15);
+                this.damTMC = 116.8;
+                this.timeMult = 1;
+                document.getElementById('timeSlider').value = 1;
+                document.getElementById('ui-time-multiplier').innerText = '1x';
+                this.particles = [];
+            },
+
+            animate: function(time) {
+                requestAnimationFrame((t) => this.animate(t));
+                if (SystemController.mode !== 'local') { this.lastTime = time || performance.now(); return; }
+                
+                const dt = time - this.lastTime;
+                this.lastTime = time;
+                
+                this.updateMath(dt);
+                
+                this.ctx.fillStyle = '#020617'; // Match deep background
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.save();
+                this.ctx.translate(this.offsetX, this.offsetY);
+                this.ctx.scale(this.scale, this.scale);
+
+                this.drawGrid();
+                this.drawTopography();
+                this.drawInfrastructure();
+                this.updateAndDrawParticles();
+                
+                this.ctx.restore();
+                this.updateUI();
+            },
+
+            updateMath: function(dt) {
+                const days = (dt / 1000) * this.timeMult;
+                this.date.setTime(this.date.getTime() + (days * 24 * 60 * 60 * 1000));
+                
+                const month = this.date.getMonth();
+                const isMonsoon = (month >= 5 && month <= 8);
+                
+                // Drain Math 
+                const urban = 162;
+                const ind = 45 - 15; // 15 MLD recycle
+                const agri = 4200;
+                let totalDrain = urban + ind + agri;
+                if(isMonsoon) totalDrain -= 25; // RWH offset
+                
+                const evapFactor = (month >= 2 && month <= 4) ? 0.1 : 0.05;
+
+                this.damTMC -= (totalDrain / 28316.8) * days * (1 + evapFactor);
+                
+                // Monsoon Recharge
+                if(isMonsoon && this.damTMC < 117.22) {
+                    this.damTMC += (1000 / 28316.8) * days; 
+                }
+
+                if(this.damTMC < -15) this.damTMC = -15; 
+            },
+
+            drawGrid: function() {
+                this.ctx.strokeStyle = 'rgba(51, 65, 85, 0.2)';
+                this.ctx.lineWidth = 1 / this.scale;
+                for(let i = -2000; i < 2000; i+=100) {
+                    this.ctx.beginPath(); this.ctx.moveTo(i, -2000); this.ctx.lineTo(i, 2000); this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.moveTo(-2000, i); this.ctx.lineTo(2000, i); this.ctx.stroke();
+                }
+            },
+
+            drawTopography: function() {
+                const isCrisis = this.damTMC < 10;
+                
+                // Bhima River
+                this.ctx.beginPath();
+                this.ctx.moveTo(-400, -200);
+                this.ctx.quadraticCurveTo(-100, 100, 300, 400);
+                this.ctx.strokeStyle = isCrisis ? 'rgba(100, 116, 139, 0.3)' : 'rgba(16, 185, 129, 0.2)'; // Turns dry grey
+                this.ctx.lineWidth = 40;
+                this.ctx.stroke();
+            },
+
+            drawInfrastructure: function() {
+                const isCrisis = this.damTMC < 10;
+                
+                // Dam Basin
+                this.ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                this.ctx.strokeStyle = isCrisis ? '#ef4444' : '#3b82f6';
+                this.ctx.lineWidth = 2 / this.scale;
+                this.ctx.fillRect(-450, -250, 100, 100);
+                this.ctx.strokeRect(-450, -250, 100, 100);
+                
+                // Dam Water Level
+                const fillH = Math.max(0, (this.damTMC + 15) / 132) * 100;
+                this.ctx.fillStyle = isCrisis ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.5)';
+                this.ctx.fillRect(-450, -150 - fillH, 100, fillH);
+                
+                // City (Right)
+                this.ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)';
+                this.ctx.strokeRect(100, -150, 200, 150);
+                this.ctx.fillStyle = '#22d3ee'; this.ctx.font = '12px "JetBrains Mono"'; this.ctx.fillText("URBAN", 110, -130);
+
+                // Industry (Bottom Right)
+                this.ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+                this.ctx.strokeRect(200, 100, 150, 100);
+                this.ctx.fillStyle = '#fbbf24'; this.ctx.fillText("MIDC", 210, 120);
+
+                // Farms (Bottom Center)
+                this.ctx.strokeStyle = isCrisis ? 'rgba(120, 113, 108, 0.4)' : 'rgba(52, 211, 153, 0.4)';
+                this.ctx.strokeRect(-100, 200, 300, 250);
+                this.ctx.fillStyle = isCrisis ? '#78716c' : '#34d399'; this.ctx.fillText("SUGARCANE", -90, 220);
+
+                // Main Pipelines
+                this.ctx.beginPath(); this.ctx.moveTo(-350, -200); this.ctx.lineTo(100, -100); this.ctx.strokeStyle = 'rgba(34, 211, 238, 0.2)'; this.ctx.stroke();
+                this.ctx.beginPath(); this.ctx.moveTo(150, -100); this.ctx.lineTo(250, 100); this.ctx.stroke();
+            },
+
+            updateAndDrawParticles: function() {
+                if(this.damTMC > -10 && Math.random() < (this.timeMult/30 + 0.1)) {
+                    // Pipe to City (Cyan)
+                    this.particles.push({ x: -350, y: -200, tx: 150, ty: -100, prog: 0, c: '#22d3ee' }); 
+                    // River to Farm (Emerald)
+                    if(Math.random() > 0.3) {
+                        this.particles.push({ x: -400, y: -200, tx: 100, ty: 300, prog: 0, c: '#34d399', isRiver: true }); 
+                    }
+                }
+                
+                for(let i = this.particles.length-1; i>=0; i--) {
+                    let p = this.particles[i];
+                    p.prog += 0.01 * Math.min(this.timeMult, 10);
+                    if(p.prog >= 1) { this.particles.splice(i, 1); continue; }
+                    
+                    let cx, cy;
+                    if(p.isRiver) {
+                        // Simple arc for river
+                        let t = p.prog;
+                        cx = (1-t)*(1-t)*-400 + 2*(1-t)*t*-100 + t*t*100;
+                        cy = (1-t)*(1-t)*-200 + 2*(1-t)*t*100 + t*t*300;
+                        // Add jitter
+                        cx += (Math.random()-0.5)*20; cy += (Math.random()-0.5)*20;
+                    } else {
+                        cx = p.x + (p.tx - p.x)*p.prog;
+                        cy = p.y + (p.ty - p.y)*p.prog;
+                        cx += (Math.random()-0.5)*4; cy += (Math.random()-0.5)*4;
+                    }
+                    
+                    this.ctx.beginPath(); this.ctx.arc(cx, cy, 2/this.scale, 0, Math.PI*2);
+                    this.ctx.fillStyle = p.c; this.ctx.shadowBlur = 5; this.ctx.shadowColor = p.c; this.ctx.fill(); this.ctx.shadowBlur = 0;
+                }
+            },
+            
+            updateUI: function() {
+                document.getElementById('ui-local-date').innerText = this.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                let pct = (this.damTMC / 117.22) * 100; if(pct < 0) pct = 0;
+                const damUI = document.getElementById('ui-local-dam');
+                damUI.innerText = pct.toFixed(1) + '%';
+                
+                if(this.damTMC < 10) {
+                    damUI.classList.replace('text-blue-400', 'text-red-500');
+                } else {
+                    damUI.classList.replace('text-red-500', 'text-blue-400');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

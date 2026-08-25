@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Aethyra | ISRO/NASA Level Hydrology Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js for Global 4D Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Tone.js for Procedural Sonification -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <!-- Post-Processing (Simulated via Shaders for performance in single file) -->
+
+    <style>
+        :root {
+            --bg-base: #f8fafc; /* Slate 50 */
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-panel: rgba(203, 213, 225, 0.7); /* Slate 300 */
+            --shadow-panel: 0 12px 40px -12px rgba(15, 23, 42, 0.08);
+            
+            --text-primary: #0f172a; /* Slate 900 */
+            --text-secondary: #475569; /* Slate 600 */
+            --text-tertiary: #94a3b8; /* Slate 400 */
+            
+            --data-blue: #0284c7; /* Sky 600 */
+            --data-teal: #0d9488; /* Teal 600 */
+            --data-amber: #d97706; /* Amber 600 */
+            --data-red: #e11d48; /* Rose 600 */
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Premium Scientific UI Panels */
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border: 1px solid var(--border-panel);
+            box-shadow: var(--shadow-panel);
+            border-radius: 8px; /* Sharper, more professional corners */
+        }
+
+        /* Micro-interactions & Scrollbars */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Range Slider - Precision Style */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 4px;
+            border-radius: 1px;
+            background: var(--text-primary);
+            cursor: ew-resize;
+            margin-top: -4px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: #cbd5e1;
+        }
+
+        /* View State Management */
+        .view-section {
+            display: none;
+            position: absolute;
+            top: 56px; /* Tighter nav */
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 56px);
+        }
+        .view-section.active { display: block; }
+        
+        #global-canvas-container, #local-canvas-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+        }
+        
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;
+        }
+        .pointer-events-auto { pointer-events: auto; }
+
+        /* Grid Backgrounds */
+        .cartesian-grid {
+            background-color: var(--bg-base);
+            background-image: 
+                linear-gradient(rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Typography Hierarchy */
+        .label-micro { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .data-value { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em; }
+        .data-value.large { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.04em; }
+
+        /* Status Indicators */
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-healthy { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+        .status-warning { background-color: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+        .status-critical { background-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+        
+        .hud-border { border-left: 2px solid var(--data-blue); padding-left: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Command Navigation -->
+    <nav class="h-14 w-full bg-white/90 backdrop-blur-md flex items-center justify-between px-6 z-50 relative border-b border-slate-200">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold tracking-widest text-slate-900 uppercase">Project Aethyra</span>
+                    <span class="text-[9px] text-slate-500 font-semibold tracking-widest uppercase mono">Command Node : Active</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-1 pointer-events-auto bg-slate-100 p-0.5 rounded border border-slate-200">
+            <button onclick="switchTab('global')" id="tab-global" class="px-5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded text-slate-900 bg-white shadow-sm border border-slate-200 transition">Planetary 4D Analysis</button>
+            <button onclick="switchTab('local')" id="tab-local" class="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded text-slate-500 hover:text-slate-900 transition">Solapur ML Micro-Twin</button>
+            <button onclick="switchTab('data')" id="tab-data" class="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded text-slate-500 hover:text-slate-900 transition">Research Corpus</button>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <span class="status-dot status-healthy animate-pulse"></span>
+                <span class="label-micro">Telemetry Sync</span>
+            </div>
+            <button id="btn-audio-toggle" class="px-3 py-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                <span class="label-micro text-slate-600">Sonification</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- VIEW 1: PLANETARY SCALE (GLOBAL 4D) -->
+    <div id="view-global" class="view-section active cartesian-grid">
+        <div id="global-canvas-container"></div>
+        
+        <div class="ui-layer p-6 flex flex-col justify-between">
+            <div class="flex justify-between items-start pointer-events-none">
+                <!-- Left HUD: Global ML Metrics -->
+                <div class="glass-panel p-5 w-96 pointer-events-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <div class="label-micro text-slate-500 mb-1">Observation Target</div>
+                            <h2 class="text-sm font-bold text-slate-900">Earth (Hydrosphere Dynamics)</h2>
+                        </div>
+                        <div class="bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                            <span class="label-micro text-blue-600">Epoch: 2026.6</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <div class="hud-border">
+                            <div class="label-micro mb-1">Global Groundwater Anomaly (GRACE)</div>
+                            <div class="flex justify-between items-end">
+                                <div class="data-value text-red-600">-4.2 <span class="text-xs text-slate-500">cm H2O Eq.</span></div>
+                                <div class="text-[9px] font-bold text-slate-400 uppercase">Critical Depletion (NW India)</div>
+                            </div>
+                        </div>
+
+                        <div class="hud-border" style="border-color: var(--data-teal)">
+                            <div class="label-micro mb-1">Atmospheric Vapor Transport</div>
+                            <div class="flex justify-between items-end">
+                                <div class="data-value text-slate-800">2.8 <span class="text-xs text-slate-500">x10⁷ kg/s</span></div>
+                                <div class="text-[9px] font-bold text-teal-600 uppercase">Active Monsoonal Jet</div>
+                            </div>
+                        </div>
+
+                        <div class="hud-border" style="border-color: var(--data-amber)">
+                            <div class="label-micro mb-1">ENSO / IOD Status (Macro Drivers)</div>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <div class="bg-slate-50 p-1.5 rounded border border-slate-100">
+                                    <div class="text-[8px] text-slate-400 uppercase">ENSO Phase</div>
+                                    <div class="text-xs font-bold text-slate-700">La Niña (Weak)</div>
+                                </div>
+                                <div class="bg-slate-50 p-1.5 rounded border border-slate-100">
+                                    <div class="text-[8px] text-slate-400 uppercase">Indian Ocean Dipole</div>
+                                    <div class="text-xs font-bold text-amber-600">+0.4°C (Positive)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <span class="label-micro">ML Prediction Confidence</span>
+                            <span class="text-xs font-bold mono text-emerald-600">98.74%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-1 mt-1 rounded overflow-hidden">
+                            <div class="bg-emerald-500 h-full w-[98.74%]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right HUD: Controls & Legend -->
+                <div class="flex flex-col gap-4 pointer-events-auto">
+                    <div class="glass-panel p-4 w-64">
+                        <div class="label-micro mb-3">4D Visualization Layers</div>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked disabled class="accent-slate-800">
+                                <span class="text-xs font-semibold text-slate-700">Topology Matrix (Base)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="toggle-atmos" checked class="accent-blue-600">
+                                <span class="text-xs font-semibold text-slate-700">Atmospheric Rivers (Vapor)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="toggle-ocean" checked class="accent-teal-600">
+                                <span class="text-xs font-semibold text-slate-700">Ocean Circulation (Currents)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel p-4 w-64 text-right">
+                        <div class="label-micro mb-2">Navigation Mechanics</div>
+                        <div class="text-[10px] text-slate-500 mb-2 leading-relaxed">Left Click + Drag to Orbit<br>Scroll to Zoom</div>
+                        <button id="btn-reset-cam" class="w-full py-1.5 text-[10px] font-bold uppercase bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border border-slate-200 transition">Reset Origin to India</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center pointer-events-none">
+                <div class="glass-panel px-6 py-2 flex items-center gap-8">
+                    <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-slate-300"></span><span class="label-micro">Landmass Node</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span><span class="label-micro">Vapor Stream</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-teal-600"></span><span class="label-micro">Thermohaline Flow</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: REGIONAL MICRO-TWIN (SOLAPUR) -->
+    <div id="view-local" class="view-section cartesian-grid">
+        <div id="local-canvas-container">
+            <canvas id="simCanvas"></canvas>
+        </div>
+        
+        <div class="ui-layer p-6 flex flex-col justify-between">
+            <!-- Top HUD -->
+            <div class="flex justify-between items-start gap-6 pointer-events-none">
+                
+                <!-- Macro Context & Math Model -->
+                <div class="glass-panel p-5 w-[420px] pointer-events-auto border-l-4 border-l-blue-600">
+                    <div class="flex justify-between items-end mb-4 border-b border-slate-200 pb-3">
+                        <div>
+                            <div class="label-micro">Micro-Twin Geographic Scope</div>
+                            <div class="text-lg font-bold text-slate-900 tracking-tight">Solapur District Grid</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="label-micro">Simulation Epoch</div>
+                            <div id="ui-date" class="data-value text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">AUG 2026</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-y-4 gap-x-6 mb-5">
+                        <div class="hud-border" style="border-color: #cbd5e1"><div class="label-micro">Demographics</div><div class="data-value text-slate-700 text-sm">1.2M (U) / 4.8M (R)</div></div>
+                        <div class="hud-border" style="border-color: #cbd5e1"><div class="label-micro">Livestock Load</div><div class="data-value text-slate-700 text-sm">1.8M Head</div></div>
+                        <div class="hud-border" style="border-color: var(--data-teal)"><div class="label-micro">Arable Coverage</div><div class="data-value text-teal-700 text-sm">1.5M Hectares</div></div>
+                        <div class="hud-border" style="border-color: var(--data-amber)"><div class="label-micro">Industrial (MIDC)</div><div class="data-value text-amber-700 text-sm">9 Zones</div></div>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center">
+                        <div>
+                            <div class="label-micro">Cumulative Rainfall (2026)</div>
+                            <div id="ui-rain-stat" class="data-value text-blue-600">250 mm</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="label-micro">RWH & Harvesting</div>
+                            <div id="ui-rwh-stat" class="text-[10px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded mt-1 border border-teal-200 inline-block">YIELD: +30 MLD</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Source Telemetry -->
+                <div class="glass-panel p-5 w-80 pointer-events-auto border-l-4 border-l-teal-600">
+                    <div class="label-micro mb-1 text-slate-500">Primary Reservoir Telemetry</div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">Ujani Dam (Bhima Basin)</h3>
+                    
+                    <div class="flex justify-between items-end mb-2">
+                        <span id="ui-dam-pct" class="data-value large text-blue-600">99.7%</span>
+                        <span class="label-micro text-slate-400 mb-1">Current Vol.</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mb-3">
+                        <div id="ui-dam-bar" class="bg-blue-500 h-full w-full transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div id="ui-dam-tmc" class="data-value text-sm text-slate-600">117.2 / 117.2 TMC</div>
+                        <div class="text-[9px] font-bold uppercase text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">Dead Storage: -15</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom HUD -->
+            <div class="flex justify-between items-end gap-6 pointer-events-none">
+                
+                <!-- Output Matrix (Drain) -->
+                <div class="glass-panel p-4 flex-grow pointer-events-auto border border-slate-200">
+                    <div class="label-micro mb-3 pb-2 border-b border-slate-100">Live Network Drain Matrix (Million Liters/Day)</div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-white p-3 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
+                            <div class="label-micro">Urban Sector (Potable)</div>
+                            <div class="data-value text-xl">162 <span class="text-[10px] text-slate-400 uppercase tracking-widest font-normal">MLD</span></div>
+                            <div class="text-[9px] text-slate-500 mt-1 uppercase mono">Municipal Pipeline</div>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute left-0 top-0 w-1 h-full bg-amber-500"></div>
+                            <div class="label-micro">Industrial (MIDC/Sugar)</div>
+                            <div class="data-value text-xl">45 <span class="text-[10px] text-slate-400 uppercase tracking-widest font-normal">MLD</span></div>
+                            <div class="text-[9px] text-emerald-700 font-bold mt-1 bg-emerald-50 inline-block px-1 rounded border border-emerald-100">-15 MLD Juice Recycle</div>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute left-0 top-0 w-1 h-full bg-teal-500"></div>
+                            <div class="label-micro">Agriculture (Raw)</div>
+                            <div class="data-value text-xl text-slate-800">4200 <span class="text-[10px] text-slate-400 uppercase tracking-widest font-normal">MLD</span></div>
+                            <div class="text-[9px] text-slate-500 mt-1 uppercase mono">70% Sugarcane Bias</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictive Time Engine -->
+                <div class="glass-panel p-5 w-96 pointer-events-auto border-t-4 border-t-slate-800">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <div class="label-micro text-slate-500">Machine Learning Module</div>
+                            <div class="text-sm font-bold text-slate-900">Predictive Temporal Engine</div>
+                        </div>
+                        <button id="btn-reset" class="text-[9px] font-bold uppercase bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded border border-slate-300 transition">Reset Epoch</button>
+                    </div>
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="label-micro text-slate-400 w-4">1x</span>
+                        <input type="range" id="timeSlider" min="1" max="500" value="1" class="flex-grow">
+                        <span id="ui-time-multiplier" class="data-value text-sm w-12 text-right bg-slate-50 px-1 rounded border border-slate-100">1x</span>
+                    </div>
+                    <div class="text-[9px] font-semibold text-slate-500 text-center uppercase tracking-widest mt-3">Accelerate temporal flow to simulate depletion scenarios</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: RESEARCH CORPUS & DOCUMENTATION -->
+    <div id="view-data" class="view-section overflow-y-auto custom-scroll bg-white">
+        <div class="max-w-4xl mx-auto px-6 py-16 lg:py-20">
+            
+            <div class="text-center mb-16 border-b border-slate-200 pb-12">
+                <div class="inline-block px-3 py-1 rounded bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-widest mb-4 border border-slate-300">ISRO / NASA Standard Documentation</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">PROJECT AETHYRA</h1>
+                <h2 class="text-xl text-slate-600 font-medium max-w-2xl mx-auto">Digital Twin & Multi-Scale Hydrology Simulation Report</h2>
+                <div class="mt-6 inline-flex gap-4 label-micro bg-slate-50 p-2 rounded border border-slate-100">
+                    <span>DATE: AUG 2026</span> | <span>SUBJECT: SOLAPUR CITY CASE STUDY & COSMIC SCALING</span>
+                </div>
+            </div>
+
+            <div class="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed space-y-10">
+                
+                <section>
+                    <h3 class="text-2xl font-bold text-slate-900 border-l-4 border-slate-900 pl-4 mb-6">1. Executive Summary</h3>
+                    <p><strong>Project Aethyra</strong> is an advanced Digital Twin ecosystem designed to map, simulate, and predict the flow, consumption, and scarcity of water resources. This case study focuses on Solapur, a historically drought-prone district in Maharashtra, India. By ingesting real-time data from 2026, the Aethyra module simulates water life-cycles from reservoir inputs to multi-sector outputs, featuring an "Accelerated Time" engine to predict future crises. The report scales this concept from a hyper-local city grid to a universal scale.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold text-slate-900 border-l-4 border-blue-600 pl-4 mb-6">2. Solapur 2026: Baseline Data & Ecosystem</h3>
+                    <p>Based on rigorous data models for the year 2026, the following metrics form the baseline variables for the Solapur Digital Twin simulation environment:</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="bg-slate-50 p-5 rounded border border-slate-200">
+                            <h4 class="font-bold text-slate-900 mb-2 text-sm uppercase tracking-wide">A. Demographics</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>City Pop:</strong> ~1.2 Million</li>
+                                <li><strong>District Pop:</strong> ~4.8 Million</li>
+                                <li><strong>Livestock:</strong> ~1.8 Million (Highly relevant for rural water drain).</li>
+                            </ul>
+                        </div>
+                        <div class="bg-amber-50 p-5 rounded border border-amber-200">
+                            <h4 class="font-bold text-slate-900 mb-2 text-sm uppercase tracking-wide">B. Industrial Footprint</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>Zones:</strong> 9 major MIDC areas.</li>
+                                <li><strong>Type:</strong> Massive textile hub & over 30 Sugar Factories.</li>
+                                <li><strong>Demand:</strong> Very High (Textile dyeing and cane processing).</li>
+                            </ul>
+                        </div>
+                        <div class="bg-teal-50 p-5 rounded border border-teal-200">
+                            <h4 class="font-bold text-slate-900 mb-2 text-sm uppercase tracking-wide">C. Agriculture & Ecology</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>Area:</strong> ~1.5 Million Hectares.</li>
+                                <li><strong>Crops:</strong> Sugarcane (highest consumer), Jowar, Pomegranate.</li>
+                                <li><strong>Forest:</strong> ~2.5% (Minimal natural water retention).</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-5 rounded border border-blue-200">
+                            <h4 class="font-bold text-slate-900 mb-2 text-sm uppercase tracking-wide">D. Climate (2026 Data)</h4>
+                            <ul class="text-sm space-y-2">
+                                <li><strong>Average:</strong> 600mm to 750mm annually.</li>
+                                <li><strong>YTD (Aug 2026):</strong> 121.3 mm to 250 mm.</li>
+                                <li><strong>Pattern:</strong> Bimodal, intermittent dry spells.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold text-slate-900 border-l-4 border-slate-900 pl-4 mb-6">3. Water Sources & Capacity Matrix</h3>
+                    <p>The lifeblood of Solapur is the Bhima River basin. The mathematical foundation of our simulation relies on the precise metrics of the <strong>Ujani Dam</strong>:</p>
+                    <ul class="list-disc pl-5 mt-4 space-y-2">
+                        <li><strong>Total Capacity:</strong> ~117.22 TMC (Thousand Million Cubic feet)</li>
+                        <li><strong>Live Storage Capacity:</strong> ~53.5 TMC</li>
+                        <li><strong>2026 Real-Time Status:</strong> After dipping into minus/dead storage (-15 TMC) earlier in the year, heavy monsoon catchments in the Pune/Western Ghats region filled the Ujani Dam to <strong>99.78% capacity</strong> by mid-August 2026.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold text-slate-900 border-l-4 border-slate-900 pl-4 mb-6">4. Requirement & Consumption Simulation (The Math)</h3>
+                    <p>To fuel the Aethyra ML engine, daily water withdrawal rates (MLD) are calculated:</p>
+                    <ol class="list-decimal pl-5 mt-4 space-y-3 font-medium text-slate-800">
+                        <li><strong>Domestic Requirement (City):</strong> 1.2M people × 135 LPCD = <strong>162 MLD</strong>.</li>
+                        <li><strong>Industrial Requirement:</strong> Estimated at <strong>45 MLD</strong>. Note: Sugar mills recycle approx 15 MLD from crushed cane juice.</li>
+                        <li><strong>Agricultural Requirement:</strong> Sugarcane alone consumes ~70% of irrigated water. Simulation accounts for <strong>~4200 MLD</strong>, creating extreme stress on reservoirs.</li>
+                        <li><strong>Forest & Animal:</strong> Approx. <strong>60-80 MLD</strong>.</li>
+                    </ol>
+                </section>
+
+                <section class="bg-slate-900 text-slate-300 p-10 rounded-xl shadow-xl mt-12 relative overflow-hidden">
+                    <h3 class="text-2xl font-bold text-white border-b border-slate-700 pb-3 mb-6">5. The Scaling Scenario: Solapur to the Cosmos</h3>
+                    <p>Project Aethyra is designed to zoom out continuously, demonstrating the interconnectedness of hydrological systems across dimensions.</p>
+                    
+                    <div class="space-y-6 mt-8">
+                        <div><strong class="text-blue-400">Level 1: Micro - Solapur City</strong><br><span class="text-sm">Focus on pipeline fluid dynamics, equitable distribution, and sugarcane vs. human survival.</span></div>
+                        <div><strong class="text-teal-400">Level 2: Meso - Maharashtra State</strong><br><span class="text-sm">Western Ghats catching Arabian Sea monsoons. Upstream dams controlling downstream fate.</span></div>
+                        <div><strong class="text-amber-400">Level 3: Macro - India (National)</strong><br><span class="text-sm">Southwest Monsoon currents. India's groundwater depletion verified via satellite gravity anomaly data (GRACE).</span></div>
+                        <div><strong class="text-indigo-400">Level 4: Global - Earth</strong><br><span class="text-sm">The closed-loop cycle. Thermohaline circulation and atmospheric rivers. Total water mass remains a constant.</span></div>
+                        <div class="pt-4 border-t border-slate-700">
+                            <strong class="text-purple-400 text-lg">Level 5: Cosmic - Interstellar Clouds</strong><br>
+                            <p class="text-sm mt-2 leading-relaxed">Where did Solapur's water originate? The simulation zooms past the solar system to visualize Interstellar Molecular Clouds. Oxygen, forged in supernovae, combined with primordial Big Bang hydrogen on cosmic dust grains. Every drop of water flowing through the Solapur municipal pipeline is alien, older than the sun, forged in the depths of space.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="mt-16 pt-6 border-t border-slate-200 text-center label-micro">
+                END OF RESEARCH CORPUS
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Core System State ---
+        const sysState = {
+            currentTab: 'global',
+            audioEnabled: false,
+            audioInitialized: false,
+            local: {
+                date: new Date(2026, 7, 15), // Aug 15, 2026
+                damTMC: 116.8,
+                timeMult: 1,
+                lastTime: performance.now(),
+                isCrisis: false,
+                rainAcc: 250,
+                isMonsoon: true
+            }
+        };
+
+        const CONSTANTS = {
+            maxCapacityTMC: 117.22, deadStorageTMC: -15.0,
+            urbanReq: 162, industryReqGross: 45, industryRecycle: 15, agriReq: 4200, rwhYieldMax: 30,
+            mlToTmcRate: 1 / 28316.8, baseMsPerDay: 800
+        };
+
+        // --- Tone.js Procedural Sonification (Data-driven Audio) ---
+        const audioNodes = { ambientDrone: null, dataStream: null, filter: null };
+
+        async function toggleAudio() {
+            if (!sysState.audioInitialized) {
+                await Tone.start();
+                
+                // Deep, sophisticated drone for Planetary level (NASA/Space feel)
+                audioNodes.ambientDrone = new Tone.Noise("pink");
+                const droneFilter = new Tone.Filter({ type: "lowpass", frequency: 100, Q: 2 }).toDestination();
+                const chorus = new Tone.Chorus(4, 2.5, 0.5).connect(droneFilter).start();
+                audioNodes.ambientDrone.connect(chorus).start();
+                audioNodes.ambientDrone.volume.value = -Infinity;
+
+                // Fluid/Data stream sound for Local Twin (Flowing water / Telemetry mix)
+                audioNodes.dataStream = new Tone.Noise("brown");
+                audioNodes.filter = new Tone.AutoFilter({ frequency: "4n", baseFrequency: 800, octaves: 2 }).toDestination();
+                audioNodes.dataStream.connect(audioNodes.filter).start();
+                audioNodes.filter.start();
+                audioNodes.dataStream.volume.value = -Infinity;
+
+                sysState.audioInitialized = true;
+            }
+
+            sysState.audioEnabled = !sysState.audioEnabled;
+            const btn = document.getElementById('btn-audio-toggle');
+            
+            if (sysState.audioEnabled) {
+                btn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-300');
+                btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v18c-4.97 0-9-4.03-9-9s4.03-9 9-9z"></path></svg><span class="label-micro text-blue-700">Active</span>`;
+            } else {
+                btn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-300');
+                btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg><span class="label-micro text-slate-600">Sonification</span>`;
+                
+                audioNodes.ambientDrone.volume.rampTo(-Infinity, 1);
+                audioNodes.dataStream.volume.rampTo(-Infinity, 1);
+            }
+            updateAudioMix();
+        }
+
+        function updateAudioMix() {
+            if (!sysState.audioEnabled) return;
+            
+            if (sysState.currentTab === 'global') {
+                audioNodes.dataStream.volume.rampTo(-Infinity, 1);
+                audioNodes.ambientDrone.volume.rampTo(-10, 2); // Rich space drone
+            } else if (sysState.currentTab === 'local') {
+                audioNodes.ambientDrone.volume.rampTo(-Infinity, 1);
+                
+                // Volume and frequency tied to crisis state and time multiplier
+                let baseVol = sysState.local.isCrisis ? -35 : -20;
+                if (sysState.local.timeMult > 10) baseVol += 5; // Louder when fast-forwarding
+                
+                audioNodes.dataStream.volume.rampTo(baseVol, 0.5);
+                audioNodes.filter.baseFrequency = sysState.local.isCrisis ? 300 : 1200; // Low rumble for crisis, high flow for healthy
+            } else {
+                audioNodes.ambientDrone.volume.rampTo(-Infinity, 1);
+                audioNodes.dataStream.volume.rampTo(-Infinity, 1);
+            }
+        }
+        document.getElementById('btn-audio-toggle').addEventListener('click', toggleAudio);
+
+        function switchTab(tabId) {
+            sysState.currentTab = tabId;
+            
+            // UI Button Updates
+            document.querySelectorAll('nav button[id^="tab-"]').forEach(btn => {
+                btn.className = "px-5 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded text-slate-500 hover:text-slate-900 transition";
+            });
+            document.getElementById(`tab-${tabId}`).className = "px-5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded text-slate-900 bg-white shadow-sm border border-slate-200 transition";
+
+            // View Toggling
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+
+            if (tabId === 'global') resizeGlobal();
+            if (tabId === 'local') resizeLocalCanvas();
+            updateAudioMix();
+        }
+
+        // --- View 1: 4D Planetary Scale (Three.js) ---
+        const globalContainer = document.getElementById('global-canvas-container');
+        const scene = new THREE.Scene();
+        // Clean white fog to blend with the CSS cartesian grid background
+        scene.fog = new THREE.FogExp2(0xf8fafc, 0.035);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 22); // Default viewing angle
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for high DPI
+        globalContainer.appendChild(renderer.domElement);
+
+        // Lighting for premium scientific look
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        const earthGroup = new THREE.Group();
+        scene.add(earthGroup);
+
+        // 1. Base Earth: High-tech wireframe/geodesic sphere
+        // Simulating a data-topology model rather than a standard photo-texture
+        const radius = 10;
+        const earthGeo = new THREE.IcosahedronGeometry(radius, 12); 
+        
+        // We use a custom shader to give it a "Data Scan" look. 
+        // Edges are visible, faces are slightly transparent.
+        const earthMat = new THREE.MeshPhysicalMaterial({
+            color: 0xe2e8f0, // Slate 200
+            wireframe: true,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.DoubleSide
+        });
+        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+        earthGroup.add(earthMesh);
+
+        // Inner solid core to hide backface lines slightly
+        const coreGeo = new THREE.IcosahedronGeometry(radius - 0.1, 12);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc }); // Match bg
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        earthGroup.add(coreMesh);
+
+        // 2. Data Layers (Atmospheric Rivers & Ocean Currents)
+        // Simulated using spline paths wrapped around the sphere
+        
+        const dataLayers = new THREE.Group();
+        earthGroup.add(dataLayers);
+
+        function createFlowLine(color, rOffset, pointsCount, speed, complexity) {
+            const curve = new THREE.Curve();
+            curve.getPoint = function(t) {
+                // Procedural winding path around a sphere
+                const phi = t * Math.PI * complexity.loops;
+                const theta = Math.sin(t * Math.PI * 2) * complexity.wobble;
+                const r = radius + rOffset + (Math.sin(t * Math.PI * 10) * 0.1); // Slight altitude variation
+                return new THREE.Vector3(
+                    r * Math.cos(theta) * Math.sin(phi),
+                    r * Math.sin(theta) * Math.sin(phi),
+                    r * Math.cos(phi)
+                );
+            };
+
+            const pts = curve.getPoints(pointsCount);
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            
+            // Advanced glowing line material
+            const mat = new THREE.LineBasicMaterial({ 
+                color: color, 
+                transparent: true, 
+                opacity: 0.8,
+                linewidth: 2 // Note: WebGL standard limits line width to 1, but coloring creates glow effect
+            });
+            const line = new THREE.Line(geo, mat);
+            
+            return { mesh: line, speed: speed };
+        }
+
+        // Atmospheric Rivers (High altitude, fast, Cyan)
+        const atmosFlows = [];
+        for(let i=0; i<5; i++) {
+            const flow = createFlowLine(0x22d3ee, 0.4, 200, 0.002 + Math.random()*0.002, {loops: 2 + Math.random()*3, wobble: 1.5});
+            flow.mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+            dataLayers.add(flow.mesh);
+            atmosFlows.push(flow);
+        }
+
+        // Ocean Thermohaline Currents (Surface level, slow, Teal)
+        const oceanFlows = [];
+        for(let i=0; i<8; i++) {
+            const flow = createFlowLine(0x0d9488, 0.05, 300, 0.0005 + Math.random()*0.001, {loops: 1 + Math.random()*2, wobble: 0.5});
+            flow.mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+            dataLayers.add(flow.mesh);
+            oceanFlows.push(flow);
+        }
+
+        // Planetary Interaction logic
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        globalContainer.addEventListener('mousedown', (e) => { isDragging = true; });
+        globalContainer.addEventListener('mouseup', (e) => { isDragging = false; });
+        globalContainer.addEventListener('mousemove', (e) => {
+            if (isDragging && sysState.currentTab === 'global') {
+                const deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
+                targetRotationY += deltaMove.x * 0.005;
+                targetRotationX += deltaMove.y * 0.005;
+            }
+            previousMousePosition = { x: e.offsetX, y: e.offsetY };
+        });
+
+        // Toggle UI
+        document.getElementById('toggle-atmos').addEventListener('change', (e) => {
+            atmosFlows.forEach(f => f.mesh.visible = e.target.checked);
+        });
+        document.getElementById('toggle-ocean').addEventListener('change', (e) => {
+            oceanFlows.forEach(f => f.mesh.visible = e.target.checked);
+        });
+        document.getElementById('btn-reset-cam').addEventListener('click', () => {
+            targetRotationX = 0.5; // Roughly India lat/lon on our arbitrary map
+            targetRotationY = -1.0;
+        });
+
+        function resizeGlobal() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
+
+        // --- View 2: Regional Micro-Twin (Solapur 2D GIS) ---
+        const localCanvas = document.getElementById('simCanvas');
+        const ctx = localCanvas.getContext('2d');
+        
+        let lWidth, lHeight, nodes = {};
+        let fluidParticles = [];
+
+        function resizeLocalCanvas() {
+            lWidth = window.innerWidth;
+            lHeight = window.innerHeight;
+            localCanvas.width = lWidth;
+            localCanvas.height = lHeight;
+            
+            // Professional GIS-style structured grid layout
+            nodes = {
+                dam: { x: lWidth * 0.15, y: lHeight * 0.4, w: 120, h: 220 },
+                treatment: { x: lWidth * 0.35, y: lHeight * 0.3 },
+                urban: { x: lWidth * 0.65, y: lHeight * 0.25, w: 240, h: 180 },
+                midc: { x: lWidth * 0.8, y: lHeight * 0.55, w: 160, h: 140 },
+                agri: { x: lWidth * 0.5, y: lHeight * 0.75, w: 400, h: 220 },
+                // River routing
+                riverW1: { x: lWidth * 0.3, y: lHeight * 0.6 }
+            };
+        }
+        window.addEventListener('resize', () => {
+            if (sysState.currentTab === 'global') resizeGlobal();
+            if (sysState.currentTab === 'local') resizeLocalCanvas();
+        });
+
+        class TelemetryParticle {
+            constructor(type, startNode) {
+                this.type = type; // 'pipe_potable', 'river_raw'
+                this.x = startNode.x; this.y = startNode.y;
+                this.progress = 0;
+                this.speed = 0.002 + Math.random() * 0.003;
+                this.dead = false;
+                
+                if (type === 'pipe_potable') {
+                    this.target = Math.random() > 0.3 ? 'urban' : 'midc';
+                    this.color = '#0284c7'; // Sky 600
+                    this.offset = (Math.random() - 0.5) * 6;
+                } else {
+                    this.target = 'agri';
+                    this.color = '#0d9488'; // Teal 600
+                    this.offset = (Math.random() - 0.5) * 40; // Wide river
+                }
+            }
+            update(timeMult) {
+                this.progress += this.speed * Math.min(timeMult, 20); // visual cap
+                if (this.progress >= 1) { this.dead = true; return; }
+
+                if (this.type === 'pipe_potable') {
+                    let t = this.progress;
+                    if (t < 0.4) {
+                        let lt = t / 0.4;
+                        this.x = nodes.dam.x + (nodes.treatment.x - nodes.dam.x) * lt;
+                        this.y = nodes.dam.y + (nodes.treatment.y - nodes.dam.y) * lt;
+                    } else {
+                        let lt = (t - 0.4) / 0.6;
+                        let dest = nodes[this.target];
+                        this.x = nodes.treatment.x + (dest.x - nodes.treatment.x) * lt;
+                        this.y = nodes.treatment.y + (dest.y - nodes.treatment.y) * lt;
+                    }
+                } else {
+                    // River Bezier Path
+                    let t = this.progress;
+                    let u = 1 - t;
+                    let p0 = { x: nodes.dam.x, y: nodes.dam.y + 60 };
+                    let p1 = nodes.riverW1;
+                    let p2 = nodes.agri;
+                    this.x = (u * u * p0.x) + (2 * u * t * p1.x) + (t * t * p2.x);
+                    this.y = (u * u * p0.y) + (2 * u * t * p1.y) + (t * t * p2.y);
+                }
+                this.x += this.offset; this.y += this.offset;
+            }
+            draw(ctx) {
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
+            }
+        }
+
+        // GIS Rendering Functions
+        function drawGISLayers(ctx) {
+            // Topography contour lines
+            ctx.strokeStyle = 'rgba(203, 213, 225, 0.4)';
+            ctx.lineWidth = 1;
+            for(let i=1; i<=3; i++) {
+                ctx.beginPath();
+                ctx.ellipse(nodes.dam.x, nodes.dam.y, 180*i, 120*i, Math.PI/12, 0, Math.PI*2);
+                ctx.stroke();
+            }
+
+            // River Path (Bhima/Sina mapping)
+            ctx.beginPath();
+            ctx.moveTo(nodes.dam.x, nodes.dam.y + 60);
+            ctx.quadraticCurveTo(nodes.riverW1.x, nodes.riverW1.y, nodes.agri.x, nodes.agri.y);
+            ctx.strokeStyle = sysState.local.isCrisis ? 'rgba(226, 232, 240, 0.8)' : 'rgba(204, 253, 242, 0.7)'; 
+            ctx.lineWidth = 45;
+            ctx.stroke();
+
+            // Pipeline Grid
+            ctx.beginPath();
+            ctx.moveTo(nodes.dam.x, nodes.dam.y);
+            ctx.lineTo(nodes.treatment.x, nodes.treatment.y);
+            ctx.lineTo(nodes.urban.x, nodes.urban.y);
+            ctx.moveTo(nodes.treatment.x, nodes.treatment.y);
+            ctx.lineTo(nodes.midc.x, nodes.midc.y);
+            ctx.strokeStyle = 'rgba(186, 230, 253, 0.6)';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+        }
+
+        function drawDam(ctx) {
+            const fillPct = Math.max(0, (sysState.local.damTMC - CONSTANTS.deadStorageTMC) / (CONSTANTS.maxCapacityTMC - CONSTANTS.deadStorageTMC));
+            
+            ctx.save();
+            ctx.translate(nodes.dam.x - nodes.dam.w/2, nodes.dam.y - nodes.dam.h/2);
+            
+            // Dam structural outline
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, nodes.dam.w, nodes.dam.h);
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.strokeRect(0, 0, nodes.dam.w, nodes.dam.h);
+            
+            // Water metric
+            const wH = nodes.dam.h * fillPct;
+            ctx.fillStyle = sysState.local.isCrisis ? 'rgba(225, 29, 72, 0.2)' : 'rgba(2, 132, 199, 0.2)';
+            ctx.fillRect(0, nodes.dam.h - wH, nodes.dam.w, wH);
+            
+            // Retaining wall rendering
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(nodes.dam.w - 15, 0, 15, nodes.dam.h);
+            
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px "JetBrains Mono"'; ctx.fillText("UJANI RSV.", 5, 20);
+            ctx.restore();
+        }
+
+        function drawUrbanSector(ctx) {
+            ctx.save();
+            ctx.translate(nodes.urban.x - nodes.urban.w/2, nodes.urban.y - nodes.urban.h/2);
+            
+            ctx.strokeStyle = 'rgba(2, 132, 199, 0.3)'; ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, nodes.urban.w, nodes.urban.h);
+            
+            // Procedural city block generation
+            const cols = 10, rows = 8;
+            const bW = nodes.urban.w/cols, bH = nodes.urban.h/rows;
+            
+            ctx.fillStyle = sysState.local.isCrisis ? 'rgba(225, 29, 72, 0.4)' : 'rgba(148, 163, 184, 0.3)';
+            for(let i=0; i<cols; i++) {
+                for(let j=0; j<rows; j++) {
+                    if (Math.random() > 0.2) { 
+                        ctx.fillRect(i*bW + 2, j*bH + 2, bW-4, bH-4);
+                    }
+                }
+            }
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px "JetBrains Mono"'; ctx.fillText("URBAN SECTOR", 5, -5);
+            ctx.restore();
+        }
+
+        function drawIndustrialSector(ctx) {
+            ctx.save();
+            ctx.translate(nodes.midc.x - nodes.midc.w/2, nodes.midc.y - nodes.midc.h/2);
+            
+            ctx.strokeStyle = 'rgba(217, 119, 6, 0.3)'; ctx.lineWidth = 2; 
+            ctx.strokeRect(0, 0, nodes.midc.w, nodes.midc.h);
+            
+            // Sugar mills & textile structures
+            ctx.fillStyle = 'rgba(217, 119, 6, 0.15)';
+            ctx.fillRect(10, 10, 50, 40); ctx.fillRect(70, 20, 80, 50); ctx.fillRect(20, 70, 60, 40);
+            
+            // Exhaust stacks
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(40, -10, 10, 20); ctx.fillRect(110, 0, 15, 20);
+            
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px "JetBrains Mono"'; ctx.fillText("MIDC ZONES", 5, -5);
+            ctx.restore();
+        }
+
+        function drawAgriculturalBelt(ctx) {
+            ctx.save();
+            ctx.translate(nodes.agri.x - nodes.agri.w/2, nodes.agri.y - nodes.agri.h/2);
+            
+            // Organic polygon for farming land
+            ctx.beginPath();
+            ctx.moveTo(30, 0); ctx.lineTo(nodes.agri.w, 30); ctx.lineTo(nodes.agri.w - 50, nodes.agri.h);
+            ctx.lineTo(0, nodes.agri.h - 30); ctx.closePath();
+            
+            ctx.fillStyle = sysState.local.isCrisis ? 'rgba(241, 245, 249, 0.8)' : 'rgba(204, 253, 242, 0.6)'; 
+            ctx.fill();
+            ctx.strokeStyle = sysState.local.isCrisis ? 'rgba(203, 213, 225, 0.8)' : 'rgba(15, 118, 110, 0.3)';
+            ctx.lineWidth = 2; ctx.stroke();
+
+            // Irrigation lines
+            ctx.strokeStyle = sysState.local.isCrisis ? 'rgba(203, 213, 225, 0.4)' : 'rgba(20, 184, 166, 0.4)';
+            for(let i=0; i<nodes.agri.w; i+=15) {
+                ctx.beginPath(); ctx.moveTo(i, 20); ctx.lineTo(i-40, nodes.agri.h-20); ctx.stroke();
+            }
+
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px "JetBrains Mono"'; ctx.fillText("SUGARCANE BELT", 40, 20);
+            ctx.restore();
+        }
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            
+            // --- 1. Planetary 4D Update (Three.js) ---
+            if (sysState.currentTab === 'global') {
+                // Smooth camera interpolation
+                earthGroup.rotation.y += (targetRotationY - earthGroup.rotation.y) * 0.05;
+                earthGroup.rotation.x += (targetRotationX - earthGroup.rotation.x) * 0.05;
+                
+                // Idle slow rotation
+                if(!isDragging) targetRotationY += 0.001; 
+
+                // Animate Flow Lines
+                atmosFlows.forEach(f => f.mesh.rotation.z -= f.speed);
+                oceanFlows.forEach(f => f.mesh.rotation.y += f.speed);
+
+                renderer.render(scene, camera);
+            }
+            
+            // --- 2. Local Twin GIS Update (Canvas) ---
+            if (sysState.currentTab === 'local') {
+                const dt = time - sysState.local.lastTime;
+                sysState.local.lastTime = time;
+                
+                // Clear canvas with base color
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(0, 0, lWidth, lHeight);
+                
+                // Math Engine Calculation
+                const daysPassed = (dt / CONSTANTS.baseMsPerDay) * sysState.local.timeMult;
+                const month = sysState.local.date.getMonth();
+                sysState.local.isMonsoon = (month >= 5 && month <= 8);
+                
+                let rwhOffset = sysState.local.isMonsoon ? CONSTANTS.rwhYieldMax : 0;
+                const netUrban = Math.max(0, CONSTANTS.urbanReq - rwhOffset);
+                const netIndustry = CONSTANTS.industryReqGross - CONSTANTS.industryRecycle;
+                const totalDrainMLD = netUrban + netIndustry + CONSTANTS.agriReq; 
+                
+                const drainTMC = totalDrainMLD * CONSTANTS.mlToTmcRate * daysPassed;
+                const evaporationTMC = drainTMC * ((month >= 2 && month <= 4) ? 0.15 : 0.05); // Higher evap in summer
+                
+                sysState.local.damTMC -= (drainTMC + evaporationTMC);
+
+                if (sysState.local.isMonsoon) {
+                    sysState.local.rainAcc += (1 * daysPassed);
+                    if (sysState.local.damTMC < CONSTANTS.maxCapacityTMC) {
+                        sysState.local.damTMC += (1200 * CONSTANTS.mlToTmcRate * daysPassed); // Catchment fill
+                    }
+                }
+                
+                // Bound constraints
+                if (sysState.local.damTMC < CONSTANTS.deadStorageTMC - 2) sysState.local.damTMC = CONSTANTS.deadStorageTMC - 2;
+                sysState.local.isCrisis = sysState.local.damTMC < 10;
+
+                // Advance temporal epoch
+                sysState.local.date.setTime(sysState.local.date.getTime() + (daysPassed * 24 * 60 * 60 * 1000));
+                
+                updateAudioMix();
+
+                // GIS Rendering
+                drawGISLayers(ctx);
+                drawDam(ctx);
+                drawUrbanSector(ctx);
+                drawIndustrialSector(ctx);
+                drawAgriculturalBelt(ctx);
+                
+                // Treatment Plant Node Marker
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(nodes.treatment.x, nodes.treatment.y, 8, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#0284c7'; ctx.lineWidth=2; ctx.stroke();
+                
+                // Particle Emission & Update
+                if (sysState.local.damTMC > CONSTANTS.deadStorageTMC) {
+                    let spawnRate = Math.min(Math.floor(sysState.local.timeMult / 5) + 1, 8);
+                    for(let i=0; i<spawnRate; i++) {
+                        if (Math.random() < 0.2) fluidParticles.push(new TelemetryParticle('pipe_potable', nodes.dam));
+                        if (Math.random() < 0.6) fluidParticles.push(new TelemetryParticle('river_raw', {x: nodes.dam.x, y: nodes.dam.y + 60}));
+                    }
+                }
+                
+                for (let i = fluidParticles.length - 1; i >= 0; i--) {
+                    let p = fluidParticles[i];
+                    p.update(sysState.local.timeMult); p.draw(ctx);
+                    if (p.dead) fluidParticles.splice(i, 1);
+                }
+
+                updateLocalUI();
+            }
+        }
+
+        function updateLocalUI() {
+            document.getElementById('ui-date').innerText = sysState.local.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+            
+            const maxVol = CONSTANTS.maxCapacityTMC;
+            let pct = (sysState.local.damTMC / maxVol) * 100; if (pct < 0) pct = 0;
+            
+            const pctEl = document.getElementById('ui-dam-pct');
+            const barEl = document.getElementById('ui-dam-bar');
+            
+            pctEl.innerText = pct.toFixed(1) + '%';
+            barEl.style.width = pct + '%';
+            document.getElementById('ui-dam-tmc').innerText = `${Math.max(CONSTANTS.deadStorageTMC, sysState.local.damTMC).toFixed(1)} / ${maxVol} TMC`;
+            
+            document.getElementById('ui-rain-stat').innerText = `${Math.floor(sysState.local.rainAcc)} mm`;
+            
+            const rwhUi = document.getElementById('ui-rwh-stat');
+            if(sysState.local.isMonsoon) { 
+                rwhUi.innerText = "YIELD: +30 MLD (ACTIVE)"; 
+                rwhUi.className = "text-[10px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded mt-1 border border-teal-200 inline-block"; 
+            } else { 
+                rwhUi.innerText = "0 MLD (DRY)"; 
+                rwhUi.className = "text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded mt-1 border border-slate-200 inline-block"; 
+            }
+
+            if (sysState.local.isCrisis) {
+                pctEl.className = "data-value large text-red-600";
+                barEl.className = "bg-red-500 h-full w-full transition-all duration-300";
+            } else {
+                pctEl.className = "data-value large text-blue-600";
+                barEl.className = "bg-blue-500 h-full w-full transition-all duration-300";
+            }
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('timeSlider').addEventListener('input', (e) => {
+            sysState.local.timeMult = parseInt(e.target.value);
+            document.getElementById('ui-time-multiplier').innerText = sysState.local.timeMult + 'x';
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            sysState.local.date = new Date(2026, 7, 15);
+            sysState.local.damTMC = 116.8;
+            sysState.local.timeMult = 1;
+            document.getElementById('timeSlider').value = 1;
+            document.getElementById('ui-time-multiplier').innerText = '1x';
+            fluidParticles = [];
+            sysState.local.isCrisis = false;
+        });
+
+        // Initialize Boot Sequence
+        window.onload = function() {
+            sysState.local.lastTime = performance.now();
+            resizeGlobal();
+            resizeLocalCanvas(); 
+            requestAnimationFrame(animate);
+            
+            // Set initial rotation for Earth to show Indian subcontinent
+            targetRotationX = 0.4;
+            targetRotationY = -1.2;
+        };
+    </script>
+</body>
+</html>
