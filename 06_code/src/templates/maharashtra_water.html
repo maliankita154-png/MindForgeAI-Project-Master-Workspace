@@ -438,6 +438,25 @@ const districtCoordinates = {
     Nanded: [19.1383, 77.3210]
 };
 
+const talavLocations = [
+    {
+        name: "Solapur Talav",
+        coordinates: [17.6713, 75.9029],
+        status: "Monitoring data pending"
+    },
+    {
+        name: "Kambar Talav",
+        coordinates: [17.6479, 75.9040],
+        status: "Small local tank, built in 1858"
+    },
+    {
+        name: "Ekrukh Tank (Ekrukh Water Reservoir)",
+        coordinates: [17.77, 75.86],
+        status: "Major Solapur water storage project",
+        capacity: "3,330 M.Cu.Ft."
+    }
+];
+
 const maharashtraData = {{ data | default([], true) | tojson }};
 
 maharashtraData.forEach(record => {
@@ -459,6 +478,21 @@ maharashtraData.forEach(record => {
         Dam: ${record.dam}<br>
         Storage: ${record.storage_pct}%<br>
         Available: ${record.water_available_mcm} MCM
+    `);
+});
+
+talavLocations.forEach(talav => {
+    L.circleMarker(talav.coordinates, {
+        radius: 9,
+        color: "#f0c75e",
+        fillColor: "#f0c75e",
+        fillOpacity: 0.95,
+        weight: 2
+    }).addTo(maharashtraMap).bindPopup(`
+        <strong>${talav.name}</strong><br>
+        Type: ${talav.name.startsWith("Ekrukh") ? "Historical Reservoir" : "Talav"}<br>
+        ${talav.capacity ? `Capacity: ${talav.capacity}<br>` : ""}
+        Status: ${talav.status}
     `);
 });
 
