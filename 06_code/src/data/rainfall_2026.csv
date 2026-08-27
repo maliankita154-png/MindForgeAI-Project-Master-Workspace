@@ -1,0 +1,13 @@
+date,year,month,rainfall_mm,runoff_mcm,groundwater_recharge_mcm,quality_flag
+2026-01-31,2026,Jan,2.4,1.1,0.7,synthetic
+2026-02-28,2026,Feb,1.8,0.8,0.5,synthetic
+2026-03-31,2026,Mar,5.2,2.2,1.5,synthetic
+2026-04-30,2026,Apr,12.6,5.4,3.7,synthetic
+2026-05-31,2026,May,18.4,7.9,5.3,synthetic
+2026-06-30,2026,Jun,142.8,61.2,41.5,synthetic
+2026-07-31,2026,Jul,286.4,121.8,82.1,synthetic
+2026-08-12,2026,Aug,118.6,50.7,34.2,synthetic
+2026-09-30,2026,Sep,104.2,44.6,30.0,synthetic
+2026-10-31,2026,Oct,51.3,21.8,14.6,synthetic
+2026-11-30,2026,Nov,19.7,8.4,5.5,synthetic
+2026-12-31,2026,Dec,6.8,2.9,1.9,synthetic

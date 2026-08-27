@@ -1,16 +1,11 @@
 # Aethera
 
-<<<<<<< HEAD
 **Aethera** is an AI-powered water-intelligence platform prototype developed as an industry internship initiative under **Chatake Innoworks Pvt. Ltd. · MindforgeAI Division**.
-=======
 This repository is the official Chatake Innoworks template for every Internship 1.0 industry project. The Program Office creates one company-owned repository per active project from this template. Students clone their assigned project repository—not this master template—and preserve the standard structure.
->>>>>>> 9d0aa6eb1a3ac7d7e846cd9916862a824f8ba54b
 
 It demonstrates a premium decision-support experience for rainfall intelligence, demand and allocation, reservoir monitoring, sustainability signals, and a transparent water digital twin.
 
-<<<<<<< HEAD
 > Status: research and product prototype. The interface uses clearly labelled demonstration data and is not an operational water-control system.
-=======
 1. Open the project repository assigned to your group under the `Chatake-Innoworks` GitHub organization.
 2. Clone that assigned repository and open it in VS Code.
 3. Read `00_project_governance/WORKING_RULES.md` and `00_project_governance/OWNERSHIP_AND_ACCESS.md` with the complete team.
@@ -19,11 +14,9 @@ It demonstrates a premium decision-support experience for rainfall intelligence,
 6. Create a branch named `member/STUDENT-ID/short-task-name` before making project changes.
 7. Move only reviewed, team-approved work into `05_shared_integration/` and then the relevant production folder through a pull request.
 8. Record sources, decisions, tasks and diary entries as the work happens.
->>>>>>> 9d0aa6eb1a3ac7d7e846cd9916862a824f8ba54b
 
 ## Run locally
 
-<<<<<<< HEAD
 ```powershell
 cd 06_code
 python -m venv .venv
@@ -31,7 +24,6 @@ python -m venv .venv
 pip install -r requirements.txt
 python src/app.py
 ```
-=======
 | Folder | Purpose |
 |---|---|
 | `00_project_governance` | team charter, roles, working rules and quality gates |
@@ -50,13 +42,10 @@ python src/app.py
 | `13_release_and_handover` | final release, checksums, installation, user guide and handover |
 | `14_publication_and_portfolio` | approved public project profile, publication checklist and showcase assets |
 | `study_material` | approved learning material relevant to this project |
->>>>>>> 9d0aa6eb1a3ac7d7e846cd9916862a824f8ba54b
 
 Open `http://127.0.0.1:5000`. Run checks with `python -m unittest discover -s tests -v`.
 
-<<<<<<< HEAD
 ## Project map
-=======
 - `main`: reviewed and demonstrable group state.
 - `develop`: integrated work for the next stable checkpoint.
 - `member/<student-id>/<task>`: individual task branch.
@@ -64,7 +53,6 @@ Open `http://127.0.0.1:5000`. Run checks with `python -m unittest discover -s te
 - A merge requires a pull request, meaningful commit message, evidence of testing and team awareness.
 - Student Codex/AI agents may push only through the authenticated student's branch and permissions.
 - Company credentials, owner tokens and shared access tokens must never be given to a student or an AI agent.
->>>>>>> 9d0aa6eb1a3ac7d7e846cd9916862a824f8ba54b
 
 - `06_code/` — Flask application, test suite, Docker deployment package
 - `01_project_definition/` — problem definition and structured abstract
@@ -83,9 +71,7 @@ Open `http://127.0.0.1:5000`. Run checks with `python -m unittest discover -s te
 
 ## Brand usage
 
-<<<<<<< HEAD
 Aethera is the project/platform name. The project should be presented as **“Aethera — a MindforgeAI internship engineering initiative by Chatake Innoworks Pvt. Ltd.”** until a formal product and trademark review is completed.
-=======
 - Portal: tasks, daily diary, abstract/report working text, notes and links.
 - Repository: code, notebooks, tests, formal report source, diagrams, deployment assets and evidence.
 - Printed diary: signed physical group record.
@@ -93,4 +79,3 @@ Aethera is the project/platform name. The project should be presented as **“Ae
 ## Publication relationship
 
 The repository remains the technical source of truth. Only reviewed material is published through `projects.chatakeinnoworks.com`. Public project pages must use the approved content in `14_publication_and_portfolio/` and must not expose private data, secrets, restricted datasets or unapproved company material.
->>>>>>> 9d0aa6eb1a3ac7d7e846cd9916862a824f8ba54b
