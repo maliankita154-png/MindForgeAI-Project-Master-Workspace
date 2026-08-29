@@ -32,7 +32,12 @@ class _RouteApp:
         return decorator
 
 
-TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+APP_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(APP_FILE_DIR)
+CODE_DIR = os.path.join(PROJECT_ROOT, "06_code")
+SRC_DIR = os.path.join(CODE_DIR, "src")
+TEMPLATE_DIR = os.path.join(SRC_DIR, "templates")
+STATIC_DIR = os.path.join(SRC_DIR, "static")
 app = _RouteApp(TEMPLATE_DIR)
 
 
@@ -59,29 +64,38 @@ def render_template(template_name, **kwargs):
     if not os.path.exists(template_path):
         return f"<div style='padding:40px;font-family:Arial;background:#06131f;color:white'><h1>AETHERA WATER INTELLIGENCE</h1><h2>{template_name}</h2><p>Template file not found.</p></div>"
     env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=select_autoescape(["html", "xml"]))
-    return env.get_template(template_name).render(**kwargs)
+
+    # The original pages were written for Flask.  Streamlit renders them in an
+    # iframe, so local Flask URLs are not available.  Navigation is supplied by
+    # the Streamlit sidebar and the stylesheet is embedded below.
+    env.globals["url_for"] = lambda endpoint, **values: "#"
+    rendered = env.get_template(template_name).render(**kwargs)
+
+    style_path = os.path.join(STATIC_DIR, "css", "style.css")
+    if os.path.exists(style_path):
+        with open(style_path, "r", encoding="utf-8") as style_file:
+            rendered = rendered.replace(
+                "</head>",
+                f"<style>{style_file.read()}</style></head>",
+                1,
+            )
+
+    return rendered
 
 
 # ============================================================
 # PROJECT PATHS
 # ============================================================
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-PROJECT_ROOT = os.path.dirname(BASE_DIR)
+BASE_DIR = CODE_DIR
 
 DATA_DIR = os.path.join(
-    BASE_DIR,
+    CODE_DIR,
     "data"
 )
 
 SRC_DATA_DIR = os.path.join(
-    BASE_DIR,
-    "src",
+    SRC_DIR,
     "data"
 )
 
@@ -127,7 +141,7 @@ RESERVOIR_DEMO_FILE = os.path.join(
 )
 
 DEMAND_FILE = os.path.join(
-    DATA_DIR,
+    SRC_DATA_DIR,
     "demand_demo.csv"
 )
 
@@ -150,8 +164,7 @@ GLOBAL_WATER_FILE = os.path.join(
 )
 
 MAHARASHTRA_WATER_FILE = os.path.join(
-    os.path.dirname(__file__),
-    "static",
+    STATIC_DIR,
     "css",
     "maharashtra_water_resources.csv"
 )
